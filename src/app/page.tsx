@@ -224,7 +224,7 @@ export default function LandingPage() {
 
         {/* Hint text */}
         <p style={{ color: '#4a4a6a', fontSize: '0.8rem', marginBottom: '24px', paddingLeft: '4px' }}>
-          Try "Apple", "Tesla", or "RELIANCE.NS"
+          Try &quot;Apple&quot;, &quot;Tesla&quot;, or &quot;RELIANCE.NS&quot;
         </p>
 
         {/* Timeframe selector */}
