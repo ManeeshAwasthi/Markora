@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { LegacySentimentResult as SentimentResult } from '@/types';
 import SearchBar from './SearchBar';
 import SentimentBadge from './SentimentBadge';
@@ -78,21 +79,39 @@ export default function Dashboard() {
       }}
     >
       {/* Header */}
-      <div style={{ marginBottom: '40px' }}>
-        <h1
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '40px' }}>
+        <div>
+          <h1
+            style={{
+              fontSize: '2rem',
+              fontWeight: 700,
+              color: '#ffffff',
+              letterSpacing: '-0.02em',
+              marginBottom: '6px',
+            }}
+          >
+            Markora
+          </h1>
+          <p style={{ color: '#555555', fontSize: '0.9rem' }}>
+            Financial news sentiment analyzer
+          </p>
+        </div>
+        <Link
+          href="/signal"
           style={{
-            fontSize: '2rem',
-            fontWeight: 700,
-            color: '#ffffff',
-            letterSpacing: '-0.02em',
-            marginBottom: '6px',
+            background: '#00ff8811',
+            color: '#00ff88',
+            border: '1px solid #00ff8833',
+            borderRadius: '8px',
+            padding: '10px 18px',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
           }}
         >
-          Markora
-        </h1>
-        <p style={{ color: '#555555', fontSize: '0.9rem' }}>
-          Financial news sentiment analyzer
-        </p>
+          Signal Board →
+        </Link>
       </div>
 
       {/* Search */}
