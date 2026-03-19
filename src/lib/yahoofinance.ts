@@ -1,8 +1,5 @@
 import YahooFinance from 'yahoo-finance2';
 
-// yahoo-finance2 v3 requires explicit instantiation.
-// suppressNotices: historical() is deprecated and mapped internally to chart();
-// we call chart() directly to avoid null close values on the current trading day.
 const yahooFinance = new YahooFinance({ suppressNotices: ['ripHistorical'] });
 
 interface PriceDataResult {
@@ -10,9 +7,50 @@ interface PriceDataResult {
   chartData: Array<{ date: string; price: number }>;
 }
 
+export interface ResolvedTicker {
+  ticker: string;
+  companyName: string;
+  exchange: string;
+}
+
+/**
+ * Accepts a ticker symbol or company name and resolves it to a canonical
+ * ticker, full company name, and exchange using yahoo-finance2 search.
+ * Falls back gracefully to the raw input if resolution fails.
+ */
+export async function resolveTicker(input: string): Promise<ResolvedTicker> {
+  try {
+    const raw = await yahooFinance.search(input, {}, { validateResult: false });
+    const results = raw as { quotes?: unknown[] };
+    const quotes = (results.quotes ?? []) as Array<{
+      symbol?: string;
+      longname?: string;
+      shortname?: string;
+      exchDisp?: string;
+      exchange?: string;
+      quoteType?: string;
+    }>;
+
+    const match = quotes.find(
+      (q) => q.quoteType === 'EQUITY' || q.quoteType === 'ETF' || q.quoteType === 'FUND'
+    );
+
+    if (match?.symbol) {
+      return {
+        ticker: match.symbol,
+        companyName: match.longname ?? match.shortname ?? match.symbol,
+        exchange: match.exchDisp ?? match.exchange ?? '',
+      };
+    }
+  } catch {
+    // fall through
+  }
+
+  return { ticker: input.toUpperCase(), companyName: input, exchange: '' };
+}
+
 /**
  * Fetches historical daily close prices for a ticker over the given timeframe.
- * Returns the total price-change percent and a sorted array of date/price points.
  */
 export async function fetchPriceData(
   ticker: string,
@@ -37,7 +75,6 @@ export async function fetchPriceData(
     );
   }
 
-  // Filter out bars where close is null (e.g. the current in-progress trading day)
   const valid = quotes.filter(
     (q): q is { date: string | Date; close: number } => q.close !== null && q.close !== undefined
   );
@@ -46,7 +83,6 @@ export async function fetchPriceData(
     throw new Error(`Invalid ticker or no price data available for ${ticker}`);
   }
 
-  // Sort ascending by date
   valid.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const firstClose = valid[0].close;

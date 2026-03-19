@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//tmp/**)",
+      "Bash(curl -s -X POST http://localhost:3000/api/analyze -H \"Content-Type: application/json\" -d '{\"\"\"\"ticker\"\"\"\":\"\"\"\"AAPL\"\"\"\",\"\"\"\"timeframe\"\"\"\":30}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(node -e \"const yf = require\\(''''yahoo-finance2''''\\); console.log\\(Object.keys\\(yf\\)\\)\")",
+      "Bash(node -e \":*)",
+      "Bash(curl -s -X POST http://localhost:3000/api/analyze -H \"Content-Type: application/json\" -d '{\"\"ticker\"\":\"\"AAPL\"\",\"\"timeframe\"\":30}')",
+      "Bash(curl -s \"https://newsapi.org/v2/top-headlines?q=AAPL&pageSize=5&language=en&apiKey=a00912adc4fa415f87709712a1175b7f\")",
+      "Bash(curl -s \"https://newsapi.org/v2/everything?q=AAPL&pageSize=5&language=en&sortBy=relevancy&apiKey=a00912adc4fa415f87709712a1175b7f\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/analyze -H \"Content-Type: application/json\" -d '{\"\"\"\"ticker\"\"\"\":\"\"\"\"INVALIDXYZ999\"\"\"\",\"\"\"\"timeframe\"\"\"\":30}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/analyze -H \"Content-Type: application/json\" -d '{\"\"\"\"ticker\"\"\"\":\"\"\"\"MSFT\"\"\"\",\"\"\"\"timeframe\"\"\"\":7}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/analyze -H \"Content-Type: application/json\" -d '{\"\"\"\"ticker\"\"\"\":\"\"\"\"TSLA\"\"\"\",\"\"\"\"timeframe\"\"\"\":90}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/analyze -H \"Content-Type: application/json\" -d '{\"\"ticker\"\":\"\"ZZZFAKE\"\",\"\"timeframe\"\":30}')",
+      "Bash(npm uninstall:*)",
+      "Bash(vercel --prod)"
+    ]
+  }
+}

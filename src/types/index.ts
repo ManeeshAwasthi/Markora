@@ -24,24 +24,18 @@ export interface NewsAPIArticle {
   publishedAt: string;
 }
 
-// ── Phase-2 types ─────────────────────────────────────────────────────────────
+// ── Phase-2 / Phase-3 types ───────────────────────────────────────────────────
 
 export interface AnalyzeRequest {
-  ticker: string;
+  ticker: string; // accepts ticker symbol OR company name
   timeframe: 7 | 30 | 90;
 }
 
 export interface SentimentResult {
-  bullish: number;   // percentage, 0–100
-  bearish: number;   // percentage, 0–100
-  neutral: number;   // percentage, 0–100
-  score: number;     // composite 0–100
-}
-
-export interface ChartDataPoint {
-  date: string;           // ISO date string
-  sentimentScore: number;
-  normalizedPrice: number;
+  bullish: number; // percentage 0–100
+  bearish: number;
+  neutral: number;
+  score: number; // composite 0–100
 }
 
 export type SignalType =
@@ -51,18 +45,46 @@ export type SignalType =
   | 'Mild Pessimism'
   | 'Hidden Strength';
 
+export type TrendDirection = 'Rising' | 'Falling' | 'Stable';
+
+export type EntryExitLabel =
+  | 'Potential Entry Zone'
+  | 'Caution — Consider Exit'
+  | 'Hold — No Strong Signal'
+  | 'Watch — Momentum Building';
+
+export interface ChartDataPoint {
+  date: string;
+  sentimentScore: number;
+  normalizedPrice: number;
+  trendScore: number;
+}
+
+export interface SearchResult {
+  ticker: string;
+  name: string;
+  exchange: string;
+}
+
 export interface AnalyzeResponse {
   ticker: string;
+  companyName: string;
+  exchange: string;
   timeframe: number;
   divergenceScore: number;
   signal: SignalType;
   sentiment: SentimentResult;
   normalizedPrice: number;
   priceChangePercent: number;
+  trendScore: number;
+  trendDirection: TrendDirection;
+  entryExitLabel: EntryExitLabel;
+  entryExitExplanation: string;
+  entryExitColor: string;
   chartData: ChartDataPoint[];
   insight: string;
   headlines: string[];
-  fetchedAt: string; // ISO timestamp
+  fetchedAt: string;
 }
 
 export interface ApiError {
