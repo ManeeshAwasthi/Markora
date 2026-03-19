@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { SentimentResult } from '@/types';
+import { LegacySentimentResult as SentimentResult } from '@/types';
 import SearchBar from './SearchBar';
 import SentimentBadge from './SentimentBadge';
 import MarketOutlook from './MarketOutlook';
