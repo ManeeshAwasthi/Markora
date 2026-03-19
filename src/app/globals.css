@@ -3,39 +3,8 @@
 body {
   background: #060608;
   color: #e8e8f0;
-  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-family: system-ui, sans-serif;
   min-height: 100vh;
-}
-
-/* Animated grid background */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(0, 229, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 229, 255, 0.025) 1px, transparent 1px);
-  background-size: 48px 48px;
-  animation: gridPulse 6s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-
-@keyframes gridPulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
-}
-
-/* Card slide-in animations (staggered via animation-delay inline) */
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Number glow on load */
-@keyframes numberGlow {
-  from { text-shadow: none; }
-  to   { text-shadow: 0 0 14px #00e5ff88, 0 0 28px #00e5ff33; }
 }
 
 /* Ticker tape scroll */
@@ -47,10 +16,4 @@ body::before {
 /* Spinner */
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-/* Tooltip fade */
-@keyframes tooltipFade {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
 }
