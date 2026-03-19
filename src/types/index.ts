@@ -1,3 +1,5 @@
+// Shared TypeScript types for Markora
+
 export interface Headline {
   title: string;
   url: string;
