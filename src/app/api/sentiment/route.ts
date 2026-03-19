@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface SentimentRequestBody {
   headlines: string[];
 }
 
-interface AnthropicSentimentResponse {
+interface GeminiSentimentResponse {
   overall: 'bullish' | 'bearish' | 'neutral';
   headlineSentiments: ('bullish' | 'bearish' | 'neutral')[];
   outlook: string;
@@ -19,17 +20,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'headlines array is required' }, { status: 400 });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: 'ANTHROPIC_API_KEY is not configured' }, { status: 500 });
+      return NextResponse.json({ error: 'GEMINI_API_KEY is not configured' }, { status: 500 });
     }
 
-    const userPrompt = `Analyze the sentiment of each of these financial news headlines and return a JSON object.
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    const prompt = `You are a financial sentiment analyst. Analyze the sentiment of each of these financial news headlines and return ONLY valid JSON — no markdown, no explanation outside the JSON.
 
 Headlines:
 ${headlines.map((h, i) => `${i + 1}. ${h}`).join('\n')}
 
-Return ONLY valid JSON in this exact shape:
+Return ONLY this exact JSON shape:
 {
   "overall": "bullish" | "bearish" | "neutral",
   "headlineSentiments": ["bullish" | "bearish" | "neutral", ...],
@@ -39,41 +43,19 @@ Return ONLY valid JSON in this exact shape:
 Rules:
 - headlineSentiments must have the same number of items as the input headlines, in the same order.
 - overall reflects the aggregate market direction.
-- outlook is a 3-line market summary joined with \\n.`;
+- outlook is a 3-line market summary joined with \\n.
+- Return only the raw JSON object, nothing else.`;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-opus-4-6',
-        max_tokens: 1024,
-        system: 'You are a financial sentiment analyst. Respond only in valid JSON.',
-        messages: [{ role: 'user', content: userPrompt }],
-      }),
-    });
+    const result = await model.generateContent(prompt);
+    const rawText = result.response.text();
 
-    if (!response.ok) {
-      const errText = await response.text();
-      return NextResponse.json(
-        { error: `Anthropic API returned ${response.status}: ${errText}` },
-        { status: 500 }
-      );
-    }
-
-    const data = await response.json();
-    const rawText: string = data.content[0].text;
-
-    // Strip markdown code fences if present
+    // Strip markdown code fences if Gemini wraps the response
     const cleaned = rawText
       .replace(/^```(?:json)?\s*/i, '')
-      .replace(/\s*```$/, '')
+      .replace(/\s*```\s*$/, '')
       .trim();
 
-    const parsed: AnthropicSentimentResponse = JSON.parse(cleaned);
+    const parsed: GeminiSentimentResponse = JSON.parse(cleaned);
 
     return NextResponse.json(parsed);
   } catch (err) {
