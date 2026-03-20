@@ -4,8 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -48,18 +48,13 @@ const TREND_ARROWS: Record<TrendDirection, string> = {
   Stable: '→',
 };
 
-const BADGE_BG: Record<EntryExitLabel, string> = {
-  'Potential Entry Zone': '#00ff88',
-  'Caution — Consider Exit': '#ef4444',
-  'Watch — Momentum Building': '#f97316',
-  'Hold — No Strong Signal': '#333',
-};
-
-const BADGE_TEXT: Record<EntryExitLabel, string> = {
-  'Potential Entry Zone': '#0a0a0a',
-  'Caution — Consider Exit': '#0a0a0a',
-  'Watch — Momentum Building': '#0a0a0a',
-  'Hold — No Strong Signal': '#e8e8f0',
+const SECTION_LABEL: React.CSSProperties = {
+  fontSize: '11px',
+  fontFamily: MONO,
+  color: '#4a4a6a',
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  marginBottom: '16px',
 };
 
 const TICKER_TAPE_ITEMS = [
@@ -67,6 +62,28 @@ const TICKER_TAPE_ITEMS = [
   'NVDA · Hidden Strength', 'META · Aligned', 'AMZN · Mild Pessimism',
   'GOOG · Aligned', 'NFLX · Mild Optimism', 'AMD · Hidden Strength',
 ];
+
+// ── Badge style per entry/exit label ─────────────────────────────────────────
+function getBadgeStyle(label: EntryExitLabel): React.CSSProperties {
+  const base: React.CSSProperties = {
+    fontFamily: MONO,
+    fontSize: '13px',
+    borderRadius: '6px',
+    padding: '6px 14px',
+    display: 'inline-block',
+  };
+  if (label === 'Hold — No Strong Signal') {
+    return { ...base, border: '2px solid #4a4a6a', background: 'transparent', color: '#888' };
+  }
+  if (label === 'Potential Entry Zone') {
+    return { ...base, border: 'none', background: '#00ff8820', color: '#00ff88' };
+  }
+  if (label === 'Caution — Consider Exit') {
+    return { ...base, border: 'none', background: '#ef444420', color: '#ef4444' };
+  }
+  // Watch — Momentum Building
+  return { ...base, border: 'none', background: '#f9731620', color: '#f97316' };
+}
 
 // ── Metric card ───────────────────────────────────────────────────────────────
 function MetricCard({
@@ -80,37 +97,39 @@ function MetricCard({
   sub?: string;
   valueColor?: string;
 }) {
+  const isLong = value.length > 8;
   return (
     <div style={{
+      minWidth: 0,
       background: '#0d0d12',
       border: '1px solid #1c1c26',
-      borderRadius: '8px',
-      padding: '20px 24px',
-      flex: '1 1 150px',
+      borderRadius: '10px',
+      padding: '20px 20px 18px',
     }}>
       <p style={{
-        color: '#555',
+        color: '#4a4a6a',
         fontSize: '11px',
         fontWeight: 500,
         letterSpacing: '0.1em',
         textTransform: 'uppercase',
         fontFamily: MONO,
-        marginBottom: '10px',
+        marginBottom: '14px',
       }}>
         {label}
       </p>
       <p style={{
         color: valueColor ?? '#e8e8f0',
-        fontSize: '1.65rem',
-        fontWeight: 500,
+        fontSize: isLong ? '1.5rem' : '2.2rem',
+        fontWeight: 600,
         fontFamily: MONO,
         lineHeight: 1,
-        marginBottom: sub ? '6px' : 0,
+        marginBottom: sub ? '8px' : 0,
+        whiteSpace: 'nowrap',
       }}>
         {value}
       </p>
       {sub && (
-        <p style={{ color: '#555', fontSize: '13px', fontFamily: FONT }}>
+        <p style={{ color: '#4a4a6a', fontSize: '12px', fontFamily: FONT, lineHeight: 1.4 }}>
           {sub}
         </p>
       )}
@@ -162,9 +181,9 @@ function TickerTape() {
 function SentimentBar({ bullish, neutral, bearish }: { bullish: number; neutral: number; bearish: number }) {
   return (
     <div>
-      <div style={{ display: 'flex', borderRadius: '6px', overflow: 'hidden', height: '10px', background: '#1c1c26', marginBottom: '14px' }}>
-        <div style={{ width: `${bullish}%`, background: '#00ff88' }} />
-        <div style={{ width: `${neutral}%`, background: '#2a2a3a' }} />
+      <div style={{ display: 'flex', borderRadius: '6px', overflow: 'hidden', height: '12px', background: '#1c1c26', marginBottom: '14px' }}>
+        <div style={{ width: `${bullish}%`, background: '#00ff88', marginRight: '2px' }} />
+        <div style={{ width: `${neutral}%`, background: '#2a2a3a', marginRight: '2px' }} />
         <div style={{ width: `${bearish}%`, background: '#ef4444' }} />
       </div>
       <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
@@ -173,6 +192,16 @@ function SentimentBar({ bullish, neutral, bearish }: { bullish: number; neutral:
         <span style={{ color: '#ef4444', fontSize: '13px', fontFamily: MONO }}>▼ Bearish {bearish}%</span>
       </div>
     </div>
+  );
+}
+
+// ── Chart legend dot ──────────────────────────────────────────────────────────
+function LegendDot({ color, label }: { color: string; label: string }) {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginRight: '20px' }}>
+      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: color, display: 'inline-block' }} />
+      <span style={{ color: '#555', fontSize: '12px', fontFamily: MONO }}>{label}</span>
+    </span>
   );
 }
 
@@ -249,12 +278,13 @@ function SignalContent() {
   }));
 
   const hasTrendLine = chartData?.some(p => p['Search Trend'] !== undefined) ?? false;
-  const xInterval = chartData ? Math.max(Math.floor(chartData.length / 5) - 1, 0) : 0;
+  const hasTrendCard = data !== null && data.trendScore !== undefined && data.trendDirection !== undefined;
+  const xInterval = chartData ? Math.floor(chartData.length / 6) : 0;
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 24px 80px', fontFamily: FONT }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 40px 100px', fontFamily: FONT }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', gap: '16px', flexWrap: 'wrap' }}>
         <div>
           <h1 style={{
             fontFamily: FONT,
@@ -284,7 +314,7 @@ function SignalContent() {
       </div>
 
       {/* Re-analyze bar */}
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '36px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap' }}>
         <input
           type="text"
           value={inputTicker}
@@ -301,7 +331,7 @@ function SignalContent() {
             height: '44px',
             padding: '0 14px',
             outline: 'none',
-            minWidth: '160px',
+            width: '220px',
           }}
         />
         {([7, 30, 90] as const).map(tf => (
@@ -316,13 +346,15 @@ function SignalContent() {
               fontFamily: FONT,
               fontSize: '13px',
               height: '44px',
-              padding: '0 16px',
+              width: '60px',
               cursor: 'pointer',
             }}
           >
             {tf}D
           </button>
         ))}
+        {/* Separator */}
+        <div style={{ width: '1px', height: '28px', background: '#2a2a3a', margin: '0 4px' }} />
         <button
           onClick={handleAnalyze}
           style={{
@@ -363,7 +395,11 @@ function SignalContent() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
           {/* Metric cards */}
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: hasTrendCard ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)',
+            gap: '12px',
+          }}>
             <MetricCard
               label="Divergence Score"
               value={data.divergenceScore > 0 ? `+${data.divergenceScore}` : String(data.divergenceScore)}
@@ -387,12 +423,14 @@ function SignalContent() {
               value={`${Math.round(data.sentiment.score)}/100`}
               sub={`${data.sentiment.bullish}% bull · ${data.sentiment.bearish}% bear`}
             />
-            <MetricCard
-              label="Search Trend"
-              value={`${data.trendScore}${TREND_ARROWS[data.trendDirection]}`}
-              sub={data.trendDirection}
-              valueColor={TREND_COLORS[data.trendDirection]}
-            />
+            {hasTrendCard && (
+              <MetricCard
+                label="Search Trend"
+                value={`${data.trendScore}${TREND_ARROWS[data.trendDirection]}`}
+                sub={data.trendDirection}
+                valueColor={TREND_COLORS[data.trendDirection]}
+              />
+            )}
           </div>
 
           {/* Entry/Exit panel */}
@@ -401,31 +439,22 @@ function SignalContent() {
               background: '#0d0d12',
               border: '1px solid #1c1c26',
               borderRadius: '8px',
-              padding: '18px 22px',
+              padding: '20px 24px',
               display: 'flex',
-              alignItems: 'flex-start',
+              alignItems: 'center',
+              justifyContent: 'space-between',
               gap: '16px',
               flexWrap: 'wrap',
             }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ marginBottom: '8px' }}>
-                  <span style={{
-                    fontFamily: MONO,
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    color: BADGE_TEXT[data.entryExitLabel],
-                    background: BADGE_BG[data.entryExitLabel],
-                    borderRadius: '4px',
-                    padding: '4px 10px',
-                  }}>
-                    {data.entryExitLabel}
-                  </span>
-                </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={getBadgeStyle(data.entryExitLabel)}>
+                  {data.entryExitLabel}
+                </span>
                 <p style={{ color: '#a0a0b8', fontSize: '14px', lineHeight: 1.55 }}>
                   {data.entryExitExplanation}
                 </p>
               </div>
-              <p style={{ color: '#4a4a6a', fontSize: '11px', alignSelf: 'flex-end', minWidth: '200px' }}>
+              <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, textAlign: 'right', minWidth: '200px' }}>
                 Quantitative analysis only. Not financial advice.
               </p>
             </div>
@@ -438,11 +467,25 @@ function SignalContent() {
             borderRadius: '8px',
             padding: '24px',
           }}>
-            <p style={{ color: '#555', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '20px' }}>
+            <p style={SECTION_LABEL}>
               Sentiment vs Normalised Price (0–100 Scale)
             </p>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData} margin={{ top: 4, right: 16, left: -14, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={380}>
+              <AreaChart data={chartData} margin={{ top: 4, right: 16, left: -14, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="fillPrice" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#00e5ff" stopOpacity={0.08} />
+                    <stop offset="95%" stopColor="#00e5ff" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="fillSentiment" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.08} />
+                    <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="fillTrend" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.08} />
+                    <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1c1c26" vertical={false} />
                 <XAxis
                   dataKey="date"
@@ -459,42 +502,52 @@ function SignalContent() {
                   axisLine={false}
                 />
                 <Tooltip
-                  contentStyle={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '6px', color: '#e8e8f0', fontSize: '12px', fontFamily: MONO }}
+                  contentStyle={{ background: '#0a0a12', border: '1px solid #2a2a3a', borderRadius: 8, fontSize: 12, fontFamily: MONO }}
                   labelStyle={{ color: '#555', marginBottom: '4px' }}
                   cursor={{ stroke: '#2a2a3a' }}
                 />
-                <Legend
-                  wrapperStyle={{ fontSize: '12px', fontFamily: MONO, color: '#555', paddingTop: '12px' }}
-                />
-                <ReferenceLine y={50} stroke="#2a2a3a" strokeDasharray="6 4" />
-                <Line
+                <Legend content={() => (
+                  <div style={{ paddingTop: '16px', textAlign: 'center' }}>
+                    <LegendDot color="#00e5ff" label="Norm. Price" />
+                    <LegendDot color="#7c3aed" label="Sentiment Score" />
+                    {hasTrendLine && <LegendDot color="#f97316" label="Search Trend" />}
+                  </div>
+                )} />
+                <ReferenceLine y={50} stroke="#2a2a3a" strokeDasharray="4 3" strokeWidth={1.5} />
+                <Area
                   type="monotone"
                   dataKey="Norm. Price"
                   stroke="#00e5ff"
                   strokeWidth={2}
+                  fill="url(#fillPrice)"
                   dot={false}
+                  activeDot={{ r: 4, strokeWidth: 0 }}
                   isAnimationActive={false}
                 />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="Sentiment Score"
-                  stroke="#00ff88"
+                  stroke="#7c3aed"
                   strokeWidth={2}
+                  strokeDasharray="5 3"
+                  fill="url(#fillSentiment)"
                   dot={false}
-                  strokeDasharray="4 2"
+                  activeDot={{ r: 4, strokeWidth: 0 }}
                   isAnimationActive={false}
                 />
                 {hasTrendLine && (
-                  <Line
+                  <Area
                     type="monotone"
                     dataKey="Search Trend"
                     stroke="#f97316"
                     strokeWidth={2}
+                    fill="url(#fillTrend)"
                     dot={false}
+                    activeDot={{ r: 4, strokeWidth: 0 }}
                     isAnimationActive={false}
                   />
                 )}
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
 
@@ -505,7 +558,7 @@ function SignalContent() {
             borderRadius: '8px',
             padding: '22px 24px',
           }}>
-            <p style={{ color: '#555', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>
+            <p style={SECTION_LABEL}>
               Sentiment Breakdown
             </p>
             <SentimentBar
@@ -517,16 +570,16 @@ function SignalContent() {
 
           {/* Analysis */}
           <div style={{
-            background: '#0f0f18',
+            background: '#0a0a12',
             border: '1px solid #1c1c26',
-            borderLeft: '2px solid #00e5ff',
+            borderLeft: '3px solid #00e5ff',
             borderRadius: '8px',
-            padding: '20px 24px',
+            padding: '24px 28px',
           }}>
-            <p style={{ color: '#555', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
+            <p style={SECTION_LABEL}>
               Analysis
             </p>
-            <p style={{ color: '#c8c8d8', fontSize: '15px', lineHeight: 1.7, maxWidth: '70ch' }}>
+            <p style={{ color: '#c0c0d0', fontSize: '15px', lineHeight: 1.75, maxWidth: '72ch' }}>
               {data.insight}
             </p>
           </div>
@@ -551,10 +604,10 @@ function SignalContent() {
                 cursor: 'pointer',
               }}
             >
-              <span style={{ color: '#555', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <span style={{ ...SECTION_LABEL, marginBottom: 0 }}>
                 Headlines used in analysis ({data.headlines.length})
               </span>
-              <span style={{ color: '#555', fontSize: '14px', fontFamily: MONO }}>
+              <span style={{ color: '#4a4a6a', fontSize: '14px', fontFamily: MONO }}>
                 {headlinesExpanded ? '▲' : '▼'}
               </span>
             </button>
