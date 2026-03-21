@@ -102,7 +102,7 @@ export default function LandingPage() {
   };
 
   const handleSelect = (s: SearchResult) => {
-    setQuery(s.ticker);
+    setQuery(s.name);
     setShowDropdown(false);
     inputRef.current?.focus();
   };
@@ -112,7 +112,7 @@ export default function LandingPage() {
     if (!t) return;
     try {
       const prev = JSON.parse(localStorage.getItem('markora_recent_searches') ?? '[]') as string[];
-      const updated = [t.toUpperCase(), ...prev.filter((x) => x !== t.toUpperCase())].slice(0, 5);
+      const updated = [t, ...prev.filter((x) => x.toLowerCase() !== t.toLowerCase())].slice(0, 5);
       localStorage.setItem('markora_recent_searches', JSON.stringify(updated));
       setRecentSearches(updated);
     } catch { /* ignore */ }

@@ -64,6 +64,15 @@ const TICKER_TAPE_ITEMS = [
   'GOOG · Aligned', 'NFLX · Mild Optimism', 'AMD · Hidden Strength',
 ];
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const fmt = (v: number | null | undefined, decimals = 2, suffix = ''): string =>
+  v !== null && v !== undefined ? `${v.toFixed(decimals)}${suffix}` : '—';
+
+const fmtPct = (v: number | null | undefined, isAlreadyPct = false): string =>
+  v !== null && v !== undefined
+    ? `${(isAlreadyPct ? v : v * 100).toFixed(1)}%`
+    : '—';
+
 // ── Badge style per entry/exit label ─────────────────────────────────────────
 function getBadgeStyle(label: EntryExitLabel): CSSProperties {
   const base: CSSProperties = {
@@ -82,59 +91,45 @@ function getBadgeStyle(label: EntryExitLabel): CSSProperties {
   if (label === 'Caution — Consider Exit') {
     return { ...base, border: 'none', background: '#ef444420', color: '#ef4444' };
   }
-  // Watch — Momentum Building
   return { ...base, border: 'none', background: '#f9731620', color: '#f97316' };
 }
 
 // ── Metric card ───────────────────────────────────────────────────────────────
 function MetricCard({
-  label,
-  value,
-  sub,
-  valueColor,
+  label, value, sub, valueColor,
 }: {
-  label: string;
-  value: string;
-  sub?: string;
-  valueColor?: string;
+  label: string; value: string; sub?: string; valueColor?: string;
 }) {
   const isLong = value.length > 8;
   return (
-    <div style={{
-      minWidth: 0,
-      background: '#0d0d12',
-      border: '1px solid #1c1c26',
-      borderRadius: '10px',
-      padding: '20px 20px 18px',
-    }}>
-      <p style={{
-        color: '#4a4a6a',
-        fontSize: '11px',
-        fontWeight: 500,
-        letterSpacing: '0.1em',
-        textTransform: 'uppercase',
-        fontFamily: MONO,
-        marginBottom: '14px',
-      }}>
+    <div style={{ minWidth: 0, background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '10px', padding: '20px 20px 18px' }}>
+      <p style={{ color: '#4a4a6a', fontSize: '11px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, marginBottom: '14px' }}>
         {label}
       </p>
-      <p style={{
-        color: valueColor ?? '#e8e8f0',
-        fontSize: isLong ? '1.5rem' : '2.2rem',
-        fontWeight: 600,
-        fontFamily: MONO,
-        lineHeight: 1,
-        marginBottom: sub ? '8px' : 0,
-        whiteSpace: 'nowrap',
-      }}>
+      <p style={{ color: valueColor ?? '#e8e8f0', fontSize: isLong ? '1.5rem' : '2.2rem', fontWeight: 600, fontFamily: MONO, lineHeight: 1, marginBottom: sub ? '8px' : 0, whiteSpace: 'nowrap' }}>
         {value}
       </p>
-      {sub && (
-        <p style={{ color: '#4a4a6a', fontSize: '12px', fontFamily: FONT, lineHeight: 1.4 }}>
-          {sub}
-        </p>
-      )}
+      {sub && <p style={{ color: '#4a4a6a', fontSize: '12px', fontFamily: FONT, lineHeight: 1.4 }}>{sub}</p>}
     </div>
+  );
+}
+
+// ── Stat row (label / value pair) ─────────────────────────────────────────────
+function StatRow({ label, value, color }: { label: string; value: string; color?: string }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #13131e' }}>
+      <span style={{ color: '#4a4a6a', fontSize: '13px', fontFamily: MONO }}>{label}</span>
+      <span style={{ color: color ?? '#e8e8f0', fontSize: '13px', fontFamily: MONO, fontWeight: 500 }}>{value}</span>
+    </div>
+  );
+}
+
+// ── Small badge ───────────────────────────────────────────────────────────────
+function Badge({ label, color, bg }: { label: string; color: string; bg: string }) {
+  return (
+    <span style={{ fontFamily: MONO, fontSize: '11px', padding: '3px 10px', borderRadius: '4px', color, background: bg, letterSpacing: '0.06em' }}>
+      {label}
+    </span>
   );
 }
 
@@ -142,26 +137,8 @@ function MetricCard({
 function TickerTape() {
   const items = [...TICKER_TAPE_ITEMS, ...TICKER_TAPE_ITEMS];
   return (
-    <div style={{
-      position: 'fixed',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: '36px',
-      background: '#0d0d12',
-      borderTop: '1px solid #1c1c26',
-      overflow: 'hidden',
-      zIndex: 10,
-    }}>
-      <div style={{
-        display: 'flex',
-        gap: '48px',
-        alignItems: 'center',
-        height: '100%',
-        width: 'max-content',
-        animation: 'tickerScroll 40s linear infinite',
-        paddingLeft: '100%',
-      }}>
+    <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: '36px', background: '#0d0d12', borderTop: '1px solid #1c1c26', overflow: 'hidden', zIndex: 10 }}>
+      <div style={{ display: 'flex', gap: '48px', alignItems: 'center', height: '100%', width: 'max-content', animation: 'tickerScroll 40s linear infinite', paddingLeft: '100%' }}>
         {items.map((item, i) => {
           const [symbol, signal] = item.split(' · ');
           const color = SIGNAL_COLORS[signal as SignalType] ?? '#555';
@@ -203,6 +180,23 @@ function LegendDot({ color, label }: { color: string; label: string }) {
       <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: color, display: 'inline-block' }} />
       <span style={{ color: '#555', fontSize: '12px', fontFamily: MONO }}>{label}</span>
     </span>
+  );
+}
+
+// ── 52-week range bar ─────────────────────────────────────────────────────────
+function WeekRangeBar({ position, low, high }: { position: number; low: number; high: number }) {
+  const clamp = Math.min(100, Math.max(0, position));
+  return (
+    <div style={{ marginTop: '4px' }}>
+      <div style={{ position: 'relative', height: '6px', background: '#1c1c26', borderRadius: '3px', margin: '10px 0 8px' }}>
+        <div style={{ position: 'absolute', left: `${clamp}%`, top: '50%', transform: 'translate(-50%, -50%)', width: '12px', height: '12px', background: '#00e5ff', borderRadius: '50%' }} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#555', fontFamily: MONO }}>
+        <span>L ${low.toFixed(2)}</span>
+        <span style={{ color: '#4a4a6a' }}>{clamp.toFixed(0)}th percentile</span>
+        <span>H ${high.toFixed(2)}</span>
+      </div>
+    </div>
   );
 }
 
@@ -264,7 +258,7 @@ function SignalContent() {
   if (!rawTicker) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 24px', fontFamily: FONT }}>
-        <p style={{ color: '#555', marginBottom: '16px' }}>No ticker selected.</p>
+        <p style={{ color: '#555', marginBottom: '16px' }}>No company selected.</p>
         <Link href="/" style={{ color: '#00e5ff', fontSize: '14px' }}>← Back to home</Link>
       </div>
     );
@@ -281,6 +275,16 @@ function SignalContent() {
   const hasTrendCard = data !== null && data.trendScore !== undefined && data.trendDirection !== undefined;
   const xInterval = chartData ? Math.floor(chartData.length / 6) : 0;
 
+  // ── Derived color helpers ─────────────────────────────────────────────────
+  const rsiColor = !data ? '#888' :
+    data.priceIntelligence.rsiLabel === 'Overbought' ? '#ef4444' :
+    data.priceIntelligence.rsiLabel === 'Oversold' ? '#00ff88' : '#888';
+
+  const betaColors: Record<string, string> = { Low: '#00ff88', Moderate: '#888', High: '#f97316', 'Very High': '#ef4444' };
+  const volColors: Record<string, string> = { Low: '#00ff88', Moderate: '#888', High: '#f97316', 'Very High': '#ef4444' };
+  const shortColors: Record<string, string> = { Normal: '#00ff88', Elevated: '#f97316', High: '#ef4444' };
+  const insiderColors: Record<string, string> = { Buying: '#00ff88', Selling: '#ef4444', Neutral: '#888' };
+
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 40px 100px', fontFamily: FONT }}>
 
@@ -292,17 +296,19 @@ function SignalContent() {
           </h1>
           <p style={{ color: '#555', fontSize: '14px' }}>
             Sentiment vs price divergence analysis
+            {data?.fundamentals.sector && (
+              <span style={{ marginLeft: '12px', color: '#4a4a6a', fontFamily: MONO, fontSize: '11px', background: '#1c1c26', padding: '2px 8px', borderRadius: '4px' }}>
+                {data.fundamentals.sector}
+              </span>
+            )}
+            {data?.fundamentals.industry && (
+              <span style={{ marginLeft: '6px', color: '#4a4a6a', fontFamily: MONO, fontSize: '11px', background: '#1c1c26', padding: '2px 8px', borderRadius: '4px' }}>
+                {data.fundamentals.industry}
+              </span>
+            )}
           </p>
         </div>
-        <Link href="/" style={{
-          color: '#e8e8f0',
-          fontSize: '14px',
-          textDecoration: 'none',
-          border: '1px solid #2a2a3a',
-          borderRadius: '6px',
-          padding: '8px 14px',
-          whiteSpace: 'nowrap',
-        }}>
+        <Link href="/" style={{ color: '#e8e8f0', fontSize: '14px', textDecoration: 'none', border: '1px solid #2a2a3a', borderRadius: '6px', padding: '8px 14px', whiteSpace: 'nowrap' }}>
           ← Home
         </Link>
       </div>
@@ -314,35 +320,14 @@ function SignalContent() {
           value={inputTicker}
           onChange={e => setInputTicker(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleAnalyze()}
-          placeholder="Ticker or company"
-          style={{
-            background: '#0d0d12',
-            border: '1px solid #2a2a3a',
-            borderRadius: '6px',
-            color: '#e8e8f0',
-            fontFamily: FONT,
-            fontSize: '14px',
-            height: '44px',
-            padding: '0 14px',
-            outline: 'none',
-            width: '220px',
-          }}
+          placeholder="Company name"
+          style={{ background: '#0d0d12', border: '1px solid #2a2a3a', borderRadius: '6px', color: '#e8e8f0', fontFamily: FONT, fontSize: '14px', height: '44px', padding: '0 14px', outline: 'none', width: '220px' }}
         />
         {([7, 30, 90] as const).map(tf => (
           <button
             key={tf}
             onClick={() => setSelectedTimeframe(tf)}
-            style={{
-              background: selectedTimeframe === tf ? '#00ff88' : '#0d0d12',
-              border: '1px solid #2a2a3a',
-              borderRadius: '6px',
-              color: selectedTimeframe === tf ? '#0a0a0a' : '#e8e8f0',
-              fontFamily: FONT,
-              fontSize: '13px',
-              height: '44px',
-              width: '60px',
-              cursor: 'pointer',
-            }}
+            style={{ background: selectedTimeframe === tf ? '#00ff88' : '#0d0d12', border: '1px solid #2a2a3a', borderRadius: '6px', color: selectedTimeframe === tf ? '#0a0a0a' : '#e8e8f0', fontFamily: FONT, fontSize: '13px', height: '44px', width: '60px', cursor: 'pointer' }}
           >
             {tf}D
           </button>
@@ -350,17 +335,7 @@ function SignalContent() {
         <div style={{ width: '1px', height: '28px', background: '#2a2a3a', margin: '0 4px' }} />
         <button
           onClick={handleAnalyze}
-          style={{
-            background: '#0d0d12',
-            border: '1px solid #2a2a3a',
-            borderRadius: '6px',
-            color: '#888',
-            fontFamily: FONT,
-            fontSize: '13px',
-            height: '44px',
-            padding: '0 20px',
-            cursor: 'pointer',
-          }}
+          style={{ background: '#0d0d12', border: '1px solid #2a2a3a', borderRadius: '6px', color: '#888', fontFamily: FONT, fontSize: '13px', height: '44px', padding: '0 20px', cursor: 'pointer' }}
         >
           Analyze
         </button>
@@ -370,9 +345,7 @@ function SignalContent() {
       {loading && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', padding: '80px 0' }}>
           <div style={{ width: '40px', height: '40px', border: '3px solid #1c1c26', borderTop: '3px solid #00e5ff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-          <p style={{ color: '#555', fontSize: '13px' }}>
-            Fetching headlines, prices, trends, and running analysis…
-          </p>
+          <p style={{ color: '#555', fontSize: '13px' }}>Fetching headlines, prices, trends, and running analysis…</p>
         </div>
       )}
 
@@ -388,23 +361,14 @@ function SignalContent() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
           {/* Metric cards */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: hasTrendCard ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)',
-            gap: '12px',
-          }}>
+          <div style={{ display: 'grid', gridTemplateColumns: hasTrendCard ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)', gap: '12px' }}>
             <MetricCard
               label="Divergence Score"
               value={data.divergenceScore > 0 ? `+${data.divergenceScore}` : String(data.divergenceScore)}
               sub="Sentiment − Normalised Price"
               valueColor={SIGNAL_COLORS[data.signal]}
             />
-            <MetricCard
-              label="Signal"
-              value={data.signal}
-              valueColor={SIGNAL_COLORS[data.signal]}
-              sub={SIGNAL_SUBTEXTS[data.signal]}
-            />
+            <MetricCard label="Signal" value={data.signal} valueColor={SIGNAL_COLORS[data.signal]} sub={SIGNAL_SUBTEXTS[data.signal]} />
             <MetricCard
               label="Price Change"
               value={`${data.priceChangePercent > 0 ? '+' : ''}${data.priceChangePercent.toFixed(2)}%`}
@@ -428,24 +392,10 @@ function SignalContent() {
 
           {/* Entry/Exit panel */}
           {data.entryExitLabel && (
-            <div style={{
-              background: '#0d0d12',
-              border: '1px solid #1c1c26',
-              borderRadius: '8px',
-              padding: '20px 24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '16px',
-              flexWrap: 'wrap',
-            }}>
+            <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <span style={getBadgeStyle(data.entryExitLabel)}>
-                  {data.entryExitLabel}
-                </span>
-                <p style={{ color: '#a0a0b8', fontSize: '14px', lineHeight: 1.55 }}>
-                  {data.entryExitExplanation}
-                </p>
+                <span style={getBadgeStyle(data.entryExitLabel)}>{data.entryExitLabel}</span>
+                <p style={{ color: '#a0a0b8', fontSize: '14px', lineHeight: 1.55 }}>{data.entryExitExplanation}</p>
               </div>
               <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, textAlign: 'right', minWidth: '200px' }}>
                 Quantitative analysis only. Not financial advice.
@@ -473,25 +423,9 @@ function SignalContent() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1c1c26" vertical={false} />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fill: '#555', fontSize: 11, fontFamily: MONO }}
-                  tickLine={false}
-                  axisLine={false}
-                  interval={xInterval}
-                />
-                <YAxis
-                  domain={[0, 100]}
-                  ticks={[0, 25, 50, 75, 100]}
-                  tick={{ fill: '#555', fontSize: 11, fontFamily: MONO }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip
-                  contentStyle={{ background: '#0a0a12', border: '1px solid #2a2a3a', borderRadius: 8, fontSize: 12, fontFamily: MONO }}
-                  labelStyle={{ color: '#555', marginBottom: '4px' }}
-                  cursor={{ stroke: '#2a2a3a' }}
-                />
+                <XAxis dataKey="date" tick={{ fill: '#555', fontSize: 11, fontFamily: MONO }} tickLine={false} axisLine={false} interval={xInterval} />
+                <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tick={{ fill: '#555', fontSize: 11, fontFamily: MONO }} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ background: '#0a0a12', border: '1px solid #2a2a3a', borderRadius: 8, fontSize: 12, fontFamily: MONO }} labelStyle={{ color: '#555', marginBottom: '4px' }} cursor={{ stroke: '#2a2a3a' }} />
                 <Legend content={() => (
                   <div style={{ paddingTop: '16px', textAlign: 'center' }}>
                     <LegendDot color="#00e5ff" label="Norm. Price" />
@@ -500,38 +434,10 @@ function SignalContent() {
                   </div>
                 )} />
                 <ReferenceLine y={50} stroke="#2a2a3a" strokeDasharray="4 3" strokeWidth={1.5} />
-                <Area
-                  type="monotone"
-                  dataKey="Norm. Price"
-                  stroke="#00e5ff"
-                  strokeWidth={2}
-                  fill="url(#fillPrice)"
-                  dot={false}
-                  activeDot={{ r: 4, strokeWidth: 0 }}
-                  isAnimationActive={false}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="Sentiment Score"
-                  stroke="#7c3aed"
-                  strokeWidth={2}
-                  strokeDasharray="5 3"
-                  fill="url(#fillSentiment)"
-                  dot={false}
-                  activeDot={{ r: 4, strokeWidth: 0 }}
-                  isAnimationActive={false}
-                />
+                <Area type="monotone" dataKey="Norm. Price" stroke="#00e5ff" strokeWidth={2} fill="url(#fillPrice)" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={false} />
+                <Area type="monotone" dataKey="Sentiment Score" stroke="#7c3aed" strokeWidth={2} strokeDasharray="5 3" fill="url(#fillSentiment)" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={false} />
                 {hasTrendLine && (
-                  <Area
-                    type="monotone"
-                    dataKey="Search Trend"
-                    stroke="#f97316"
-                    strokeWidth={2}
-                    fill="url(#fillTrend)"
-                    dot={false}
-                    activeDot={{ r: 4, strokeWidth: 0 }}
-                    isAnimationActive={false}
-                  />
+                  <Area type="monotone" dataKey="Search Trend" stroke="#f97316" strokeWidth={2} fill="url(#fillTrend)" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={false} />
                 )}
               </AreaChart>
             </ResponsiveContainer>
@@ -540,62 +446,265 @@ function SignalContent() {
           {/* Sentiment breakdown */}
           <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
             <p style={SECTION_LABEL}>Sentiment Breakdown</p>
-            <SentimentBar
-              bullish={data.sentiment.bullish}
-              neutral={data.sentiment.neutral}
-              bearish={data.sentiment.bearish}
-            />
+            <SentimentBar bullish={data.sentiment.bullish} neutral={data.sentiment.neutral} bearish={data.sentiment.bearish} />
           </div>
 
           {/* Analysis */}
-          <div style={{
-            background: '#0a0a12',
-            border: '1px solid #1c1c26',
-            borderLeft: '3px solid #00e5ff',
-            borderRadius: '8px',
-            padding: '24px 28px',
-          }}>
+          <div style={{ background: '#0a0a12', border: '1px solid #1c1c26', borderLeft: '3px solid #00e5ff', borderRadius: '8px', padding: '24px 28px' }}>
             <p style={SECTION_LABEL}>Analysis</p>
-            <p style={{ color: '#c0c0d0', fontSize: '15px', lineHeight: 1.75, maxWidth: '72ch' }}>
-              {data.insight}
-            </p>
+            <p style={{ color: '#c0c0d0', fontSize: '15px', lineHeight: 1.75, maxWidth: '72ch' }}>{data.insight}</p>
           </div>
+
+          {/* ── PRICE INTELLIGENCE ─────────────────────────────────────────────── */}
+          <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
+            <p style={SECTION_LABEL}>Price Intelligence</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '20px' }}>
+              {/* RSI */}
+              <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
+                <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>RSI (14-day)</p>
+                <p style={{ color: rsiColor, fontSize: '2rem', fontFamily: MONO, fontWeight: 600, lineHeight: 1, marginBottom: '6px' }}>
+                  {data.priceIntelligence.rsi}
+                </p>
+                <Badge
+                  label={data.priceIntelligence.rsiLabel}
+                  color={rsiColor}
+                  bg={rsiColor + '18'}
+                />
+              </div>
+              {/* 200 MA */}
+              <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
+                <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>200-Day MA</p>
+                <p style={{ color: '#e8e8f0', fontSize: '1.6rem', fontFamily: MONO, fontWeight: 600, lineHeight: 1, marginBottom: '6px' }}>
+                  ${data.priceIntelligence.ma200.toFixed(2)}
+                </p>
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <Badge
+                    label={data.priceIntelligence.ma200Label}
+                    color={data.priceIntelligence.ma200Label === 'Above' ? '#00ff88' : '#ef4444'}
+                    bg={data.priceIntelligence.ma200Label === 'Above' ? '#00ff8818' : '#ef444418'}
+                  />
+                  <span style={{ color: '#555', fontSize: '12px', fontFamily: MONO }}>
+                    {data.priceIntelligence.ma200PercentDiff > 0 ? '+' : ''}{data.priceIntelligence.ma200PercentDiff.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+              {/* ATR */}
+              <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
+                <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>ATR (14-day)</p>
+                <p style={{ color: '#e8e8f0', fontSize: '2rem', fontFamily: MONO, fontWeight: 600, lineHeight: 1, marginBottom: '6px' }}>
+                  ${data.priceIntelligence.atr.toFixed(2)}
+                </p>
+                <p style={{ color: '#4a4a6a', fontSize: '12px', fontFamily: FONT }}>Avg. daily range</p>
+              </div>
+              {/* Cross signal */}
+              <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
+                <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>MA Cross Signal</p>
+                <div style={{ marginTop: '8px' }}>
+                  <Badge
+                    label={data.priceIntelligence.crossSignal === 'None' ? 'No recent cross' : data.priceIntelligence.crossSignal}
+                    color={data.priceIntelligence.crossSignal === 'Golden Cross' ? '#fbbf24' : data.priceIntelligence.crossSignal === 'Death Cross' ? '#ef4444' : '#555'}
+                    bg={data.priceIntelligence.crossSignal === 'Golden Cross' ? '#fbbf2418' : data.priceIntelligence.crossSignal === 'Death Cross' ? '#ef444418' : '#1c1c26'}
+                  />
+                </div>
+                <p style={{ color: '#4a4a6a', fontSize: '12px', fontFamily: FONT, marginTop: '10px' }}>50 vs 200-day MA · last 10 days</p>
+              </div>
+            </div>
+            {/* 52-week range */}
+            <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
+              <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>52-Week Range</p>
+              <WeekRangeBar
+                position={data.priceIntelligence.weekRange52Position}
+                low={data.priceIntelligence.low52}
+                high={data.priceIntelligence.high52}
+              />
+            </div>
+          </div>
+
+          {/* ── FUNDAMENTALS ───────────────────────────────────────────────────── */}
+          <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
+            <p style={SECTION_LABEL}>Fundamentals</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 40px' }}>
+              <div>
+                <StatRow label="P/E Ratio (trailing)" value={fmt(data.fundamentals.peRatio, 1)} />
+                <StatRow label="Forward P/E" value={fmt(data.fundamentals.forwardPE, 1)} />
+                <StatRow label="PEG Ratio" value={fmt(data.fundamentals.pegRatio, 2)} />
+                <StatRow label="Revenue Growth (YoY)" value={fmtPct(data.fundamentals.revenueGrowth)}
+                  color={data.fundamentals.revenueGrowth !== null ? (data.fundamentals.revenueGrowth >= 0 ? '#00ff88' : '#ef4444') : undefined}
+                />
+                <StatRow label="Gross Margins" value={fmtPct(data.fundamentals.grossMargins)} />
+              </div>
+              <div>
+                <StatRow label="Return on Equity" value={fmtPct(data.fundamentals.returnOnEquity)}
+                  color={data.fundamentals.returnOnEquity !== null ? (data.fundamentals.returnOnEquity >= 0 ? '#00ff88' : '#ef4444') : undefined}
+                />
+                <StatRow label="Debt / Equity" value={fmt(data.fundamentals.debtToEquity, 2)} />
+                <StatRow label="Current Ratio" value={fmt(data.fundamentals.currentRatio, 2)} />
+                <StatRow label="Dividend Yield" value={fmtPct(data.fundamentals.dividendYield)} />
+                <StatRow label="Sector" value={data.fundamentals.sector ?? '—'} />
+              </div>
+            </div>
+          </div>
+
+          {/* ── MOMENTUM & FLOW ────────────────────────────────────────────────── */}
+          <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
+            <p style={SECTION_LABEL}>Momentum & Flow</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+              {/* Institutional */}
+              <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
+                <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>Institutional Ownership</p>
+                <p style={{ color: '#e8e8f0', fontSize: '2rem', fontFamily: MONO, fontWeight: 600, lineHeight: 1 }}>
+                  {data.momentumFlow.institutionalOwnershipPercent !== null
+                    ? `${data.momentumFlow.institutionalOwnershipPercent.toFixed(1)}%`
+                    : '—'}
+                </p>
+              </div>
+              {/* Insider */}
+              <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
+                <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>Insider Activity (90 days)</p>
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'baseline', marginBottom: '8px' }}>
+                  <span style={{ color: '#00ff88', fontSize: '1.4rem', fontFamily: MONO, fontWeight: 600 }}>{data.momentumFlow.insiderBuys}↑</span>
+                  <span style={{ color: '#ef4444', fontSize: '1.4rem', fontFamily: MONO, fontWeight: 600 }}>{data.momentumFlow.insiderSells}↓</span>
+                </div>
+                <Badge
+                  label={data.momentumFlow.insiderSentiment}
+                  color={insiderColors[data.momentumFlow.insiderSentiment]}
+                  bg={insiderColors[data.momentumFlow.insiderSentiment] + '18'}
+                />
+              </div>
+              {/* Short interest */}
+              <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
+                <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>Short Interest</p>
+                <p style={{ color: '#e8e8f0', fontSize: '1.6rem', fontFamily: MONO, fontWeight: 600, lineHeight: 1, marginBottom: '6px' }}>
+                  {data.momentumFlow.shortPercentOfFloat !== null
+                    ? `${(data.momentumFlow.shortPercentOfFloat * 100).toFixed(1)}%`
+                    : '—'}
+                </p>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Badge
+                    label={data.momentumFlow.shortLabel}
+                    color={shortColors[data.momentumFlow.shortLabel]}
+                    bg={shortColors[data.momentumFlow.shortLabel] + '18'}
+                  />
+                  {data.momentumFlow.shortRatio !== null && (
+                    <span style={{ color: '#555', fontSize: '12px', fontFamily: MONO }}>
+                      {data.momentumFlow.shortRatio.toFixed(1)}d to cover
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── RISK PROFILE ───────────────────────────────────────────────────── */}
+          <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
+            <p style={SECTION_LABEL}>Risk Profile</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+              {/* Beta */}
+              <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
+                <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>Beta</p>
+                <p style={{ color: '#e8e8f0', fontSize: '2rem', fontFamily: MONO, fontWeight: 600, lineHeight: 1, marginBottom: '8px' }}>
+                  {data.riskProfile.beta !== null ? data.riskProfile.beta.toFixed(2) : '—'}
+                </p>
+                <Badge
+                  label={data.riskProfile.betaLabel}
+                  color={betaColors[data.riskProfile.betaLabel]}
+                  bg={betaColors[data.riskProfile.betaLabel] + '18'}
+                />
+              </div>
+              {/* Realized vol */}
+              <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
+                <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>Realized Volatility</p>
+                <p style={{ color: volColors[data.riskProfile.volatilityLabel], fontSize: '2rem', fontFamily: MONO, fontWeight: 600, lineHeight: 1, marginBottom: '8px' }}>
+                  {data.riskProfile.realizedVolatility.toFixed(1)}%
+                </p>
+                <Badge
+                  label={data.riskProfile.volatilityLabel}
+                  color={volColors[data.riskProfile.volatilityLabel]}
+                  bg={volColors[data.riskProfile.volatilityLabel] + '18'}
+                />
+              </div>
+              {/* Max drawdown */}
+              <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
+                <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>Max Drawdown</p>
+                <p style={{ color: '#ef4444', fontSize: '2rem', fontFamily: MONO, fontWeight: 600, lineHeight: 1, marginBottom: '8px' }}>
+                  {data.riskProfile.maxDrawdown.toFixed(1)}%
+                </p>
+                <p style={{ color: '#4a4a6a', fontSize: '12px', fontFamily: FONT }}>Peak-to-trough over period</p>
+              </div>
+              {/* Sharpe */}
+              <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
+                <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>Sharpe Ratio</p>
+                <p style={{
+                  color: data.riskProfile.sharpeRatio === null ? '#555' :
+                    data.riskProfile.sharpeRatio >= 1 ? '#00ff88' :
+                    data.riskProfile.sharpeRatio >= 0 ? '#888' : '#ef4444',
+                  fontSize: '2rem', fontFamily: MONO, fontWeight: 600, lineHeight: 1, marginBottom: '8px'
+                }}>
+                  {data.riskProfile.sharpeRatio !== null ? data.riskProfile.sharpeRatio.toFixed(2) : '—'}
+                </p>
+                <p style={{ color: '#4a4a6a', fontSize: '12px', fontFamily: FONT }}>Annualized risk-adjusted return</p>
+              </div>
+            </div>
+          </div>
+
+          {/* ── PEER COMPARISON ────────────────────────────────────────────────── */}
+          {data.peerComparison.peers.length > 0 && (
+            <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
+              <p style={SECTION_LABEL}>Peer Comparison</p>
+              {/* Header row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '12px', padding: '0 0 10px', borderBottom: '1px solid #1c1c26', marginBottom: '4px' }}>
+                <span style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Company</span>
+                <span style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.08em', textTransform: 'uppercase', textAlign: 'right' }}>Price Chg</span>
+                <span style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.08em', textTransform: 'uppercase', textAlign: 'right' }}>P/E</span>
+                <span style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.08em', textTransform: 'uppercase', textAlign: 'right' }}>vs Target</span>
+              </div>
+              {/* Target row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '12px', padding: '12px 0', borderBottom: '1px solid #13131e', background: '#00e5ff08', borderRadius: '4px', marginBottom: '2px' }}>
+                <span style={{ color: '#e8e8f0', fontSize: '13px', fontFamily: FONT, paddingLeft: '8px' }}>
+                  {data.companyName}
+                  <span style={{ marginLeft: '8px', color: '#00e5ff', fontSize: '10px', fontFamily: MONO, background: '#00e5ff15', padding: '1px 6px', borderRadius: '3px' }}>target</span>
+                </span>
+                <span style={{ color: data.priceChangePercent >= 0 ? '#00ff88' : '#ef4444', fontSize: '13px', fontFamily: MONO, textAlign: 'right' }}>
+                  {data.priceChangePercent >= 0 ? '+' : ''}{data.priceChangePercent.toFixed(2)}%
+                </span>
+                <span style={{ color: '#e8e8f0', fontSize: '13px', fontFamily: MONO, textAlign: 'right' }}>
+                  {fmt(data.fundamentals.peRatio, 1)}
+                </span>
+                <span style={{ color: '#555', fontSize: '13px', fontFamily: MONO, textAlign: 'right' }}>—</span>
+              </div>
+              {/* Peer rows */}
+              {data.peerComparison.peers.map((peer, i) => (
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '12px', padding: '12px 0', borderBottom: i < data.peerComparison.peers.length - 1 ? '1px solid #13131e' : 'none' }}>
+                  <span style={{ color: '#a0a0b8', fontSize: '13px', fontFamily: FONT }}>{peer.companyName}</span>
+                  <span style={{ color: peer.priceChangePercent >= 0 ? '#00ff88' : '#ef4444', fontSize: '13px', fontFamily: MONO, textAlign: 'right' }}>
+                    {peer.priceChangePercent >= 0 ? '+' : ''}{peer.priceChangePercent.toFixed(2)}%
+                  </span>
+                  <span style={{ color: '#e8e8f0', fontSize: '13px', fontFamily: MONO, textAlign: 'right' }}>
+                    {peer.peRatio !== null ? peer.peRatio.toFixed(1) : '—'}
+                  </span>
+                  <span style={{ color: peer.relativeStrength >= 0 ? '#00ff88' : '#ef4444', fontSize: '13px', fontFamily: MONO, textAlign: 'right' }}>
+                    {peer.relativeStrength >= 0 ? '+' : ''}{peer.relativeStrength.toFixed(2)}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Headlines */}
           <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', overflow: 'hidden' }}>
             <button
               onClick={() => setHeadlinesExpanded(!headlinesExpanded)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                padding: '18px 24px',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-              }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '18px 24px', background: 'transparent', border: 'none', cursor: 'pointer' }}
             >
               <span style={{ ...SECTION_LABEL, marginBottom: 0 }}>
                 Headlines used in analysis ({data.headlines.length})
               </span>
-              <span style={{ color: '#4a4a6a', fontSize: '14px', fontFamily: MONO }}>
-                {headlinesExpanded ? '▲' : '▼'}
-              </span>
+              <span style={{ color: '#4a4a6a', fontSize: '14px', fontFamily: MONO }}>{headlinesExpanded ? '▲' : '▼'}</span>
             </button>
             {headlinesExpanded && (
               <div style={{ borderTop: '1px solid #1c1c26' }}>
                 {data.headlines.map((h, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      padding: '12px 24px',
-                      borderBottom: i < data.headlines.length - 1 ? '1px solid #1c1c26' : 'none',
-                      color: '#666',
-                      fontSize: '13px',
-                      lineHeight: 1.55,
-                    }}
-                  >
+                  <div key={i} style={{ padding: '12px 24px', borderBottom: i < data.headlines.length - 1 ? '1px solid #1c1c26' : 'none', color: '#666', fontSize: '13px', lineHeight: 1.55 }}>
                     {h}
                   </div>
                 ))}
