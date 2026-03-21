@@ -184,7 +184,7 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 }
 
 // ── 52-week range bar ─────────────────────────────────────────────────────────
-function WeekRangeBar({ position, low, high }: { position: number; low: number; high: number }) {
+function WeekRangeBar({ position, low, high, currencySymbol }: { position: number; low: number; high: number; currencySymbol: string }) {
   const clamp = Math.min(100, Math.max(0, position));
   return (
     <div style={{ marginTop: '4px' }}>
@@ -192,9 +192,9 @@ function WeekRangeBar({ position, low, high }: { position: number; low: number; 
         <div style={{ position: 'absolute', left: `${clamp}%`, top: '50%', transform: 'translate(-50%, -50%)', width: '12px', height: '12px', background: '#00e5ff', borderRadius: '50%' }} />
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#555', fontFamily: MONO }}>
-        <span>L ${low.toFixed(2)}</span>
+        <span>L {currencySymbol}{low.toFixed(2)}</span>
         <span style={{ color: '#4a4a6a' }}>{clamp.toFixed(0)}th percentile</span>
-        <span>H ${high.toFixed(2)}</span>
+        <span>H {currencySymbol}{high.toFixed(2)}</span>
       </div>
     </div>
   );
@@ -475,7 +475,7 @@ function SignalContent() {
               <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
                 <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>200-Day MA</p>
                 <p style={{ color: '#e8e8f0', fontSize: '1.6rem', fontFamily: MONO, fontWeight: 600, lineHeight: 1, marginBottom: '6px' }}>
-                  ${data.priceIntelligence.ma200.toFixed(2)}
+                  {data.currencySymbol}{data.priceIntelligence.ma200.toFixed(2)}
                 </p>
                 <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                   <Badge
@@ -492,7 +492,7 @@ function SignalContent() {
               <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
                 <p style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>ATR (14-day)</p>
                 <p style={{ color: '#e8e8f0', fontSize: '2rem', fontFamily: MONO, fontWeight: 600, lineHeight: 1, marginBottom: '6px' }}>
-                  ${data.priceIntelligence.atr.toFixed(2)}
+                  {data.currencySymbol}{data.priceIntelligence.atr.toFixed(2)}
                 </p>
                 <p style={{ color: '#4a4a6a', fontSize: '12px', fontFamily: FONT }}>Avg. daily range</p>
               </div>
@@ -516,6 +516,7 @@ function SignalContent() {
                 position={data.priceIntelligence.weekRange52Position}
                 low={data.priceIntelligence.low52}
                 high={data.priceIntelligence.high52}
+                currencySymbol={data.currencySymbol}
               />
             </div>
           </div>
