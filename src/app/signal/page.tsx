@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -48,7 +49,7 @@ const TREND_ARROWS: Record<TrendDirection, string> = {
   Stable: '→',
 };
 
-const SECTION_LABEL: React.CSSProperties = {
+const SECTION_LABEL: CSSProperties = {
   fontSize: '11px',
   fontFamily: MONO,
   color: '#4a4a6a',
@@ -64,8 +65,8 @@ const TICKER_TAPE_ITEMS = [
 ];
 
 // ── Badge style per entry/exit label ─────────────────────────────────────────
-function getBadgeStyle(label: EntryExitLabel): React.CSSProperties {
-  const base: React.CSSProperties = {
+function getBadgeStyle(label: EntryExitLabel): CSSProperties {
+  const base: CSSProperties = {
     fontFamily: MONO,
     fontSize: '13px',
     borderRadius: '6px',
@@ -216,7 +217,6 @@ function SignalContent() {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AnalyzeResponse | null>(null);
   const [headlinesExpanded, setHeadlinesExpanded] = useState(false);
-
   const [inputTicker, setInputTicker] = useState(rawTicker);
   const [selectedTimeframe, setSelectedTimeframe] = useState<7 | 30 | 90>(timeframe);
 
@@ -265,7 +265,7 @@ function SignalContent() {
     return (
       <div style={{ textAlign: 'center', padding: '80px 24px', fontFamily: FONT }}>
         <p style={{ color: '#555', marginBottom: '16px' }}>No ticker selected.</p>
-        <Link href="/" style={{ color: '#00e5ff', fontSize: '0.9rem' }}>← Back to home</Link>
+        <Link href="/" style={{ color: '#00e5ff', fontSize: '14px' }}>← Back to home</Link>
       </div>
     );
   }
@@ -283,17 +283,11 @@ function SignalContent() {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 40px 100px', fontFamily: FONT }}>
+
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', gap: '16px', flexWrap: 'wrap' }}>
         <div>
-          <h1 style={{
-            fontFamily: FONT,
-            fontSize: '28px',
-            fontWeight: 700,
-            color: '#e8e8f0',
-            lineHeight: 1.2,
-            marginBottom: '6px',
-          }}>
+          <h1 style={{ fontFamily: FONT, fontSize: '28px', fontWeight: 700, color: '#e8e8f0', lineHeight: 1.2, marginBottom: '6px' }}>
             {data?.companyName ?? 'Signal Board'}
           </h1>
           <p style={{ color: '#555', fontSize: '14px' }}>
@@ -353,7 +347,6 @@ function SignalContent() {
             {tf}D
           </button>
         ))}
-        {/* Separator */}
         <div style={{ width: '1px', height: '28px', background: '#2a2a3a', margin: '0 4px' }} />
         <button
           onClick={handleAnalyze}
@@ -461,15 +454,8 @@ function SignalContent() {
           )}
 
           {/* Chart */}
-          <div style={{
-            background: '#0d0d12',
-            border: '1px solid #1c1c26',
-            borderRadius: '8px',
-            padding: '24px',
-          }}>
-            <p style={SECTION_LABEL}>
-              Sentiment vs Normalised Price (0–100 Scale)
-            </p>
+          <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '24px' }}>
+            <p style={SECTION_LABEL}>Sentiment vs Normalised Price (0–100 Scale)</p>
             <ResponsiveContainer width="100%" height={380}>
               <AreaChart data={chartData} margin={{ top: 4, right: 16, left: -14, bottom: 0 }}>
                 <defs>
@@ -552,15 +538,8 @@ function SignalContent() {
           </div>
 
           {/* Sentiment breakdown */}
-          <div style={{
-            background: '#0d0d12',
-            border: '1px solid #1c1c26',
-            borderRadius: '8px',
-            padding: '22px 24px',
-          }}>
-            <p style={SECTION_LABEL}>
-              Sentiment Breakdown
-            </p>
+          <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
+            <p style={SECTION_LABEL}>Sentiment Breakdown</p>
             <SentimentBar
               bullish={data.sentiment.bullish}
               neutral={data.sentiment.neutral}
@@ -576,21 +555,14 @@ function SignalContent() {
             borderRadius: '8px',
             padding: '24px 28px',
           }}>
-            <p style={SECTION_LABEL}>
-              Analysis
-            </p>
+            <p style={SECTION_LABEL}>Analysis</p>
             <p style={{ color: '#c0c0d0', fontSize: '15px', lineHeight: 1.75, maxWidth: '72ch' }}>
               {data.insight}
             </p>
           </div>
 
           {/* Headlines */}
-          <div style={{
-            background: '#0d0d12',
-            border: '1px solid #1c1c26',
-            borderRadius: '8px',
-            overflow: 'hidden',
-          }}>
+          <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', overflow: 'hidden' }}>
             <button
               onClick={() => setHeadlinesExpanded(!headlinesExpanded)}
               style={{
