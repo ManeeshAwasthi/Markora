@@ -53,16 +53,19 @@ export async function resolveTickerFromName(companyName: string): Promise<Resolv
 
   const equities = quotes.filter((q) => q.quoteType === 'EQUITY' && q.symbol);
 
-  // Prefer NSE over BSE for Indian companies (higher liquidity, more complete data)
-  const nse = equities.find((q) => q.exchange === 'NSE');
-  const match = nse ?? equities[0];
-
-  if (!match?.symbol) {
+  const first = equities[0];
+  if (!first?.symbol) {
     throw new Error(`Company not found: ${companyName}`);
   }
 
-  let ticker = match.symbol;
-  let exch = match.exchange;
+  // Only apply NSE-over-BSE preference when the top result is already Indian.
+  // This prevents an obscure NSE-listed company from overriding a US stock (e.g. AAPL).
+  const firstIsIndian = first.exchange === 'NSE' || first.exchange === 'BSE' || first.exchange === 'BOM';
+  const nse = firstIsIndian ? equities.find((q) => q.exchange === 'NSE') : undefined;
+  const match = nse ?? first;
+
+  let ticker = match.symbol!;
+  let exch = match.exchange ?? '';
 
   // If Yahoo Finance returns an unrecognised exchange code but the ticker already
   // has an Indian suffix, override the exchange so mapExchange picks up INR/₹.
