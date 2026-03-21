@@ -1,9 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-interface NewsAPIResponse {
+interface NewsdataResponse {
   status: string;
-  totalResults: number;
-  articles: Array<{ title: string | null; description: string | null }>;
+  results: Array<{ title: string | null; description: string | null }>;
 }
 
 interface GeminiRelevanceJSON {
@@ -12,38 +11,43 @@ interface GeminiRelevanceJSON {
 
 /**
  * Fetches relevant news headlines for a company using a two-step approach:
- * 1. Broad NewsAPI fetch using exact phrase matching
+ * 1. newsdata.io fetch using exact phrase matching with timeframe filtering
  * 2. Gemini relevance gate to filter articles primarily about the company
  */
 export async function fetchHeadlines(
   companyName: string,
-  // timeframe is not used in the query — NewsAPI free tier does not support
-  // reliable date filtering; relevancy sort surfaces recent articles naturally
   _timeframe: number
 ): Promise<string[]> {
-  const apiKey = process.env.NEWS_API_KEY;
-  if (!apiKey) throw new Error('NEWS_API_KEY is not configured');
+  const apiKey = process.env.NEWSDATA_API_KEY;
+  if (!apiKey) throw new Error('NEWSDATA_API_KEY is not configured');
 
-  // ── Step 1: Broad NewsAPI fetch ───────────────────────────────────────────
-  const url =
-    `https://newsapi.org/v2/everything` +
-    `?q=${encodeURIComponent(`"${companyName}"`)}` +
-    `&pageSize=60` +
-    `&language=en` +
-    `&sortBy=relevancy`;
+  // ── Step 1: newsdata.io fetch ─────────────────────────────────────────────
+  const url = new URL('https://newsdata.io/api/1/news');
+  url.searchParams.set('apikey', apiKey);
+  url.searchParams.set('q', `"${companyName}"`);
+  url.searchParams.set('language', 'en');
+  url.searchParams.set('size', '10');
 
-  const response = await fetch(url, {
-    headers: { 'X-Api-Key': apiKey },
-    cache: 'no-store',
-  });
-
-  if (!response.ok) {
-    throw new Error(`NewsAPI request failed with status ${response.status}`);
+  // Omit from_date for 90-day timeframe — newsdata.io free tier window limit
+  if (_timeframe !== 90) {
+    const fromDate = new Date();
+    fromDate.setDate(fromDate.getDate() - _timeframe);
+    url.searchParams.set('from_date', fromDate.toISOString().slice(0, 10));
   }
 
-  const data = (await response.json()) as NewsAPIResponse;
+  const response = await fetch(url.toString(), { cache: 'no-store' });
 
-  const candidates = data.articles
+  if (!response.ok) {
+    throw new Error(`newsdata.io request failed with status ${response.status}`);
+  }
+
+  const data = (await response.json()) as NewsdataResponse;
+
+  if (data.status !== 'success') {
+    throw new Error(`newsdata.io request failed with status ${data.status}`);
+  }
+
+  const candidates = (data.results ?? [])
     .filter((a) => typeof a.title === 'string' && a.title.trim().length > 0)
     .slice(0, 50);
 

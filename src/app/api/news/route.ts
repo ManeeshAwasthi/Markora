@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { NewsAPIArticle } from '@/types';
+
+interface NewsdataArticle {
+  title: string | null;
+  link: string | null;
+  description: string | null;
+  pubDate: string | null;
+  source_id: string;
+}
+
+interface NewsdataResponse {
+  status: string;
+  results: NewsdataArticle[];
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,36 +22,40 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'query parameter is required' }, { status: 400 });
     }
 
-    const apiKey = process.env.NEWS_API_KEY;
+    const apiKey = process.env.NEWSDATA_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: 'NEWS_API_KEY is not configured' }, { status: 500 });
+      return NextResponse.json({ error: 'NEWSDATA_API_KEY is not configured' }, { status: 500 });
     }
 
-    const url = new URL('https://newsapi.org/v2/everything');
+    const url = new URL('https://newsdata.io/api/1/news');
+    url.searchParams.set('apikey', apiKey);
     url.searchParams.set('q', query);
-    url.searchParams.set('sortBy', 'publishedAt');
     url.searchParams.set('language', 'en');
-    url.searchParams.set('pageSize', '10');
+    url.searchParams.set('size', '10');
 
-    const response = await fetch(url.toString(), {
-      headers: { 'X-Api-Key': apiKey },
-      next: { revalidate: 0 },
-    });
+    const response = await fetch(url.toString(), { next: { revalidate: 0 } });
 
     if (!response.ok) {
       return NextResponse.json(
-        { error: `NewsAPI returned ${response.status}` },
+        { error: `newsdata.io returned ${response.status}` },
         { status: 500 }
       );
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as NewsdataResponse;
 
-    const headlines = (data.articles as NewsAPIArticle[]).map((article) => ({
+    if (data.status !== 'success') {
+      return NextResponse.json(
+        { error: `newsdata.io returned status ${data.status}` },
+        { status: 500 }
+      );
+    }
+
+    const headlines = (data.results ?? []).map((article) => ({
       title: article.title,
-      url: article.url,
-      source: article.source.name,
-      publishedAt: article.publishedAt,
+      url: article.link,
+      source: article.source_id,
+      publishedAt: article.pubDate,
     }));
 
     return NextResponse.json(headlines);

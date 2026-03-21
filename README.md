@@ -11,7 +11,7 @@ Quantitative divergence analysis tool for equity markets.
 ## Environment variables
 Copy .env.local and fill in your keys:
 - GEMINI_API_KEY — from Google AI Studio
-- NEWS_API_KEY — from newsapi.org
+- NEWSDATA_API_KEY — from newsdata.io
 
 ## Run locally
 npm run dev
