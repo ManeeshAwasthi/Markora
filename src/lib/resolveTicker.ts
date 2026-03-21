@@ -10,12 +10,12 @@ function mapExchange(exchange: string | undefined): Omit<ResolvedCompany, 'ticke
   if (!exchange) {
     return { exchange: 'UNKNOWN', country: 'United States', currency: 'USD', currencySymbol: '$' };
   }
-  // NSE — Yahoo Finance may return 'NSE', 'NSI', or 'NMS' for Indian NSE stocks
-  if (exchange === 'NSE' || exchange === 'NSI' || exchange === 'NMS') {
+  // NSE — Yahoo Finance uses 'NSE' for Indian NSE stocks
+  if (exchange === 'NSE') {
     return { exchange: 'NSE', country: 'India', currency: 'INR', currencySymbol: '₹' };
   }
-  // BSE — Yahoo Finance may return 'BSE', 'BOM', 'BSI', or 'BO'
-  if (exchange === 'BSE' || exchange === 'BOM' || exchange === 'BSI' || exchange === 'BO') {
+  // BSE — Yahoo Finance may return 'BSE' or 'BOM' for Indian BSE stocks
+  if (exchange === 'BSE' || exchange === 'BOM') {
     return { exchange: 'BSE', country: 'India', currency: 'INR', currencySymbol: '₹' };
   }
   if (exchange === 'LSE') {
@@ -89,6 +89,5 @@ export function getCurrencyForExchange(exchange: string | undefined): Pick<Resol
  * Returns true if the given exchange is an Indian market (NSE or BSE).
  */
 export function isIndianExchange(exchange: string | undefined): boolean {
-  return exchange === 'NSE' || exchange === 'NSI' || exchange === 'NMS' ||
-         exchange === 'BSE' || exchange === 'BOM' || exchange === 'BSI' || exchange === 'BO';
+  return exchange === 'NSE' || exchange === 'BSE' || exchange === 'BOM';
 }
