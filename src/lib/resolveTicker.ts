@@ -10,10 +10,12 @@ function mapExchange(exchange: string | undefined): Omit<ResolvedCompany, 'ticke
   if (!exchange) {
     return { exchange: 'UNKNOWN', country: 'United States', currency: 'USD', currencySymbol: '$' };
   }
-  if (exchange === 'NSE') {
+  // NSE — Yahoo Finance may return 'NSE', 'NSI', or 'NMS' for Indian NSE stocks
+  if (exchange === 'NSE' || exchange === 'NSI' || exchange === 'NMS') {
     return { exchange: 'NSE', country: 'India', currency: 'INR', currencySymbol: '₹' };
   }
-  if (exchange === 'BSE') {
+  // BSE — Yahoo Finance may return 'BSE', 'BOM', 'BSI', or 'BO'
+  if (exchange === 'BSE' || exchange === 'BOM' || exchange === 'BSI' || exchange === 'BO') {
     return { exchange: 'BSE', country: 'India', currency: 'INR', currencySymbol: '₹' };
   }
   if (exchange === 'LSE') {
@@ -60,7 +62,12 @@ export async function resolveTickerFromName(companyName: string): Promise<Resolv
   }
 
   let ticker = match.symbol;
-  const exch = match.exchange;
+  let exch = match.exchange;
+
+  // If Yahoo Finance returns an unrecognised exchange code but the ticker already
+  // has an Indian suffix, override the exchange so mapExchange picks up INR/₹.
+  if (ticker.endsWith('.NS')) exch = 'NSE';
+  else if (ticker.endsWith('.BO')) exch = 'BSE';
 
   // Ensure correct suffix for Indian stocks
   if (exch === 'NSE' && !ticker.endsWith('.NS')) ticker = `${ticker}.NS`;
@@ -82,5 +89,6 @@ export function getCurrencyForExchange(exchange: string | undefined): Pick<Resol
  * Returns true if the given exchange is an Indian market (NSE or BSE).
  */
 export function isIndianExchange(exchange: string | undefined): boolean {
-  return exchange === 'NSE' || exchange === 'BSE';
+  return exchange === 'NSE' || exchange === 'NSI' || exchange === 'NMS' ||
+         exchange === 'BSE' || exchange === 'BOM' || exchange === 'BSI' || exchange === 'BO';
 }
