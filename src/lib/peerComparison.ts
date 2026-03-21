@@ -34,7 +34,6 @@ export async function fetchPeerComparison(
     // ── Get target price change and industry in parallel ──────────────────────
     const [targetPriceChange, assetRaw] = await Promise.all([
       getPriceChangePercent(targetTicker, period1, period2),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (yahooFinance as any).quoteSummary(
         targetTicker,
         { modules: ['assetProfile'] },
@@ -69,7 +68,6 @@ export async function fetchPeerComparison(
 
           const [peerPriceChange, peerSummaryRaw] = await Promise.all([
             getPriceChangePercent(peerTicker, period1, period2),
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (yahooFinance as any).quoteSummary(
               peerTicker,
               { modules: ['summaryDetail'] },

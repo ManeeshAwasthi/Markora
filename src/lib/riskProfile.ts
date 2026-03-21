@@ -49,7 +49,6 @@ export async function computeRiskProfile(
     const ticker = await resolveTickerFromName(companyName);
 
     // ── Beta from quoteSummary ─────────────────────────────────────────────────
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const summaryRaw = await (yahooFinance as any).quoteSummary(
       ticker,
       { modules: ['summaryDetail'] },

@@ -48,7 +48,6 @@ export async function fetchMomentumAndFlow(companyName: string): Promise<Momentu
   try {
     const ticker = await resolveTickerFromName(companyName);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const raw = await (yahooFinance as any).quoteSummary(
       ticker,
       { modules: ['majorHoldersBreakdown', 'insiderTransactions', 'defaultKeyStatistics'] },
