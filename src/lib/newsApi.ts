@@ -4,45 +4,17 @@ interface NewsAPIResponse {
   articles: Array<{ title: string | null }>;
 }
 
-// Words that appear in company names but are too generic to filter on
-const COMPANY_SUFFIX_STOPWORDS = new Set([
-  'ltd', 'limited', 'inc', 'corp', 'corporation', 'co', 'company',
-  'group', 'holdings', 'holding', 'industries', 'industry',
-  'the', 'and', 'of', 'for', 'in',
-]);
+// Financial/business context terms. An article must mention the company name
+// AND at least one of these to be considered relevant. This prevents generic
+// words like "eternal" from matching unrelated lifestyle/culture articles.
+const FINANCIAL_CONTEXT =
+  'stock OR shares OR market OR earnings OR revenue OR profit OR quarterly OR ' +
+  'investor OR IPO OR merger OR acquisition OR CEO OR sales OR valuation OR dividend';
 
-/**
- * Extracts the meaningful keywords from a company name for headline filtering.
- * e.g. "Eternal Limited" → ["eternal"]
- *      "State Bank of India" → ["state", "bank", "india"]
- *      "Apple Inc" → ["apple"]
- */
-function significantWords(companyName: string): string[] {
-  return companyName
-    .toLowerCase()
-    .split(/\s+/)
-    .filter((w) => w.length > 2 && !COMPANY_SUFFIX_STOPWORDS.has(w));
-}
-
-/**
- * Fetches up to 30 recent news headlines for the given company name using NewsAPI.
- * Searches titles only to avoid body-match noise (e.g. "eternal" in unrelated articles).
- * Post-filters to drop any headline that doesn't mention a key company word.
- */
-export async function fetchHeadlines(
-  companyName: string,
-  timeframe: number
-): Promise<string[]> {
-  const apiKey = process.env.NEWS_API_KEY;
-  if (!apiKey) throw new Error('NEWS_API_KEY is not configured');
-
-  // searchIn=title ensures the company name appears in the actual headline,
-  // not buried in the article body. This prevents generic words like "eternal"
-  // from matching thousands of unrelated articles.
+async function fetchFromNewsAPI(apiKey: string, query: string): Promise<string[]> {
   const url =
     `https://newsapi.org/v2/everything` +
-    `?q=${encodeURIComponent(companyName)}` +
-    `&searchIn=title` +
+    `?q=${encodeURIComponent(query)}` +
     `&pageSize=30` +
     `&language=en` +
     `&sortBy=relevancy`;
@@ -58,23 +30,38 @@ export async function fetchHeadlines(
 
   const data = (await response.json()) as NewsAPIResponse;
 
-  const allTitles = data.articles
+  return data.articles
     .map((a) => a.title)
     .filter((t): t is string => typeof t === 'string' && t.trim().length > 0);
+}
 
-  // Post-filter: keep only headlines that mention at least one significant
-  // word from the company name. This is a safety net for cases where the
-  // title search returns tangentially related results.
-  const keywords = significantWords(companyName);
-  const relevant =
-    keywords.length === 0
-      ? allTitles
-      : allTitles.filter((h) =>
-          keywords.some((kw) => h.toLowerCase().includes(kw))
-        );
+/**
+ * Fetches up to 30 recent news headlines for the given company name using NewsAPI.
+ *
+ * Strategy:
+ * 1. Primary query: "CompanyName" AND (financial context terms)
+ *    — This prevents generic words like "eternal" or "general" from matching
+ *      unrelated articles where the word appears in the body.
+ * 2. Fallback query: "CompanyName" (exact phrase, no context filter)
+ *    — Used when the primary query returns too few results (niche companies
+ *      or those rarely covered with standard financial vocabulary).
+ */
+export async function fetchHeadlines(
+  companyName: string,
+  timeframe: number
+): Promise<string[]> {
+  const apiKey = process.env.NEWS_API_KEY;
+  if (!apiKey) throw new Error('NEWS_API_KEY is not configured');
 
-  // Fall back to all title-matched results if the keyword filter is too strict
-  const headlines = relevant.length >= 3 ? relevant : allTitles;
+  // Primary: exact company name + financial context
+  const primaryQuery = `"${companyName}" AND (${FINANCIAL_CONTEXT})`;
+  const primary = await fetchFromNewsAPI(apiKey, primaryQuery);
+
+  if (primary.length >= 5) return primary;
+
+  // Fallback: exact phrase only, no context filter
+  const fallback = await fetchFromNewsAPI(apiKey, `"${companyName}"`);
+  const headlines = fallback.length > 0 ? fallback : primary;
 
   if (headlines.length === 0) {
     throw new Error(`NO_NEWS: No recent news found for ${companyName}`);
