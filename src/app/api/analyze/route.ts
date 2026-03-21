@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchHeadlines } from '@/lib/newsApi';
-import { fetchPriceData, resolveTicker } from '@/lib/yahoofinance';
+import { fetchPriceData } from '@/lib/yahoofinance';
 import { analyzeSentiment } from '@/lib/gemini';
 import { fetchTrends } from '@/lib/trends';
 import { normalizePriceChange, computeDivergenceScore } from '@/lib/normalize';
 import { getSignal, getEntryExitSignal } from '@/lib/divergence';
+import { computePriceIntelligence } from '@/lib/priceIntelligence';
+import { fetchFundamentals } from '@/lib/fundamentals';
+import { fetchMomentumAndFlow } from '@/lib/momentum';
+import { computeRiskProfile } from '@/lib/riskProfile';
+import { fetchPeerComparison } from '@/lib/peerComparison';
 import {
   AnalyzeRequest,
   AnalyzeResponse,
@@ -32,68 +37,63 @@ export async function POST(
     if (
       typeof body !== 'object' ||
       body === null ||
-      !('ticker' in body) ||
+      !('companyName' in body) ||
       !('timeframe' in body)
     ) {
       return NextResponse.json<ApiError>(
-        { error: 'Missing required fields: ticker and timeframe', code: 'INVALID_TICKER' },
+        { error: 'Missing required fields: companyName and timeframe', code: 'INVALID_COMPANY' },
         { status: 400 }
       );
     }
 
     const raw = body as Record<string, unknown>;
 
-    if (typeof raw.ticker !== 'string' || raw.ticker.trim().length === 0) {
+    if (typeof raw.companyName !== 'string' || raw.companyName.trim().length === 0) {
       return NextResponse.json<ApiError>(
-        { error: 'ticker must be a non-empty string', code: 'INVALID_TICKER' },
+        { error: 'companyName must be a non-empty string', code: 'INVALID_COMPANY' },
         { status: 400 }
       );
     }
 
-    if (raw.ticker.trim().length > 100) {
+    if (raw.companyName.trim().length > 100) {
       return NextResponse.json<ApiError>(
-        { error: 'ticker must be 100 characters or fewer', code: 'INVALID_TICKER' },
+        { error: 'companyName must be 100 characters or fewer', code: 'INVALID_COMPANY' },
         { status: 400 }
       );
     }
 
     if (!VALID_TIMEFRAMES.has(Number(raw.timeframe))) {
       return NextResponse.json<ApiError>(
-        { error: 'timeframe must be exactly 7, 30, or 90', code: 'INVALID_TICKER' },
+        { error: 'timeframe must be exactly 7, 30, or 90', code: 'INVALID_COMPANY' },
         { status: 400 }
       );
     }
 
-    const rawInput = raw.ticker.trim();
+    const companyName = raw.companyName.trim();
     const timeframe = Number(raw.timeframe) as AnalyzeRequest['timeframe'];
 
-    // ── 2. Resolve ticker → canonical symbol + company name ───────────────────
-    const { ticker, companyName, exchange } = await resolveTicker(rawInput);
-
-    // ── 3. Fetch headlines, price data, and trends in parallel ────────────────
+    // ── 2. Fetch core data: headlines, price, trends (parallel) ──────────────
     const [headlines, priceData, trends] = await Promise.all([
-      fetchHeadlines(ticker, timeframe),
-      fetchPriceData(ticker, timeframe),
+      fetchHeadlines(companyName, timeframe),
+      fetchPriceData(companyName, timeframe),
       fetchTrends(companyName, timeframe),
     ]);
 
-    // ── 4. Sentiment analysis (after parallel fetch, needs trend context) ─────
+    // ── 3. Sentiment analysis (needs trend context from step 2) ───────────────
     const { sentiment, insight } = await analyzeSentiment(
       headlines,
-      ticker,
       companyName,
       trends.trendDirection,
       trends.trendScore
     );
 
-    // ── 5. Compute divergence scores ──────────────────────────────────────────
+    // ── 4. Compute divergence scores ──────────────────────────────────────────
     const normalizedPrice = normalizePriceChange(priceData.priceChangePercent);
     const divergenceScore = computeDivergenceScore(sentiment.score, normalizedPrice);
     const signal = getSignal(divergenceScore);
     const entryExit = getEntryExitSignal(signal, trends.trendDirection, priceData.priceChangePercent);
 
-    // ── 6. Build chart data ───────────────────────────────────────────────────
-    // Merge trend data (weekly) into price data (daily) via forward-fill.
+    // ── 5. Build chart data ───────────────────────────────────────────────────
     const sortedTrend = [...trends.trendData].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
@@ -101,9 +101,7 @@ export async function POST(
 
     const chartData: ChartDataPoint[] = priceData.chartData.map((point) => {
       const pointDate = new Date(point.date).getTime();
-
-      // Find most recent trend data point at or before this price date
-      let trendValue = trends.trendScore; // default to average
+      let trendValue = trends.trendScore;
       for (const td of sortedTrend) {
         if (new Date(td.date).getTime() <= pointDate) {
           trendValue = td.value;
@@ -111,7 +109,6 @@ export async function POST(
           break;
         }
       }
-
       const rollingChange = ((point.price - firstPrice) / firstPrice) * 100;
       return {
         date: point.date.slice(0, 10),
@@ -121,11 +118,20 @@ export async function POST(
       };
     });
 
+    // ── 6. Fetch enrichment layers in parallel (each self-heals on failure) ───
+    const [priceIntelligence, fundamentals, momentumFlow, riskProfile, peerComparison] =
+      await Promise.all([
+        computePriceIntelligence(companyName, timeframe),
+        fetchFundamentals(companyName),
+        fetchMomentumAndFlow(companyName),
+        computeRiskProfile(companyName, timeframe),
+        fetchPeerComparison(companyName, timeframe),
+      ]);
+
     // ── 7. Return ─────────────────────────────────────────────────────────────
     const response: AnalyzeResponse = {
-      ticker,
       companyName,
-      exchange,
+      exchange: '',
       timeframe,
       divergenceScore,
       signal,
@@ -141,6 +147,11 @@ export async function POST(
       insight,
       headlines,
       fetchedAt: new Date().toISOString(),
+      priceIntelligence,
+      fundamentals,
+      momentumFlow,
+      riskProfile,
+      peerComparison,
     };
 
     return NextResponse.json<AnalyzeResponse>(response);
@@ -154,15 +165,21 @@ export async function POST(
       );
     }
 
+    if (message.includes('Company not found')) {
+      return NextResponse.json<ApiError>(
+        { error: message, code: 'INVALID_COMPANY' },
+        { status: 400 }
+      );
+    }
+
     if (
-      message.includes('Invalid ticker') ||
-      message.includes('no price data') ||
+      message.includes('No price data') ||
       message.includes('symbol may be delisted') ||
       message.includes('No data found') ||
-      message.includes('ticker symbol is valid')
+      message.includes('company name is valid')
     ) {
       return NextResponse.json<ApiError>(
-        { error: message, code: 'INVALID_TICKER' },
+        { error: message, code: 'INVALID_COMPANY' },
         { status: 400 }
       );
     }

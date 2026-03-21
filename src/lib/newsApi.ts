@@ -5,11 +5,11 @@ interface NewsAPIResponse {
 }
 
 /**
- * Fetches up to 30 recent news headlines for the given ticker using NewsAPI.
+ * Fetches up to 30 recent news headlines for the given company name using NewsAPI.
  * Returns only the article titles as plain strings.
  */
 export async function fetchHeadlines(
-  ticker: string,
+  companyName: string,
   timeframe: number
 ): Promise<string[]> {
   const apiKey = process.env.NEWS_API_KEY;
@@ -18,10 +18,10 @@ export async function fetchHeadlines(
   // The free NewsAPI plan permits articles up to ~1 month old.
   // Omitting `from` lets NewsAPI use its default window, avoiding off-by-one
   // 426 errors at the plan boundary. We rely on sortBy=relevancy to surface
-  // the most pertinent recent articles for the given ticker.
+  // the most pertinent recent articles for the given company.
   const url =
     `https://newsapi.org/v2/everything` +
-    `?q=${encodeURIComponent(ticker)}` +
+    `?q=${encodeURIComponent(companyName)}` +
     `&pageSize=30` +
     `&language=en` +
     `&sortBy=relevancy`;
@@ -45,7 +45,7 @@ export async function fetchHeadlines(
     .filter((t): t is string => typeof t === 'string' && t.trim().length > 0);
 
   if (headlines.length === 0) {
-    throw new Error(`NO_NEWS: No recent news found for ${ticker}`);
+    throw new Error(`NO_NEWS: No recent news found for ${companyName}`);
   }
 
   return headlines;

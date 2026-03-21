@@ -237,7 +237,7 @@ function SignalContent() {
         const res = await fetch('/api/analyze', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ ticker: rawTicker, timeframe }),
+          body: JSON.stringify({ companyName: rawTicker, timeframe }),
         });
         const json = await res.json();
         if (!cancelled) {

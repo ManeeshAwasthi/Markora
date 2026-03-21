@@ -1,4 +1,5 @@
 import YahooFinance from 'yahoo-finance2';
+import { resolveTickerFromName } from './resolveTicker';
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['ripHistorical'] });
 
@@ -7,55 +8,16 @@ interface PriceDataResult {
   chartData: Array<{ date: string; price: number }>;
 }
 
-export interface ResolvedTicker {
-  ticker: string;
-  companyName: string;
-  exchange: string;
-}
-
 /**
- * Accepts a ticker symbol or company name and resolves it to a canonical
- * ticker, full company name, and exchange using yahoo-finance2 search.
- * Falls back gracefully to the raw input if resolution fails.
- */
-export async function resolveTicker(input: string): Promise<ResolvedTicker> {
-  try {
-    const raw = await yahooFinance.search(input, {}, { validateResult: false });
-    const results = raw as { quotes?: unknown[] };
-    const quotes = (results.quotes ?? []) as Array<{
-      symbol?: string;
-      longname?: string;
-      shortname?: string;
-      exchDisp?: string;
-      exchange?: string;
-      quoteType?: string;
-    }>;
-
-    const match = quotes.find(
-      (q) => q.quoteType === 'EQUITY' || q.quoteType === 'ETF' || q.quoteType === 'FUND'
-    );
-
-    if (match?.symbol) {
-      return {
-        ticker: match.symbol,
-        companyName: match.longname ?? match.shortname ?? match.symbol,
-        exchange: match.exchDisp ?? match.exchange ?? '',
-      };
-    }
-  } catch {
-    // fall through
-  }
-
-  return { ticker: input.toUpperCase(), companyName: input, exchange: '' };
-}
-
-/**
- * Fetches historical daily close prices for a ticker over the given timeframe.
+ * Fetches historical daily close prices for a company over the given timeframe.
+ * Resolves the company name to a ticker internally — the ticker never leaves this file.
  */
 export async function fetchPriceData(
-  ticker: string,
+  companyName: string,
   timeframe: number
 ): Promise<PriceDataResult> {
+  const ticker = await resolveTickerFromName(companyName);
+
   const period2 = new Date();
   const period1 = new Date();
   period1.setDate(period1.getDate() - timeframe);
@@ -71,7 +33,7 @@ export async function fetchPriceData(
     quotes = (result.quotes ?? []) as Array<{ date: string | Date; close: number | null }>;
   } catch (err) {
     throw new Error(
-      `Could not fetch price data for ${ticker}. Check that the ticker symbol is valid. (${String(err)})`
+      `Could not fetch price data for ${companyName}. Check that the company name is valid. (${String(err)})`
     );
   }
 
@@ -80,7 +42,7 @@ export async function fetchPriceData(
   );
 
   if (valid.length < 2) {
-    throw new Error(`Invalid ticker or no price data available for ${ticker}`);
+    throw new Error(`No price data available for ${companyName}`);
   }
 
   valid.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());

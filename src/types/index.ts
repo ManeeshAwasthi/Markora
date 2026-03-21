@@ -27,7 +27,7 @@ export interface NewsAPIArticle {
 // ── Phase-2 / Phase-3 types ───────────────────────────────────────────────────
 
 export interface AnalyzeRequest {
-  ticker: string; // accepts ticker symbol OR company name
+  companyName: string;
   timeframe: 7 | 30 | 90;
 }
 
@@ -66,8 +66,76 @@ export interface SearchResult {
   exchange: string;
 }
 
+// ── Layer 6 — Price Intelligence ──────────────────────────────────────────────
+
+export interface PriceIntelligence {
+  rsi: number;
+  rsiLabel: 'Overbought' | 'Oversold' | 'Neutral';
+  ma200: number;
+  ma200Label: 'Above' | 'Below';
+  ma200PercentDiff: number;
+  high52: number;
+  low52: number;
+  weekRange52Position: number;
+  crossSignal: 'Golden Cross' | 'Death Cross' | 'None';
+  atr: number;
+}
+
+// ── Layer 7 — Fundamental Snapshot ───────────────────────────────────────────
+
+export interface FundamentalSnapshot {
+  peRatio: number | null;
+  forwardPE: number | null;
+  pegRatio: number | null;
+  revenueGrowth: number | null;
+  grossMargins: number | null;
+  debtToEquity: number | null;
+  currentRatio: number | null;
+  returnOnEquity: number | null;
+  dividendYield: number | null;
+  sector: string | null;
+  industry: string | null;
+}
+
+// ── Layer 8 — Momentum and Flow ───────────────────────────────────────────────
+
+export interface MomentumFlow {
+  institutionalOwnershipPercent: number | null;
+  insiderBuys: number;
+  insiderSells: number;
+  insiderSentiment: 'Buying' | 'Selling' | 'Neutral';
+  shortPercentOfFloat: number | null;
+  shortRatio: number | null;
+  shortLabel: 'High' | 'Elevated' | 'Normal';
+}
+
+// ── Layer 9 — Risk Profile ────────────────────────────────────────────────────
+
+export interface RiskProfile {
+  beta: number | null;
+  betaLabel: 'Low' | 'Moderate' | 'High' | 'Very High';
+  realizedVolatility: number;
+  volatilityLabel: 'Low' | 'Moderate' | 'High' | 'Very High';
+  maxDrawdown: number;
+  sharpeRatio: number | null;
+}
+
+// ── Layer 10 — Peer Comparison ────────────────────────────────────────────────
+
+export interface PeerSnapshot {
+  companyName: string;
+  priceChangePercent: number;
+  peRatio: number | null;
+  relativeStrength: number;
+}
+
+export interface PeerComparison {
+  peers: PeerSnapshot[];
+}
+
+// ── Analyze response (all layers combined) ────────────────────────────────────
+
 export interface AnalyzeResponse {
-  ticker: string;
   companyName: string;
   exchange: string;
   timeframe: number;
@@ -85,9 +153,15 @@ export interface AnalyzeResponse {
   insight: string;
   headlines: string[];
   fetchedAt: string;
+  // New layers
+  priceIntelligence: PriceIntelligence;
+  fundamentals: FundamentalSnapshot;
+  momentumFlow: MomentumFlow;
+  riskProfile: RiskProfile;
+  peerComparison: PeerComparison;
 }
 
 export interface ApiError {
   error: string;
-  code: 'INVALID_TICKER' | 'NO_NEWS' | 'API_FAILURE' | 'RATE_LIMIT' | 'UNKNOWN';
+  code: 'INVALID_COMPANY' | 'NO_NEWS' | 'API_FAILURE' | 'RATE_LIMIT' | 'UNKNOWN';
 }
