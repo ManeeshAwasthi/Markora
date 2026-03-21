@@ -1,6 +1,5 @@
 import YahooFinance from 'yahoo-finance2';
-import { resolveTickerFromName } from './resolveTicker';
-import { PriceIntelligence } from '@/types';
+import { ResolvedCompany, PriceIntelligence } from '@/types';
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['ripHistorical'] });
 
@@ -26,12 +25,12 @@ const FALLBACK: PriceIntelligence = {
 };
 
 export async function computePriceIntelligence(
-  companyName: string,
+  resolved: ResolvedCompany,
   // timeframe intentionally unused here — all indicators use fixed windows
   _timeframe: number
 ): Promise<PriceIntelligence> {
   try {
-    const ticker = await resolveTickerFromName(companyName);
+    const { ticker } = resolved;
 
     // Fetch 365 days of OHLC — enough for all computations
     const period2 = new Date();
@@ -136,6 +135,7 @@ export async function computePriceIntelligence(
     }
 
     // ── ATR (14-day Average True Range) ──────────────────────────────────────
+    // ATR is price-denominated — for Indian stocks this will be in INR.
     let atr = 0;
     if (quotes.length >= 15) {
       const last15 = quotes.slice(-15);

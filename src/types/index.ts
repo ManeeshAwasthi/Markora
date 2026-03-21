@@ -66,6 +66,16 @@ export interface SearchResult {
   exchange: string;
 }
 
+// ── Resolved company (ticker + market metadata) ───────────────────────────────
+
+export interface ResolvedCompany {
+  ticker: string;          // e.g. "RELIANCE.NS" or "AAPL"
+  exchange: string;        // e.g. "NSE" | "NASDAQ" | "NYSE" | "LSE"
+  country: string;         // e.g. "India" | "United States" | "United Kingdom"
+  currency: string;        // e.g. "INR" | "USD" | "GBP" | "EUR"
+  currencySymbol: string;  // e.g. "₹" | "$" | "£" | "€"
+}
+
 // ── Layer 6 — Price Intelligence ──────────────────────────────────────────────
 
 export interface PriceIntelligence {
@@ -95,6 +105,7 @@ export interface FundamentalSnapshot {
   dividendYield: number | null;
   sector: string | null;
   industry: string | null;
+  currencySymbol: string;
 }
 
 // ── Layer 8 — Momentum and Flow ───────────────────────────────────────────────
@@ -118,6 +129,7 @@ export interface RiskProfile {
   volatilityLabel: 'Low' | 'Moderate' | 'High' | 'Very High';
   maxDrawdown: number;
   sharpeRatio: number | null;
+  currencySymbol: string;
 }
 
 // ── Layer 10 — Peer Comparison ────────────────────────────────────────────────
@@ -127,6 +139,7 @@ export interface PeerSnapshot {
   priceChangePercent: number;
   peRatio: number | null;
   relativeStrength: number;
+  currencySymbol: string;
 }
 
 export interface PeerComparison {
@@ -138,6 +151,10 @@ export interface PeerComparison {
 export interface AnalyzeResponse {
   companyName: string;
   exchange: string;
+  country: string;
+  currency: string;
+  currencySymbol: string;
+  currentPrice: number;
   timeframe: number;
   divergenceScore: number;
   signal: SignalType;

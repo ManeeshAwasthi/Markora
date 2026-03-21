@@ -1,6 +1,5 @@
 import YahooFinance from 'yahoo-finance2';
-import { resolveTickerFromName } from './resolveTicker';
-import { MomentumFlow } from '@/types';
+import { ResolvedCompany, MomentumFlow } from '@/types';
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['ripHistorical'] });
 
@@ -44,9 +43,9 @@ function isSell(type: string | null | undefined): boolean {
   return t.includes('sale') || t.includes('sell') || t === 's';
 }
 
-export async function fetchMomentumAndFlow(companyName: string): Promise<MomentumFlow> {
+export async function fetchMomentumAndFlow(resolved: ResolvedCompany): Promise<MomentumFlow> {
   try {
-    const ticker = await resolveTickerFromName(companyName);
+    const { ticker } = resolved;
 
     const raw = await (yahooFinance as any).quoteSummary(
       ticker,

@@ -10,6 +10,7 @@ import { fetchFundamentals } from '@/lib/fundamentals';
 import { fetchMomentumAndFlow } from '@/lib/momentum';
 import { computeRiskProfile } from '@/lib/riskProfile';
 import { fetchPeerComparison } from '@/lib/peerComparison';
+import { resolveTickerFromName } from '@/lib/resolveTicker';
 import {
   AnalyzeRequest,
   AnalyzeResponse,
@@ -72,28 +73,32 @@ export async function POST(
     const companyName = raw.companyName.trim();
     const timeframe = Number(raw.timeframe) as AnalyzeRequest['timeframe'];
 
-    // ── 2. Fetch core data: headlines, price, trends (parallel) ──────────────
+    // ── 2. Resolve ticker once — flows through all lib functions ──────────────
+    const resolved = await resolveTickerFromName(companyName);
+
+    // ── 3. Fetch core data: headlines, price, trends (parallel) ──────────────
     const [headlines, priceData, trends] = await Promise.all([
       fetchHeadlines(companyName, timeframe),
-      fetchPriceData(companyName, timeframe),
+      fetchPriceData(resolved, timeframe),
       fetchTrends(companyName, timeframe),
     ]);
 
-    // ── 3. Sentiment analysis (needs trend context from step 2) ───────────────
+    // ── 4. Sentiment analysis (needs trend context from step 3) ───────────────
     const { sentiment, insight } = await analyzeSentiment(
       headlines,
       companyName,
       trends.trendDirection,
-      trends.trendScore
+      trends.trendScore,
+      resolved
     );
 
-    // ── 4. Compute divergence scores ──────────────────────────────────────────
+    // ── 5. Compute divergence scores ──────────────────────────────────────────
     const normalizedPrice = normalizePriceChange(priceData.priceChangePercent);
     const divergenceScore = computeDivergenceScore(sentiment.score, normalizedPrice);
     const signal = getSignal(divergenceScore);
     const entryExit = getEntryExitSignal(signal, trends.trendDirection, priceData.priceChangePercent);
 
-    // ── 5. Build chart data ───────────────────────────────────────────────────
+    // ── 6. Build chart data ───────────────────────────────────────────────────
     const sortedTrend = [...trends.trendData].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
@@ -118,20 +123,24 @@ export async function POST(
       };
     });
 
-    // ── 6. Fetch enrichment layers in parallel (each self-heals on failure) ───
+    // ── 7. Fetch enrichment layers in parallel (each self-heals on failure) ───
     const [priceIntelligence, fundamentals, momentumFlow, riskProfile, peerComparison] =
       await Promise.all([
-        computePriceIntelligence(companyName, timeframe),
-        fetchFundamentals(companyName),
-        fetchMomentumAndFlow(companyName),
-        computeRiskProfile(companyName, timeframe),
-        fetchPeerComparison(companyName, timeframe),
+        computePriceIntelligence(resolved, timeframe),
+        fetchFundamentals(resolved),
+        fetchMomentumAndFlow(resolved),
+        computeRiskProfile(resolved, timeframe),
+        fetchPeerComparison(resolved, timeframe),
       ]);
 
-    // ── 7. Return ─────────────────────────────────────────────────────────────
+    // ── 8. Return ─────────────────────────────────────────────────────────────
     const response: AnalyzeResponse = {
       companyName,
-      exchange: '',
+      exchange: resolved.exchange,
+      country: resolved.country,
+      currency: resolved.currency,
+      currencySymbol: resolved.currencySymbol,
+      currentPrice: priceData.currentPrice,
       timeframe,
       divergenceScore,
       signal,
@@ -160,14 +169,17 @@ export async function POST(
 
     if (message.includes('NO_NEWS')) {
       return NextResponse.json<ApiError>(
-        { error: message, code: 'NO_NEWS' },
+        { error: `No recent news found for the requested company.`, code: 'NO_NEWS' },
         { status: 404 }
       );
     }
 
     if (message.includes('Company not found')) {
       return NextResponse.json<ApiError>(
-        { error: message, code: 'INVALID_COMPANY' },
+        {
+          error: `Could not find a listed company matching the provided name. Try using the full official company name.`,
+          code: 'INVALID_COMPANY',
+        },
         { status: 400 }
       );
     }

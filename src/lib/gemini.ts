@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { SentimentResult } from '@/types';
+import { SentimentResult, ResolvedCompany } from '@/types';
 import { computeSentimentScore } from '@/lib/normalize';
 import { TrendDirection } from '@/types';
 
@@ -14,7 +14,8 @@ export async function analyzeSentiment(
   headlines: string[],
   companyName: string,
   trendDirection: TrendDirection,
-  trendScore: number
+  trendScore: number,
+  resolved: ResolvedCompany
 ): Promise<{ sentiment: SentimentResult; insight: string }> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('GEMINI_API_KEY is not configured');
@@ -29,7 +30,7 @@ export async function analyzeSentiment(
       ? `\nAdditional context: Public search interest for ${companyName} is currently ${trendDirection} (search trend index: ${trendScore}/100).`
       : '';
 
-  const prompt = `You are a senior financial analyst. Analyse the following news headlines about ${companyName} and return ONLY a valid JSON object — no markdown, no explanation outside the JSON.
+  const prompt = `You are a senior financial analyst. Analyse the following news headlines about ${companyName}, a ${resolved.country} listed company. All price references in the insight should use ${resolved.currencySymbol} as the currency symbol. Return ONLY a valid JSON object — no markdown, no explanation outside the JSON.
 
 Headlines:
 ${numberedHeadlines}

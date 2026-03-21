@@ -1,6 +1,5 @@
 import YahooFinance from 'yahoo-finance2';
-import { resolveTickerFromName } from './resolveTicker';
-import { FundamentalSnapshot } from '@/types';
+import { ResolvedCompany, FundamentalSnapshot } from '@/types';
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['ripHistorical'] });
 
@@ -39,11 +38,12 @@ const FALLBACK: FundamentalSnapshot = {
   dividendYield: null,
   sector: null,
   industry: null,
+  currencySymbol: '',
 };
 
-export async function fetchFundamentals(companyName: string): Promise<FundamentalSnapshot> {
+export async function fetchFundamentals(resolved: ResolvedCompany): Promise<FundamentalSnapshot> {
   try {
-    const ticker = await resolveTickerFromName(companyName);
+    const { ticker, currencySymbol } = resolved;
 
     const raw = await (yahooFinance as any).quoteSummary(
       ticker,
@@ -66,6 +66,7 @@ export async function fetchFundamentals(companyName: string): Promise<Fundamenta
       dividendYield: n(raw.summaryDetail?.dividendYield),
       sector: raw.assetProfile?.sector ?? null,
       industry: raw.assetProfile?.industry ?? null,
+      currencySymbol,
     };
   } catch {
     return FALLBACK;

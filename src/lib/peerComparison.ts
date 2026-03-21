@@ -1,6 +1,6 @@
 import YahooFinance from 'yahoo-finance2';
-import { resolveTickerFromName } from './resolveTicker';
-import { PeerComparison, PeerSnapshot } from '@/types';
+import { ResolvedCompany, PeerComparison, PeerSnapshot } from '@/types';
+import { getCurrencyForExchange, isIndianExchange } from './resolveTicker';
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['ripHistorical'] });
 
@@ -21,11 +21,12 @@ async function getPriceChangePercent(
 }
 
 export async function fetchPeerComparison(
-  companyName: string,
+  resolved: ResolvedCompany,
   timeframe: number
 ): Promise<PeerComparison> {
   try {
-    const targetTicker = await resolveTickerFromName(companyName);
+    const { ticker: targetTicker, currency: targetCurrency, currencySymbol: targetCurrencySymbol } = resolved;
+    const targetIsIndian = isIndianExchange(resolved.exchange);
 
     const period2 = new Date();
     const period1 = new Date();
@@ -51,11 +52,22 @@ export async function fetchPeerComparison(
       longname?: string;
       shortname?: string;
       quoteType?: string;
+      exchange?: string;
     }>;
 
-    const peerTickers = candidates
-      .filter((c) => c.quoteType === 'EQUITY' && c.symbol && c.symbol !== targetTicker)
-      .slice(0, 3);
+    // Filter to same market type:
+    // - Indian stocks: only NSE/BSE peers
+    // - Non-Indian stocks: exclude NSE/BSE peers
+    // - Only include peers whose currency matches target currency
+    const filteredCandidates = candidates.filter((c) => {
+      if (c.quoteType !== 'EQUITY' || !c.symbol || c.symbol === targetTicker) return false;
+      const peerIsIndian = isIndianExchange(c.exchange);
+      if (targetIsIndian !== peerIsIndian) return false;
+      const peerCurrency = getCurrencyForExchange(c.exchange).currency;
+      return peerCurrency === targetCurrency;
+    });
+
+    const peerTickers = filteredCandidates.slice(0, 3);
 
     if (peerTickers.length === 0) return FALLBACK;
 
@@ -63,8 +75,15 @@ export async function fetchPeerComparison(
     const peerResults = await Promise.all(
       peerTickers.map(async (peer): Promise<PeerSnapshot | null> => {
         try {
-          const peerTicker = peer.symbol!;
+          let peerTicker = peer.symbol!;
+          const peerExchange = peer.exchange;
           const peerName = peer.longname ?? peer.shortname ?? peerTicker;
+
+          // Ensure correct suffix for Indian peers
+          if (peerExchange === 'NSE' && !peerTicker.endsWith('.NS')) peerTicker = `${peerTicker}.NS`;
+          if (peerExchange === 'BSE' && !peerTicker.endsWith('.BO')) peerTicker = `${peerTicker}.BO`;
+
+          const peerCurrencySymbol = getCurrencyForExchange(peerExchange).currencySymbol;
 
           const [peerPriceChange, peerSummaryRaw] = await Promise.all([
             getPriceChangePercent(peerTicker, period1, period2),
@@ -86,6 +105,7 @@ export async function fetchPeerComparison(
             priceChangePercent: Math.round(peerPriceChange * 100) / 100,
             peRatio,
             relativeStrength: Math.round((peerPriceChange - targetPriceChange) * 100) / 100,
+            currencySymbol: peerCurrencySymbol || targetCurrencySymbol,
           };
         } catch {
           return null;

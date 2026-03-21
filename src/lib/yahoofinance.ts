@@ -1,22 +1,29 @@
 import YahooFinance from 'yahoo-finance2';
-import { resolveTickerFromName } from './resolveTicker';
+import { ResolvedCompany } from '@/types';
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['ripHistorical'] });
+
+// NOTE: Indian stocks (NSE/BSE) trade in IST (Asia/Kolkata, UTC+5:30).
+// Yahoo Finance normalizes all dates internally, so no manual timezone
+// conversion is needed when working with their chart() or quoteSummary() APIs.
 
 interface PriceDataResult {
   priceChangePercent: number;
   chartData: Array<{ date: string; price: number }>;
+  currentPrice: number;
+  currencySymbol: string;
 }
 
 /**
  * Fetches historical daily close prices for a company over the given timeframe.
- * Resolves the company name to a ticker internally — the ticker never leaves this file.
+ * Accepts a pre-resolved ResolvedCompany — the ticker is never re-resolved here.
+ * Yahoo Finance returns prices in the stock's native currency automatically.
  */
 export async function fetchPriceData(
-  companyName: string,
+  resolved: ResolvedCompany,
   timeframe: number
 ): Promise<PriceDataResult> {
-  const ticker = await resolveTickerFromName(companyName);
+  const { ticker, currencySymbol } = resolved;
 
   const period2 = new Date();
   const period1 = new Date();
@@ -33,7 +40,7 @@ export async function fetchPriceData(
     quotes = (result.quotes ?? []) as Array<{ date: string | Date; close: number | null }>;
   } catch (err) {
     throw new Error(
-      `Could not fetch price data for ${companyName}. Check that the company name is valid. (${String(err)})`
+      `Could not fetch price data for ${ticker}. Check that the company name is valid. (${String(err)})`
     );
   }
 
@@ -42,7 +49,7 @@ export async function fetchPriceData(
   );
 
   if (valid.length < 2) {
-    throw new Error(`No price data available for ${companyName}`);
+    throw new Error(`No price data available for ${ticker} on ${resolved.exchange}.`);
   }
 
   valid.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -56,5 +63,5 @@ export async function fetchPriceData(
     price: point.close,
   }));
 
-  return { priceChangePercent, chartData };
+  return { priceChangePercent, chartData, currentPrice: lastClose, currencySymbol };
 }

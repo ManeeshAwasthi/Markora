@@ -1,6 +1,5 @@
 import YahooFinance from 'yahoo-finance2';
-import { resolveTickerFromName } from './resolveTicker';
-import { RiskProfile } from '@/types';
+import { ResolvedCompany, RiskProfile } from '@/types';
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['ripHistorical'] });
 
@@ -17,6 +16,7 @@ const FALLBACK: RiskProfile = {
   volatilityLabel: 'Low',
   maxDrawdown: 0,
   sharpeRatio: null,
+  currencySymbol: '',
 };
 
 function betaLabel(beta: number | null): RiskProfile['betaLabel'] {
@@ -42,11 +42,11 @@ function stdDev(values: number[]): number {
 }
 
 export async function computeRiskProfile(
-  companyName: string,
+  resolved: ResolvedCompany,
   timeframe: number
 ): Promise<RiskProfile> {
   try {
-    const ticker = await resolveTickerFromName(companyName);
+    const { ticker, currencySymbol } = resolved;
 
     // ── Beta from quoteSummary ─────────────────────────────────────────────────
     const summaryRaw = await (yahooFinance as any).quoteSummary(
@@ -83,7 +83,7 @@ export async function computeRiskProfile(
       .map((q) => q.close);
 
     if (closes.length < 2) {
-      return { ...FALLBACK, beta, betaLabel: betaLabel(beta) };
+      return { ...FALLBACK, beta, betaLabel: betaLabel(beta), currencySymbol };
     }
 
     // ── Realized volatility (30-day annualized) ───────────────────────────────
@@ -124,6 +124,7 @@ export async function computeRiskProfile(
       volatilityLabel: volatilityLabel(realizedVolatility),
       maxDrawdown,
       sharpeRatio,
+      currencySymbol,
     };
   } catch {
     return FALLBACK;
