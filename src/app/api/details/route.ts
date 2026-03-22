@@ -179,7 +179,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Beta from quoteSummary
     let beta: number | null = null;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const summaryRaw = await (yahooFinance as any).quoteSummary(ticker, { modules: ['summaryDetail'] }, { validateResult: false }) as any;
       const betaRaw = summaryRaw?.summaryDetail?.beta;
       if (betaRaw !== null && betaRaw !== undefined && isFinite(betaRaw)) beta = betaRaw;
@@ -242,11 +241,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // ── Earnings history ─────────────────────────────────────────────────
     let earningsHistory: Array<{ quarter: string; epsActual: number | null; epsEstimate: number | null }> = [];
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ehRaw = await (yahooFinance as any).quoteSummary(ticker, { modules: ['earningsHistory'] }, { validateResult: false }) as any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const history = ehRaw?.earningsHistory?.history ?? [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       earningsHistory = history.slice(0, 8).map((h: any) => ({
         quarter: h.quarter ? new Date(h.quarter).toISOString().slice(0, 7) : h.period ?? '',
         epsActual: h.epsActual ?? null,
@@ -257,10 +253,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // ── Revenue history ──────────────────────────────────────────────────
     let revenueHistory: Array<{ period: string; revenue: number | null }> = [];
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const isRaw = await (yahooFinance as any).quoteSummary(ticker, { modules: ['incomeStatementHistoryQuarterly'] }, { validateResult: false }) as any;
       const stmts = isRaw?.incomeStatementHistoryQuarterly?.incomeStatementHistory ?? [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       revenueHistory = stmts.slice(0, 8).map((s: any) => ({
         period: s.endDate ? new Date(s.endDate).toISOString().slice(0, 7) : '',
         revenue: s.totalRevenue ?? null,

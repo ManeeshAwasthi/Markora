@@ -29,7 +29,6 @@ function DetailsContent() {
   const tabParam = (searchParams.get('tab') ?? 'price-intelligence') as TabSlug;
 
   const [activeTab, setActiveTab] = useState<TabSlug>(tabParam);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
