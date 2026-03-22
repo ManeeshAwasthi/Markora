@@ -538,7 +538,7 @@ function SignalContent() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div style={{ fontSize: '11px', fontFamily: MONO, color: '#4a4a6a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>PRICE INTELLIGENCE</div>
               <a
-                href={`/signal/price-intelligence?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}`}
+                href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=price-intelligence`}
                 style={{ color: '#4a4a6a', fontFamily: MONO, fontSize: '12px', textDecoration: 'none' }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#00e5ff'; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#4a4a6a'; }}
@@ -632,7 +632,17 @@ function SignalContent() {
 
           {/* ── FUNDAMENTALS ───────────────────────────────────────────────────── */}
           <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
-            <p style={SECTION_LABEL}>Fundamentals</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <p style={{ ...SECTION_LABEL, marginBottom: 0 }}>Fundamentals</p>
+              <a
+                href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=fundamentals`}
+                style={{ color: '#4a4a6a', fontFamily: MONO, fontSize: '12px', textDecoration: 'none' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#00e5ff'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#4a4a6a'; }}
+              >
+                View Details →
+              </a>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 40px' }}>
               <div>
                 <StatRow label="P/E Ratio (trailing)" hint="Stock price ÷ earnings — lower may mean cheaper" value={fmt(data.fundamentals.peRatio, 1)} />
@@ -657,7 +667,17 @@ function SignalContent() {
 
           {/* ── MOMENTUM & FLOW ────────────────────────────────────────────────── */}
           <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
-            <p style={SECTION_LABEL}>Momentum & Flow</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <p style={{ ...SECTION_LABEL, marginBottom: 0 }}>Momentum &amp; Flow</p>
+              <a
+                href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=momentum`}
+                style={{ color: '#4a4a6a', fontFamily: MONO, fontSize: '12px', textDecoration: 'none' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#00e5ff'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#4a4a6a'; }}
+              >
+                View Details →
+              </a>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
               {/* Institutional */}
               <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
@@ -734,7 +754,17 @@ function SignalContent() {
 
           {/* ── RISK PROFILE ───────────────────────────────────────────────────── */}
           <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
-            <p style={SECTION_LABEL}>Risk Profile</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <p style={{ ...SECTION_LABEL, marginBottom: 0 }}>Risk Profile</p>
+              <a
+                href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=risk-profile`}
+                style={{ color: '#4a4a6a', fontFamily: MONO, fontSize: '12px', textDecoration: 'none' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#00e5ff'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#4a4a6a'; }}
+              >
+                View Details →
+              </a>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
               {/* Beta */}
               <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
@@ -819,7 +849,17 @@ function SignalContent() {
           {/* ── PEER COMPARISON ────────────────────────────────────────────────── */}
           {data.peerComparison.peers.length > 0 && (
             <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
-              <p style={SECTION_LABEL}>Peer Comparison</p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <p style={{ ...SECTION_LABEL, marginBottom: 0 }}>Peer Comparison</p>
+                <a
+                  href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=peer-comparison`}
+                  style={{ color: '#4a4a6a', fontFamily: MONO, fontSize: '12px', textDecoration: 'none' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#00e5ff'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#4a4a6a'; }}
+                >
+                  View Details →
+                </a>
+              </div>
               {/* Header row */}
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '12px', padding: '0 0 10px', borderBottom: '1px solid #1c1c26', marginBottom: '4px' }}>
                 <span style={{ color: '#4a4a6a', fontSize: '11px', fontFamily: MONO, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Company</span>
