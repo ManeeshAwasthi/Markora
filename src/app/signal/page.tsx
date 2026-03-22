@@ -535,7 +535,17 @@ function SignalContent() {
 
           {/* ── PRICE INTELLIGENCE ─────────────────────────────────────────────── */}
           <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
-            <p style={SECTION_LABEL}>Price Intelligence</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ fontSize: '11px', fontFamily: MONO, color: '#4a4a6a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>PRICE INTELLIGENCE</div>
+              <a
+                href={`/signal/price-intelligence?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}`}
+                style={{ color: '#4a4a6a', fontFamily: MONO, fontSize: '12px', textDecoration: 'none' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#00e5ff'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#4a4a6a'; }}
+              >
+                View Details →
+              </a>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '20px' }}>
               {/* RSI */}
               <div style={{ background: '#080810', border: '1px solid #1c1c26', borderRadius: '8px', padding: '16px' }}>
