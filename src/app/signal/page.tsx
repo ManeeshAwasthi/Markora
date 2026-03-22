@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef, useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -15,7 +15,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
-import { AnalyzeResponse, ApiError, SignalType, TrendDirection, EntryExitLabel } from '@/types';
+import { AnalyzeResponse, ApiError, SignalType, TrendDirection, EntryExitLabel, SearchResult } from '@/types';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
@@ -216,6 +216,9 @@ function SignalContent() {
   const [headlinesExpanded, setHeadlinesExpanded] = useState(false);
   const [inputTicker, setInputTicker] = useState(rawTicker);
   const [selectedTimeframe, setSelectedTimeframe] = useState<7 | 30 | 90>(timeframe);
+  const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setInputTicker(rawTicker);
@@ -251,6 +254,22 @@ function SignalContent() {
     run();
     return () => { cancelled = true; };
   }, [rawTicker, timeframe]);
+
+  const fetchSuggestions = useCallback(async (value: string) => {
+    if (value.trim().length < 1) {
+      setSuggestions([]);
+      setShowDropdown(false);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(value)}`);
+      const data: SearchResult[] = await res.json();
+      setSuggestions(data);
+      setShowDropdown(data.length > 0);
+    } catch {
+      setSuggestions([]);
+    }
+  }, []);
 
   const handleAnalyze = () => {
     const t = inputTicker.trim();
@@ -318,14 +337,70 @@ function SignalContent() {
 
       {/* Re-analyze bar */}
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap' }}>
-        <input
-          type="text"
-          value={inputTicker}
-          onChange={e => setInputTicker(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleAnalyze()}
-          placeholder="Company name"
-          style={{ background: '#0d0d12', border: '1px solid #2a2a3a', borderRadius: '6px', color: '#e8e8f0', fontFamily: FONT, fontSize: '14px', height: '44px', padding: '0 14px', outline: 'none', width: '220px' }}
-        />
+        <div style={{ position: 'relative', width: '220px' }}>
+          <input
+            type="text"
+            value={inputTicker}
+            onChange={e => {
+              const val = e.target.value;
+              setInputTicker(val);
+              if (debounceRef.current) clearTimeout(debounceRef.current);
+              debounceRef.current = setTimeout(() => fetchSuggestions(val), 280);
+            }}
+            onKeyDown={e => {
+              if (e.key === 'Enter') { setShowDropdown(false); handleAnalyze(); }
+              if (e.key === 'Escape') setShowDropdown(false);
+            }}
+            onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+            onFocus={() => inputTicker.trim().length > 0 && suggestions.length > 0 && setShowDropdown(true)}
+            placeholder="Company name"
+            style={{ background: '#0d0d12', border: '1px solid #2a2a3a', borderRadius: '6px', color: '#e8e8f0', fontFamily: FONT, fontSize: '14px', height: '44px', padding: '0 14px', outline: 'none', width: '100%' }}
+          />
+          {showDropdown && suggestions.length > 0 && (
+            <div style={{
+              position: 'absolute',
+              top: 'calc(100% + 4px)',
+              left: 0,
+              right: 0,
+              background: '#0d0d12',
+              border: '1px solid #1c1c26',
+              borderRadius: '8px',
+              overflow: 'hidden',
+              zIndex: 50,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+            }}>
+              {suggestions.map((s, i) => (
+                <button
+                  key={i}
+                  onMouseDown={() => {
+                    setInputTicker(s.name);
+                    setShowDropdown(false);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    width: '100%',
+                    padding: '10px 14px',
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: i < suggestions.length - 1 ? '1px solid #1c1c26' : 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#13131f'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                >
+                  <span style={{ fontFamily: MONO, fontSize: '12px', color: '#00e5ff', minWidth: '55px' }}>{s.ticker}</span>
+                  <span style={{ color: '#e8e8f0', fontSize: '13px', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
+                  {s.exchange && (
+                    <span style={{ fontFamily: MONO, fontSize: '11px', color: '#4a4a6a', background: '#1c1c26', borderRadius: '4px', padding: '2px 6px' }}>{s.exchange}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         {([7, 30, 90] as const).map(tf => (
           <button
             key={tf}
