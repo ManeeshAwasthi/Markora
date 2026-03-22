@@ -22,18 +22,13 @@ export async function fetchHeadlines(
   if (!apiKey) throw new Error('NEWSDATA_API_KEY is not configured');
 
   // ── Step 1: newsdata.io fetch ─────────────────────────────────────────────
-  const url = new URL('https://newsdata.io/api/1/news');
+  const url = new URL('https://newsdata.io/api/1/latest');
   url.searchParams.set('apikey', apiKey);
-  url.searchParams.set('q', `"${companyName}"`);
+  url.searchParams.set('q', companyName);
   url.searchParams.set('language', 'en');
   url.searchParams.set('size', '10');
-
-  // Omit from_date for 90-day timeframe — newsdata.io free tier window limit
-  if (_timeframe !== 90) {
-    const fromDate = new Date();
-    fromDate.setDate(fromDate.getDate() - _timeframe);
-    url.searchParams.set('from_date', fromDate.toISOString().slice(0, 10));
-  }
+  // Free-tier timeframe filter via hours (max 48h); from_date is archive-only
+  url.searchParams.set('timeframe', String(Math.min(_timeframe * 24, 48)));
 
   const response = await fetch(url.toString(), { cache: 'no-store' });
 
