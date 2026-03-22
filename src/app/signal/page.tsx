@@ -100,13 +100,13 @@ function MetricCard({
 }: {
   label: string; value: string; sub?: string; valueColor?: string;
 }) {
-  const isLong = value.length > 8;
+  const fontSize = value.length > 14 ? '1.2rem' : value.length > 10 ? '1.5rem' : value.length > 7 ? '1.85rem' : '2.2rem';
   return (
-    <div style={{ minWidth: 0, background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '10px', padding: '20px 20px 18px' }}>
+    <div style={{ minWidth: 0, background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '10px', padding: '22px 22px 20px' }}>
       <p style={{ color: '#4a4a6a', fontSize: '11px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, marginBottom: '14px' }}>
         {label}
       </p>
-      <p style={{ color: valueColor ?? '#e8e8f0', fontSize: isLong ? '1.5rem' : '2.2rem', fontWeight: 600, fontFamily: MONO, lineHeight: 1, marginBottom: sub ? '8px' : 0, whiteSpace: 'nowrap' }}>
+      <p style={{ color: valueColor ?? '#e8e8f0', fontSize, fontWeight: 600, fontFamily: MONO, lineHeight: 1.2, marginBottom: sub ? '10px' : 0, wordBreak: 'break-word' }}>
         {value}
       </p>
       {sub && <p style={{ color: '#4a4a6a', fontSize: '12px', fontFamily: FONT, lineHeight: 1.4 }}>{sub}</p>}
@@ -351,7 +351,7 @@ function SignalContent() {
         </div>
       )}
 
-    <div style={{ flex: 1, maxWidth: data ? 'calc(1200px - 200px)' : '1200px', margin: '0 auto', padding: '48px 40px 100px', fontFamily: FONT }}>
+    <div style={{ flex: 1, minWidth: 0, padding: '48px 48px 100px', fontFamily: FONT }}>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', gap: '16px', flexWrap: 'wrap' }}>
@@ -482,7 +482,7 @@ function SignalContent() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
           {/* Metric cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: hasTrendCard ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: hasTrendCard ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)', gap: '14px' }}>
             <MetricCard
               label="Divergence Score"
               value={data.divergenceScore > 0 ? `+${data.divergenceScore}` : String(data.divergenceScore)}
