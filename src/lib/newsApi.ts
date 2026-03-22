@@ -27,8 +27,7 @@ export async function fetchHeadlines(
   url.searchParams.set('q', companyName);
   url.searchParams.set('language', 'en');
   url.searchParams.set('size', '10');
-  // Free-tier timeframe filter via hours (max 48h); from_date is archive-only
-  url.searchParams.set('timeframe', String(Math.min(_timeframe * 24, 48)));
+  // timeframe and from_date are not supported on the free tier — omitted
 
   const response = await fetch(url.toString(), { cache: 'no-store' });
 
