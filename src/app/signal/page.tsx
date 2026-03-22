@@ -307,8 +307,51 @@ function SignalContent() {
   const shortColors: Record<string, string> = { Normal: '#00ff88', Elevated: '#f97316', High: '#ef4444' };
   const insiderColors: Record<string, string> = { Buying: '#00ff88', Selling: '#ef4444', Neutral: '#888' };
 
+  const NAV_SECTIONS = [
+    { id: 'price-intelligence', label: 'Price Intelligence' },
+    { id: 'fundamentals', label: 'Fundamentals' },
+    { id: 'momentum', label: 'Momentum & Flow' },
+    { id: 'risk-profile', label: 'Risk Profile' },
+    { id: 'peer-comparison', label: 'Peer Comparison' },
+  ];
+
+  const [activeSection, setActiveSection] = useState('price-intelligence');
+
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 40px 100px', fontFamily: FONT }}>
+    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: FONT }}>
+
+      {/* ── LEFT SIDEBAR NAV ──────────────────────────────────────────────── */}
+      {data && (
+        <div style={{ width: '200px', flexShrink: 0, position: 'sticky', top: 0, height: '100vh', borderRight: '1px solid #1c1c26', background: '#0d0d12', display: 'flex', flexDirection: 'column', paddingTop: '40px', overflowY: 'auto' }}>
+          <p style={{ color: '#2a2a3a', fontFamily: MONO, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0 20px', marginBottom: '12px' }}>Sections</p>
+          {NAV_SECTIONS.map(sec => (
+            <a
+              key={sec.id}
+              href={`#${sec.id}`}
+              onClick={() => setActiveSection(sec.id)}
+              style={{
+                display: 'block',
+                padding: '13px 20px',
+                fontFamily: MONO,
+                fontSize: '11px',
+                letterSpacing: '0.07em',
+                textTransform: 'uppercase',
+                textDecoration: 'none',
+                color: activeSection === sec.id ? '#00e5ff' : '#4a4a6a',
+                background: activeSection === sec.id ? '#00e5ff08' : 'transparent',
+                borderLeft: activeSection === sec.id ? '3px solid #00e5ff' : '3px solid transparent',
+                transition: 'color 0.15s',
+              }}
+              onMouseEnter={e => { if (activeSection !== sec.id) (e.currentTarget as HTMLElement).style.color = '#a0a0b8'; }}
+              onMouseLeave={e => { if (activeSection !== sec.id) (e.currentTarget as HTMLElement).style.color = '#4a4a6a'; }}
+            >
+              {sec.label}
+            </a>
+          ))}
+        </div>
+      )}
+
+    <div style={{ flex: 1, maxWidth: data ? 'calc(1200px - 200px)' : '1200px', margin: '0 auto', padding: '48px 40px 100px', fontFamily: FONT }}>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', gap: '16px', flexWrap: 'wrap' }}>
@@ -534,7 +577,7 @@ function SignalContent() {
           </div>
 
           {/* ── PRICE INTELLIGENCE ─────────────────────────────────────────────── */}
-          <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
+          <div id="price-intelligence" style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div style={{ fontSize: '11px', fontFamily: MONO, color: '#4a4a6a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>PRICE INTELLIGENCE</div>
               <a
@@ -631,7 +674,7 @@ function SignalContent() {
           </div>
 
           {/* ── FUNDAMENTALS ───────────────────────────────────────────────────── */}
-          <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
+          <div id="fundamentals" style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <p style={{ ...SECTION_LABEL, marginBottom: 0 }}>Fundamentals</p>
               <a
@@ -666,7 +709,7 @@ function SignalContent() {
           </div>
 
           {/* ── MOMENTUM & FLOW ────────────────────────────────────────────────── */}
-          <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
+          <div id="momentum" style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <p style={{ ...SECTION_LABEL, marginBottom: 0 }}>Momentum &amp; Flow</p>
               <a
@@ -753,7 +796,7 @@ function SignalContent() {
           </div>
 
           {/* ── RISK PROFILE ───────────────────────────────────────────────────── */}
-          <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
+          <div id="risk-profile" style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <p style={{ ...SECTION_LABEL, marginBottom: 0 }}>Risk Profile</p>
               <a
@@ -848,7 +891,7 @@ function SignalContent() {
 
           {/* ── PEER COMPARISON ────────────────────────────────────────────────── */}
           {data.peerComparison.peers.length > 0 && (
-            <div style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
+            <div id="peer-comparison" style={{ background: '#0d0d12', border: '1px solid #1c1c26', borderRadius: '8px', padding: '22px 24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <p style={{ ...SECTION_LABEL, marginBottom: 0 }}>Peer Comparison</p>
                 <a
@@ -924,6 +967,7 @@ function SignalContent() {
         </div>
       )}
       <TickerTape />
+    </div>
     </div>
   );
 }
