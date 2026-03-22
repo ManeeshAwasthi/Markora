@@ -277,6 +277,16 @@ function SignalContent() {
     router.push(`/signal?ticker=${encodeURIComponent(t)}&timeframe=${selectedTimeframe}`);
   };
 
+  const NAV_SECTIONS = [
+    { id: 'price-intelligence', label: 'Price Intelligence' },
+    { id: 'fundamentals', label: 'Fundamentals' },
+    { id: 'momentum', label: 'Momentum & Flow' },
+    { id: 'risk-profile', label: 'Risk Profile' },
+    { id: 'peer-comparison', label: 'Peer Comparison' },
+  ];
+
+  const [activeSection, setActiveSection] = useState('price-intelligence');
+
   if (!rawTicker) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 24px', fontFamily: FONT }}>
@@ -306,16 +316,6 @@ function SignalContent() {
   const volColors: Record<string, string> = { Low: '#00ff88', Moderate: '#888', High: '#f97316', 'Very High': '#ef4444' };
   const shortColors: Record<string, string> = { Normal: '#00ff88', Elevated: '#f97316', High: '#ef4444' };
   const insiderColors: Record<string, string> = { Buying: '#00ff88', Selling: '#ef4444', Neutral: '#888' };
-
-  const NAV_SECTIONS = [
-    { id: 'price-intelligence', label: 'Price Intelligence' },
-    { id: 'fundamentals', label: 'Fundamentals' },
-    { id: 'momentum', label: 'Momentum & Flow' },
-    { id: 'risk-profile', label: 'Risk Profile' },
-    { id: 'peer-comparison', label: 'Peer Comparison' },
-  ];
-
-  const [activeSection, setActiveSection] = useState('price-intelligence');
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: FONT }}>
