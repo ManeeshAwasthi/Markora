@@ -78,7 +78,7 @@ export async function POST(
 
     // ── 3. Fetch core data: headlines, price, trends (parallel) ──────────────
     const [headlines, priceData, trends] = await Promise.all([
-      fetchHeadlines(companyName, timeframe),
+      fetchHeadlines(companyName, timeframe, resolved.ticker),
       fetchPriceData(resolved, timeframe),
       fetchTrends(companyName, timeframe),
     ]);

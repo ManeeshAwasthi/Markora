@@ -304,7 +304,7 @@ function SignalContent() {
   }));
 
   const hasTrendLine = chartData?.some(p => p['Search Trend'] !== undefined) ?? false;
-  const hasTrendCard = data !== null && data.trendScore !== undefined && data.trendDirection !== undefined;
+  const hasTrendCard = data !== null && data.trendScore !== undefined && data.trendDirection !== undefined && !(data.trendScore === 50 && data.trendDirection === 'Stable');
   const xInterval = chartData ? Math.floor(chartData.length / 6) : 0;
 
   // ── Derived color helpers ─────────────────────────────────────────────────

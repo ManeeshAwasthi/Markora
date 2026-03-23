@@ -1,8 +1,17 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-interface NewsdataResponse {
-  status: string;
-  results: Array<{ title: string | null; description: string | null }>;
+interface FinnhubNewsItem {
+  headline: string;
+  summary?: string;
+}
+
+interface MarketauxNewsItem {
+  title: string;
+  description?: string;
+}
+
+interface MarketauxResponse {
+  data: MarketauxNewsItem[];
 }
 
 interface GeminiRelevanceJSON {
@@ -10,83 +19,78 @@ interface GeminiRelevanceJSON {
 }
 
 /**
- * Parses Google News RSS XML and extracts titles.
- * Google News RSS returns standard RSS XML with <item><title>...</title></item>
+ * Source 1: Finnhub /company-news — keyed on ticker + date range.
+ * Works reliably from Vercel serverless IPs.
  */
-function parseTitlesFromRSS(xml: string): string[] {
-  const titles: string[] = [];
-  const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
-  let itemMatch: RegExpExecArray | null;
-  while ((itemMatch = itemRegex.exec(xml)) !== null) {
-    const titleMatch = itemMatch[1].match(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/);
-    if (titleMatch) {
-      let title = (titleMatch[1] ?? titleMatch[2] ?? '').trim();
-      // Google News appends " - Source Name" to titles — strip it
-      const dashIndex = title.lastIndexOf(' - ');
-      if (dashIndex > 20) {
-        title = title.slice(0, dashIndex).trim();
-      }
-      if (title.length > 10) {
-        titles.push(title);
-      }
-    }
-  }
-  return titles;
-}
-
-/**
- * Source 1: Google News RSS — free, no API key, supports time ranges.
- * Returns up to ~100 headlines. Supports `when:7d`, `when:30d`, etc.
- */
-async function fetchFromGoogleNewsRSS(companyName: string, timeframeDays: number): Promise<string[]> {
+async function fetchFromFinnhub(
+  ticker: string,
+  timeframeDays: number
+): Promise<{ title: string; description: string }[]> {
   try {
-    const whenParam = `${timeframeDays}d`;
-    const query = encodeURIComponent(`"${companyName}" when:${whenParam}`);
-    const url = `https://news.google.com/rss/search?q=${query}&ceid=US:en&hl=en-US&gl=US`;
+    const apiKey = process.env.FINNHUB_API_KEY;
+    if (!apiKey) return [];
 
-    const response = await fetch(url, {
-      cache: 'no-store',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; Markora/1.0)',
-      },
-    });
+    const to = new Date();
+    const from = new Date();
+    from.setDate(to.getDate() - timeframeDays);
 
+    const toStr = to.toISOString().slice(0, 10);
+    const fromStr = from.toISOString().slice(0, 10);
+
+    const url = `https://finnhub.io/api/v1/company-news?symbol=${encodeURIComponent(ticker)}&from=${fromStr}&to=${toStr}&token=${apiKey}`;
+
+    const response = await fetch(url, { cache: 'no-store' });
     if (!response.ok) return [];
 
-    const xml = await response.text();
-    return parseTitlesFromRSS(xml);
+    const data = (await response.json()) as FinnhubNewsItem[];
+    if (!Array.isArray(data)) return [];
+
+    return data
+      .filter((a) => typeof a.headline === 'string' && a.headline.trim().length > 10)
+      .slice(0, 50)
+      .map((a) => ({
+        title: a.headline.trim(),
+        description: typeof a.summary === 'string' ? a.summary.trim().slice(0, 120) : '',
+      }));
   } catch {
     return [];
   }
 }
 
 /**
- * Source 2: newsdata.io — free tier, max 10 articles, last 48 hours only.
- * Used as fallback when Google News RSS returns too few results.
+ * Source 2: Marketaux /v1/news/all — keyed on company name.
+ * Fallback when Finnhub returns too few results.
  */
-async function fetchFromNewsdata(companyName: string): Promise<{ title: string; description: string }[]> {
+async function fetchFromMarketaux(
+  companyName: string,
+  timeframeDays: number
+): Promise<{ title: string; description: string }[]> {
   try {
-    const apiKey = process.env.NEWSDATA_API_KEY;
+    const apiKey = process.env.MARKETAUX_API_KEY;
     if (!apiKey) return [];
 
-    const url = new URL('https://newsdata.io/api/1/latest');
-    url.searchParams.set('apikey', apiKey);
-    url.searchParams.set('q', companyName);
+    const publishedAfter = new Date();
+    publishedAfter.setDate(publishedAfter.getDate() - timeframeDays);
+    const publishedAfterStr = publishedAfter.toISOString().slice(0, 10);
+
+    const url = new URL('https://api.marketaux.com/v1/news/all');
+    url.searchParams.set('api_token', apiKey);
+    url.searchParams.set('search', companyName);
     url.searchParams.set('language', 'en');
-    url.searchParams.set('size', '10');
-    url.searchParams.set('timeframe', '48');
+    url.searchParams.set('limit', '30');
+    url.searchParams.set('published_after', publishedAfterStr);
 
     const response = await fetch(url.toString(), { cache: 'no-store' });
     if (!response.ok) return [];
 
-    const data = (await response.json()) as NewsdataResponse;
-    if (data.status !== 'success') return [];
+    const data = (await response.json()) as MarketauxResponse;
+    if (!Array.isArray(data?.data)) return [];
 
-    return (data.results ?? [])
-      .filter((a) => typeof a.title === 'string' && a.title.trim().length > 0)
+    return data.data
+      .filter((a) => typeof a.title === 'string' && a.title.trim().length > 10)
       .map((a) => ({
-        title: a.title as string,
-        description: typeof a.description === 'string' ? a.description : '',
+        title: a.title.trim(),
+        description: typeof a.description === 'string' ? a.description.trim().slice(0, 120) : '',
       }));
   } catch {
     return [];
@@ -120,30 +124,29 @@ function deduplicateTitles(titles: string[]): string[] {
  * Main headline fetching function — multi-source aggregation.
  *
  * Strategy:
- * 1. Fetch from Google News RSS (primary — free, large volume, supports timeframe)
- * 2. Fetch from newsdata.io (secondary — smaller volume but different sources)
+ * 1. Fetch from Finnhub (primary — ticker-based, reliable on serverless)
+ * 2. Fetch from Marketaux (fallback — name-based, different sources)
  * 3. Merge, deduplicate, and cap at 30
  * 4. Run Gemini relevance gate to filter out noise
  */
 export async function fetchHeadlines(
   companyName: string,
-  _timeframe: number
+  timeframe: number,
+  ticker?: string
 ): Promise<string[]> {
   // ── Step 1: Fetch from multiple sources in parallel ───────────────────────
-  const [googleTitles, newsdataArticles] = await Promise.all([
-    fetchFromGoogleNewsRSS(companyName, _timeframe),
-    fetchFromNewsdata(companyName),
+  const [finnhubArticles, marketauxArticles] = await Promise.all([
+    ticker ? fetchFromFinnhub(ticker, timeframe) : Promise.resolve([]),
+    fetchFromMarketaux(companyName, timeframe),
   ]);
 
-  const newsdataTitles = newsdataArticles.map((a) => a.title);
-
-  // Merge: Google News first (higher volume), then newsdata
-  const allTitles = [...googleTitles, ...newsdataTitles];
+  const allArticles = [...finnhubArticles, ...marketauxArticles];
+  const allTitles = allArticles.map((a) => a.title);
 
   // Deduplicate across sources
   const deduplicated = deduplicateTitles(allTitles);
 
-  if (deduplicated.length === 0) {
+  if (deduplicated.length < 3) {
     throw new Error(`NO_NEWS: No recent news found for ${companyName}`);
   }
 
@@ -164,8 +167,8 @@ export async function fetchHeadlines(
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const descriptionMap = new Map<string, string>();
-    for (const a of newsdataArticles) {
-      if (a.description) descriptionMap.set(a.title, a.description.trim().slice(0, 120));
+    for (const a of allArticles) {
+      if (a.description) descriptionMap.set(a.title, a.description);
     }
 
     const numberedList = candidates
