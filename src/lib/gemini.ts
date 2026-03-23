@@ -21,7 +21,10 @@ export async function analyzeSentiment(
   if (!apiKey) throw new Error('GEMINI_API_KEY is not configured');
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  const model = genAI.getGenerativeModel(
+    { model: 'gemini-2.5-flash', generationConfig: { temperature: 0 } },
+    { apiVersion: 'v1beta' }
+  );
 
   const numberedHeadlines = headlines.map((h, i) => `${i + 1}. ${h}`).join('\n');
 
