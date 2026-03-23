@@ -5,7 +5,6 @@
   /* Backgrounds */
   --bg-base:        #060608;
   --bg-surface:     #0d0d12;
-  --bg-deep:        #080810;
   --bg-elevated:    #0a0a10;
 
   /* Borders */
@@ -37,7 +36,7 @@
   --radius-lg:      16px;
 
   /* Easing */
-  --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out:       cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out:    cubic-bezier(0.4, 0, 0.2, 1);
   --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -47,7 +46,6 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  scroll-behavior: smooth;
   scrollbar-gutter: stable;
 }
 
@@ -65,13 +63,13 @@ body {
 
 /* ─── Keyframes ──────────────────────────────────────────────────────────── */
 
-/* Ticker tape */
+/* Existing — ticker tape */
 @keyframes tickerScroll {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 
-/* Spinner */
+/* Existing — spinner */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -94,28 +92,40 @@ body {
   to   { opacity: 1; }
 }
 
-/* Landing page signal pills */
-@keyframes pillSlideIn {
-  from { opacity: 0; transform: translateX(-12px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
 /* Signal-colored element glow oscillation */
 @keyframes glowPulse {
   0%, 100% { filter: brightness(0.9); }
   50%       { filter: brightness(1.1); }
 }
 
-/* Landing grid fade in */
+/* Hero number breathing */
+@keyframes breathe {
+  0%, 100% { filter: brightness(1); }
+  50%       { filter: brightness(1.08); }
+}
+
+/* Landing grid fade in (with delay baked in via animation-delay on usage) */
 @keyframes gridFadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+/* Landing page signal pills */
+@keyframes pillSlideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 /* Sentiment bar fill */
 @keyframes barFill {
   from { width: 0; }
   to   { width: var(--bar-width, 100%); }
+}
+
+/* Focus border glow pulse */
+@keyframes borderGlow {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50%       { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cyan) 30%, transparent); }
 }
 
 /* ─── Grid Background ────────────────────────────────────────────────────── */
@@ -125,12 +135,11 @@ body {
   pointer-events: none;
   z-index: 0;
   background-image:
-    repeating-linear-gradient(0deg,   transparent, transparent 39px, rgba(28, 28, 38, 0.6) 39px, rgba(28, 28, 38, 0.6) 40px),
-    repeating-linear-gradient(90deg,  transparent, transparent 39px, rgba(28, 28, 38, 0.6) 39px, rgba(28, 28, 38, 0.6) 40px);
-  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 85%);
-  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 85%);
-  animation: gridFadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
-  opacity: 0;
+    repeating-linear-gradient(0deg,   transparent, transparent 39px, rgba(28, 28, 38, 0.7) 39px, rgba(28, 28, 38, 0.7) 40px),
+    repeating-linear-gradient(90deg,  transparent, transparent 39px, rgba(28, 28, 38, 0.7) 39px, rgba(28, 28, 38, 0.7) 40px);
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  animation: gridFadeIn 0.8s var(--ease-out) 0.2s both;
 }
 
 /* ─── Sentiment Bar ──────────────────────────────────────────────────────── */
