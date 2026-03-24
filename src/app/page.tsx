@@ -21,16 +21,6 @@ const TICKER_ITEMS = [
   { ticker: 'GOOG',        signal: 'Aligned',         color: '#00ff88', price: '+0.9%' },
 ];
 
-const SIGNAL_ROWS = [
-  { ticker: 'AAPL',     barWidth: '62%', signal: 'Aligned',     color: '#00ff88', price: '+1.2%' },
-  { ticker: 'NVDA',     barWidth: '88%', signal: 'Hidden Str.', color: '#00e5ff', price: '+5.1%' },
-  { ticker: 'TSLA',     barWidth: '71%', signal: 'Mild Opt.',   color: '#f97316', price: '+3.4%' },
-  { ticker: 'MSFT',     barWidth: '40%', signal: 'Overconf.',   color: '#ef4444', price: '-0.8%' },
-  { ticker: 'META',     barWidth: '58%', signal: 'Aligned',     color: '#00ff88', price: '+0.6%' },
-  { ticker: 'AMZN',     barWidth: '28%', signal: 'Mild Pess.',  color: '#f97316', price: '-1.9%' },
-  { ticker: 'RELIANCE', barWidth: '80%', signal: 'Hidden Str.', color: '#00e5ff', price: '+2.3%' },
-];
-
 const SIGNALS = [
   { name: 'Overconfidence', color: '#ef4444', desc: 'Crowd bullish. Price disagrees. Pullback risk elevated.'         },
   { name: 'Mild Optimism',  color: '#f97316', desc: 'Sentiment slightly ahead of price. Watch momentum.'             },
@@ -53,29 +43,17 @@ const STATS = [
   { value: '3',   label: 'Timeframe windows',         color: '#e8e8f0' },
 ];
 
-const SIGNAL_COLORS: Record<string, string> = {
-  'Overconfidence': '#ef4444',
-  'Mild Optimism':  '#f97316',
-  'Aligned':        '#00ff88',
-  'Mild Pessimism': '#f97316',
-  'Hidden Strength':'#00e5ff',
-  'Overconf.':      '#ef4444',
-  'Mild Opt.':      '#f97316',
-  'Hidden Str.':    '#00e5ff',
-  'Mild Pess.':     '#f97316',
-};
-
-const MONO  = 'var(--font-dm-mono), "Courier New", monospace';
-const SERIF = 'var(--font-dm-serif), Georgia, serif';
-const BODY  = 'var(--font-outfit), system-ui, sans-serif';
+const MONO  = 'var(--font-space-mono), "Courier New", monospace';
+const SERIF = 'var(--font-playfair), Georgia, serif';
+const BODY  = 'var(--font-space-grotesk), system-ui, sans-serif';
 
 function TickerTape() {
   const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
   return (
-    <div style={{ height: '32px', background: '#0a0a0f', borderBottom: '1px solid #111118', overflow: 'hidden' }}>
+    <div style={{ height: '32px', background: '#0a0a0f', borderBottom: '1px solid #0f0f16', overflow: 'hidden' }}>
       <div style={{
         display: 'flex',
-        gap: '48px',
+        gap: '56px',
         alignItems: 'center',
         height: '100%',
         width: 'max-content',
@@ -85,9 +63,9 @@ function TickerTape() {
         {items.map((item, i) => (
           <span key={i} style={{ whiteSpace: 'nowrap', fontFamily: MONO, fontSize: '11px', letterSpacing: '0.04em' }}>
             <span style={{ color: '#e8e8f0' }}>{item.ticker}</span>
-            <span style={{ color: '#252535', margin: '0 6px' }}>·</span>
+            <span style={{ color: '#1a1a24', margin: '0 6px' }}>·</span>
             <span style={{ color: item.color }}>{item.signal}</span>
-            <span style={{ color: '#252535', margin: '0 6px' }}>·</span>
+            <span style={{ color: '#1a1a24', margin: '0 6px' }}>·</span>
             <span style={{ color: '#3a3a4a' }}>{item.price}</span>
           </span>
         ))}
@@ -163,21 +141,22 @@ export default function LandingPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: '48px',
+        height: '50px',
         padding: '0 48px',
         background: '#060608',
-        borderBottom: '1px solid #111118',
+        borderBottom: '1px solid #0f0f16',
       }}>
         <span style={{
           fontFamily: MONO,
-          fontSize: '16px',
-          letterSpacing: '0.08em',
+          fontSize: '14px',
+          fontWeight: 700,
+          letterSpacing: '0.12em',
           color: '#e8e8f0',
         }}>
           MARKORA
         </span>
 
-        <div style={{ display: 'flex', gap: '32px' }}>
+        <div style={{ display: 'flex', gap: '36px' }}>
           {['SIGNALS', 'MARKETS', 'METHODOLOGY'].map((link) => (
             <a
               key={link}
@@ -186,7 +165,7 @@ export default function LandingPage() {
                 fontFamily: MONO,
                 fontSize: '10px',
                 textTransform: 'uppercase' as const,
-                letterSpacing: '0.14em',
+                letterSpacing: '0.18em',
                 color: '#3a3a4a',
                 textDecoration: 'none',
                 transition: 'color 150ms',
@@ -214,346 +193,229 @@ export default function LandingPage() {
 
       {/* ── 3. HERO ────────────────────────────────────────────────────────── */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 420px',
-        minHeight: 'calc(100vh - 84px)',
-        maxHeight: '760px',
+        padding: '100px 52px 96px',
+        maxWidth: '860px',
       }}>
-
-        {/* LEFT COLUMN */}
-        <div style={{
-          padding: '80px 48px 80px 48px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          borderRight: '1px solid #111118',
+        <p style={{
+          fontFamily: MONO,
+          fontSize: '10px',
+          color: '#3a3a4a',
+          textTransform: 'uppercase' as const,
+          letterSpacing: '0.24em',
+          marginBottom: '40px',
         }}>
-          {/* Top section */}
-          <div>
-            <p style={{
-              fontFamily: MONO,
-              fontSize: '10px',
-              color: '#3a3a4a',
-              textTransform: 'uppercase' as const,
-              letterSpacing: '0.2em',
-              marginBottom: '32px',
-            }}>
-              DIVERGENCE ANALYSIS ENGINE
-            </p>
+          DIVERGENCE ANALYSIS ENGINE
+        </p>
 
-            <h1 style={{ margin: 0, marginBottom: '24px' }}>
-              <span style={{
-                display: 'block',
-                fontFamily: SERIF,
-                fontSize: 'clamp(44px, 5.5vw, 72px)',
-                color: '#e8e8f0',
-                lineHeight: 1,
-                fontWeight: 400,
-                fontStyle: 'normal',
-                animation: 'heroFadeIn 300ms ease forwards',
-              }}>
-                Where sentiment
-              </span>
-              <span style={{
-                display: 'block',
-                fontFamily: SERIF,
-                fontSize: 'clamp(44px, 5.5vw, 72px)',
-                color: '#e8e8f0',
-                lineHeight: 1,
-                fontWeight: 400,
-                animation: 'heroFadeIn 300ms ease forwards',
-              }}>
-                meets{' '}
-                <em style={{
-                  fontStyle: 'italic',
-                  color: '#00e5ff',
-                }}>reality.</em>
-              </span>
-            </h1>
+        <h1 style={{
+          margin: 0,
+          marginBottom: '32px',
+          fontSize: 'clamp(52px, 6vw, 82px)',
+          lineHeight: 0.95,
+          letterSpacing: '-0.01em',
+          fontWeight: 400,
+          animation: 'heroFadeIn 300ms ease forwards',
+        }}>
+          <span style={{
+            display: 'block',
+            fontFamily: SERIF,
+            fontStyle: 'normal',
+          }}>
+            Where sentiment
+          </span>
+          <span style={{
+            display: 'block',
+            fontFamily: SERIF,
+          }}>
+            meets{' '}
+            <em style={{
+              fontStyle: 'italic',
+              color: '#00e5ff',
+            }}>reality.</em>
+          </span>
+        </h1>
 
-            <p style={{
-              fontFamily: BODY,
-              fontSize: '14px',
-              color: '#6b6b80',
-              lineHeight: 1.7,
-              maxWidth: '400px',
-              marginBottom: '48px',
-            }}>
-              Markora quantifies the gap between what the crowd believes and what price confirms. Five signal types across 50+ global markets.
-            </p>
-          </div>
+        <p style={{
+          fontFamily: BODY,
+          fontSize: '16px',
+          fontWeight: 300,
+          color: '#5a5a70',
+          lineHeight: 1.8,
+          maxWidth: '520px',
+          marginBottom: '56px',
+        }}>
+          Markora quantifies the gap between what the crowd believes and what price confirms. Five signal types across 50+ global markets.
+        </p>
 
-          {/* Bottom section: search + CTA */}
-          <div style={{ maxWidth: '480px' }}>
-            <div style={{ position: 'relative' }}>
-              <input
-                ref={inputRef}
-                value={query}
-                onChange={(e) => handleInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') { setShowDropdown(false); handleAnalyze(); }
-                  if (e.key === 'Escape') setShowDropdown(false);
-                }}
-                onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
-                onFocus={() => query.trim().length > 0 && suggestions.length > 0 && setShowDropdown(true)}
-                placeholder="Search company or ticker — AAPL, Reliance, TSLA"
-                style={{
-                  width: '100%',
-                  height: '52px',
-                  background: '#0a0a0f',
-                  border: '1px solid #1a1a24',
-                  borderRadius: 0,
-                  padding: '0 48px 0 16px',
-                  color: '#e8e8f0',
-                  fontFamily: MONO,
-                  fontSize: '13px',
-                  letterSpacing: '0.02em',
-                  outline: 'none',
-                  boxSizing: 'border-box' as const,
-                  transition: 'border-color 150ms',
-                }}
-                onFocusCapture={(e) => { (e.target as HTMLInputElement).style.borderColor = '#00e5ff'; }}
-                onBlurCapture={(e)  => { (e.target as HTMLInputElement).style.borderColor = '#1a1a24'; }}
-              />
-              <span style={{
-                position: 'absolute',
-                right: '16px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#3a3a4a',
-                fontFamily: MONO,
-                fontSize: '16px',
-                pointerEvents: 'none',
-              }}>→</span>
-
-              {/* Autocomplete dropdown */}
-              {showDropdown && suggestions.length > 0 && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
-                  background: '#0a0a0f',
-                  border: '1px solid #1a1a24',
-                  borderTop: 'none',
-                  zIndex: 50,
-                  overflow: 'hidden',
-                }}>
-                  {suggestions.map((s, i) => (
-                    <button
-                      key={i}
-                      onMouseDown={() => handleSelect(s)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        width: '100%',
-                        padding: '10px 16px',
-                        background: 'transparent',
-                        border: 'none',
-                        borderBottom: i < suggestions.length - 1 ? '1px solid #111118' : 'none',
-                        cursor: 'pointer',
-                        textAlign: 'left' as const,
-                      }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#0d0d14'; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-                    >
-                      <span style={{
-                        fontFamily: MONO,
-                        fontSize: '11px',
-                        color: '#00e5ff',
-                        minWidth: '60px',
-                      }}>{s.ticker}</span>
-                      <span style={{
-                        fontFamily: BODY,
-                        fontSize: '13px',
-                        color: '#e8e8f0',
-                        flex: 1,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap' as const,
-                      }}>{s.name}</span>
-                      {s.exchange && (
-                        <span style={{
-                          fontFamily: MONO,
-                          fontSize: '10px',
-                          color: '#3a3a4a',
-                          background: '#111118',
-                          padding: '2px 6px',
-                        }}>{s.exchange}</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Timeframe selector — flush below input, no gap */}
-            <div style={{ display: 'flex' }}>
-              {TIMEFRAMES.map(({ value, label }, idx) => (
-                <button
-                  key={value}
-                  onClick={() => setTimeframe(value)}
-                  style={{
-                    flex: 1,
-                    height: '36px',
-                    background: timeframe === value ? '#0d0d14' : '#0a0a0f',
-                    border: '1px solid #1a1a24',
-                    borderTop: 'none',
-                    borderRight: idx < TIMEFRAMES.length - 1 ? 'none' : '1px solid #1a1a24',
-                    borderBottom: timeframe === value ? '2px solid #00e5ff' : '1px solid #1a1a24',
-                    borderRadius: 0,
-                    color: timeframe === value ? '#00e5ff' : '#3a3a4a',
-                    fontFamily: MONO,
-                    fontSize: '10px',
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase' as const,
-                    cursor: 'pointer',
-                    transition: 'color 150ms, background 150ms',
-                  }}
-                >{label}</button>
-              ))}
-            </div>
-
-            {/* Run Analysis button */}
-            <button
-              onClick={handleAnalyze}
+        {/* Search + CTA block */}
+        <div style={{ maxWidth: '540px' }}>
+          <div style={{ position: 'relative' }}>
+            <input
+              ref={inputRef}
+              value={query}
+              onChange={(e) => handleInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') { setShowDropdown(false); handleAnalyze(); }
+                if (e.key === 'Escape') setShowDropdown(false);
+              }}
+              onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+              onFocus={() => query.trim().length > 0 && suggestions.length > 0 && setShowDropdown(true)}
+              placeholder="Search company or ticker — AAPL, Reliance, TSLA"
               style={{
                 width: '100%',
-                height: '48px',
-                marginTop: '2px',
-                background: '#e8e8f0',
-                color: '#060608',
-                border: 'none',
+                height: '58px',
+                background: '#0a0a0f',
+                border: '1px solid #1c1c28',
                 borderRadius: 0,
-                fontFamily: MONO,
-                fontSize: '11px',
-                fontWeight: 700,
-                letterSpacing: '0.2em',
-                textTransform: 'uppercase' as const,
-                cursor: 'pointer',
-                transition: 'background 150ms',
-              }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#ffffff'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#e8e8f0'; }}
-            >RUN ANALYSIS</button>
-
-            <p style={{
-              fontFamily: MONO,
-              fontSize: '10px',
-              color: '#3a3a4a',
-              letterSpacing: '0.06em',
-              marginTop: '12px',
-            }}>
-              Quantitative analysis only. Not financial advice.
-            </p>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN — live signal board */}
-        <div style={{
-          borderLeft: '1px solid #111118',
-          background: '#0a0a0f',
-          padding: '40px 32px',
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
-            <span style={{
-              fontFamily: MONO,
-              fontSize: '10px',
-              color: '#3a3a4a',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase' as const,
-            }}>LIVE SIGNAL BOARD</span>
-            <span style={{
-              fontFamily: MONO,
-              fontSize: '9px',
-              color: '#3a3a4a',
-              background: '#111118',
-              padding: '2px 6px',
-            }}>30D</span>
-          </div>
-
-          {/* Signal rows */}
-          {SIGNAL_ROWS.map((row, i) => (
-            <div key={i} style={{
-              display: 'grid',
-              gridTemplateColumns: '64px 1fr 80px 56px',
-              gap: '12px',
-              alignItems: 'center',
-              padding: '11px 0',
-              borderBottom: '1px solid #0d0d14',
-            }}>
-              <span style={{
-                fontFamily: MONO,
-                fontSize: '12px',
+                padding: '0 48px 0 16px',
                 color: '#e8e8f0',
-                fontWeight: 600,
-                letterSpacing: '0.05em',
-              }}>{row.ticker}</span>
-
-              <div style={{ height: '3px', background: '#111118', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: row.barWidth, background: SIGNAL_COLORS[row.signal] ?? row.color }} />
-              </div>
-
-              <span style={{
-                fontFamily: MONO,
-                fontSize: '9px',
-                color: SIGNAL_COLORS[row.signal] ?? row.color,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase' as const,
-                textAlign: 'right' as const,
-              }}>{row.signal}</span>
-
-              <span style={{
                 fontFamily: MONO,
                 fontSize: '12px',
-                color: row.price.startsWith('-') ? '#ef4444' : '#00ff88',
-                textAlign: 'right' as const,
-              }}>{row.price}</span>
-            </div>
-          ))}
-
-          {/* Divergence scale */}
-          <div style={{ marginTop: '24px' }}>
-            <p style={{
-              fontFamily: MONO,
-              fontSize: '9px',
+                letterSpacing: '0.02em',
+                outline: 'none',
+                boxSizing: 'border-box' as const,
+                transition: 'border-color 150ms',
+              }}
+              onFocusCapture={(e) => { (e.target as HTMLInputElement).style.borderColor = '#00e5ff'; }}
+              onBlurCapture={(e)  => { (e.target as HTMLInputElement).style.borderColor = '#1c1c28'; }}
+            />
+            <span style={{
+              position: 'absolute',
+              right: '16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
               color: '#3a3a4a',
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase' as const,
-              marginBottom: '8px',
-            }}>DIVERGENCE SCALE</p>
+              fontFamily: MONO,
+              fontSize: '16px',
+              pointerEvents: 'none',
+            }}>→</span>
 
-            <div style={{ position: 'relative' }}>
-              <div style={{
-                height: '3px',
-                background: 'linear-gradient(90deg, #ef4444 0%, #1a1a24 50%, #00e5ff 100%)',
-              }} />
+            {/* Autocomplete dropdown */}
+            {showDropdown && suggestions.length > 0 && (
               <div style={{
                 position: 'absolute',
-                top: '-4px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '2px',
-                height: '11px',
-                background: '#e8e8f0',
-              }} />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
-              <span style={{ fontFamily: MONO, fontSize: '9px', color: '#ef4444' }}>−100 OVERCONF.</span>
-              <span style={{ fontFamily: MONO, fontSize: '9px', color: '#3a3a4a' }}>0 ALIGNED</span>
-              <span style={{ fontFamily: MONO, fontSize: '9px', color: '#00e5ff' }}>+100 HIDDEN</span>
-            </div>
+                top: '100%',
+                left: 0,
+                right: 0,
+                background: '#0a0a0f',
+                border: '1px solid #1c1c28',
+                borderTop: 'none',
+                zIndex: 50,
+                overflow: 'hidden',
+              }}>
+                {suggestions.map((s, i) => (
+                  <button
+                    key={i}
+                    onMouseDown={() => handleSelect(s)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      width: '100%',
+                      padding: '10px 16px',
+                      background: 'transparent',
+                      border: 'none',
+                      borderBottom: i < suggestions.length - 1 ? '1px solid #0f0f16' : 'none',
+                      cursor: 'pointer',
+                      textAlign: 'left' as const,
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#0d0d14'; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                  >
+                    <span style={{
+                      fontFamily: MONO,
+                      fontSize: '11px',
+                      color: '#00e5ff',
+                      minWidth: '60px',
+                    }}>{s.ticker}</span>
+                    <span style={{
+                      fontFamily: BODY,
+                      fontSize: '13px',
+                      color: '#e8e8f0',
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap' as const,
+                    }}>{s.name}</span>
+                    {s.exchange && (
+                      <span style={{
+                        fontFamily: MONO,
+                        fontSize: '10px',
+                        color: '#3a3a4a',
+                        background: '#111118',
+                        padding: '2px 6px',
+                      }}>{s.exchange}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+
+          {/* Timeframe selector — flush below input */}
+          <div style={{ display: 'flex' }}>
+            {TIMEFRAMES.map(({ value, label }, idx) => (
+              <button
+                key={value}
+                onClick={() => setTimeframe(value)}
+                style={{
+                  flex: 1,
+                  height: '42px',
+                  background: timeframe === value ? '#0d0d14' : '#0a0a0f',
+                  border: '1px solid #1c1c28',
+                  borderTop: 'none',
+                  borderRight: idx < TIMEFRAMES.length - 1 ? 'none' : '1px solid #1c1c28',
+                  borderBottom: timeframe === value ? '2px solid #00e5ff' : '1px solid #1c1c28',
+                  borderRadius: 0,
+                  color: timeframe === value ? '#00e5ff' : '#3a3a4a',
+                  fontFamily: MONO,
+                  fontSize: '10px',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase' as const,
+                  cursor: 'pointer',
+                  transition: 'color 150ms, background 150ms',
+                }}
+              >{label}</button>
+            ))}
+          </div>
+
+          {/* Run Analysis button */}
+          <button
+            onClick={handleAnalyze}
+            style={{
+              width: '100%',
+              height: '54px',
+              marginTop: '2px',
+              background: '#e8e8f0',
+              color: '#060608',
+              border: 'none',
+              borderRadius: 0,
+              fontFamily: MONO,
+              fontSize: '11px',
+              fontWeight: 700,
+              letterSpacing: '0.22em',
+              textTransform: 'uppercase' as const,
+              cursor: 'pointer',
+              transition: 'background 150ms',
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#ffffff'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#e8e8f0'; }}
+          >RUN ANALYSIS</button>
+
+          <p style={{
+            fontFamily: MONO,
+            fontSize: '10px',
+            color: '#3a3a4a',
+            letterSpacing: '0.06em',
+            marginTop: '16px',
+          }}>
+            Quantitative analysis only. Not financial advice.
+          </p>
         </div>
       </div>
 
       {/* ── 4. FIVE SIGNALS STRIP ──────────────────────────────────────────── */}
-      <div style={{ borderTop: '1px solid #111118' }}>
+      <div style={{ borderTop: '1px solid #0f0f16' }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -565,39 +427,40 @@ export default function LandingPage() {
             fontFamily: MONO,
             fontSize: '9px',
             color: '#3a3a4a',
-            letterSpacing: '0.2em',
+            letterSpacing: '0.24em',
             textTransform: 'uppercase' as const,
             whiteSpace: 'nowrap' as const,
           }}>FIVE SIGNALS</span>
-          <div style={{ flex: 1, height: '1px', background: '#111118' }} />
+          <div style={{ flex: 1, height: '1px', background: '#0f0f16' }} />
         </div>
 
         <div style={{ display: 'flex' }}>
           {SIGNALS.map((sig, i) => (
             <div key={i} style={{
               flex: 1,
-              padding: '28px 32px',
-              borderRight: i < SIGNALS.length - 1 ? '1px solid #111118' : 'none',
+              padding: '44px 36px',
+              borderRight: i < SIGNALS.length - 1 ? '1px solid #0f0f16' : 'none',
             }}>
               <div style={{
-                width: '24px',
-                height: '2px',
+                width: '28px',
+                height: '3px',
                 background: sig.color,
-                marginBottom: '16px',
+                marginBottom: '22px',
               }} />
               <p style={{
                 fontFamily: MONO,
                 fontSize: '11px',
                 color: sig.color,
                 fontWeight: 600,
-                letterSpacing: '0.06em',
-                marginBottom: '8px',
+                letterSpacing: '0.08em',
+                marginBottom: '12px',
               }}>{sig.name}</p>
               <p style={{
                 fontFamily: BODY,
-                fontSize: '12px',
-                color: '#6b6b80',
-                lineHeight: 1.6,
+                fontSize: '13px',
+                fontWeight: 300,
+                color: '#5a5a70',
+                lineHeight: 1.85,
               }}>{sig.desc}</p>
             </div>
           ))}
@@ -605,7 +468,7 @@ export default function LandingPage() {
       </div>
 
       {/* ── 5. HOW IT WORKS ────────────────────────────────────────────────── */}
-      <div style={{ borderTop: '1px solid #111118' }}>
+      <div style={{ borderTop: '1px solid #0f0f16' }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -617,40 +480,41 @@ export default function LandingPage() {
             fontFamily: MONO,
             fontSize: '9px',
             color: '#3a3a4a',
-            letterSpacing: '0.2em',
+            letterSpacing: '0.24em',
             textTransform: 'uppercase' as const,
             whiteSpace: 'nowrap' as const,
           }}>HOW IT WORKS</span>
-          <div style={{ flex: 1, height: '1px', background: '#111118' }} />
+          <div style={{ flex: 1, height: '1px', background: '#0f0f16' }} />
         </div>
 
         <div style={{ display: 'flex' }}>
           {HOW_IT_WORKS.map((step, i) => (
             <div key={i} style={{
               flex: 1,
-              padding: '40px 36px',
-              borderRight: i < HOW_IT_WORKS.length - 1 ? '1px solid #111118' : 'none',
+              padding: '48px 40px',
+              borderRight: i < HOW_IT_WORKS.length - 1 ? '1px solid #0f0f16' : 'none',
             }}>
               <p style={{
                 fontFamily: MONO,
                 fontSize: '10px',
-                color: '#3a3a4a',
-                letterSpacing: '0.1em',
-                marginBottom: '20px',
+                color: '#222230',
+                letterSpacing: '0.12em',
+                marginBottom: '28px',
               }}>{step.step}</p>
               <p style={{
                 fontFamily: SERIF,
-                fontSize: '18px',
+                fontSize: '21px',
                 color: '#e8e8f0',
                 lineHeight: 1.2,
-                marginBottom: '12px',
+                marginBottom: '16px',
                 fontWeight: 400,
               }}>{step.title}</p>
               <p style={{
                 fontFamily: BODY,
-                fontSize: '12px',
-                color: '#6b6b80',
-                lineHeight: 1.75,
+                fontSize: '13px',
+                fontWeight: 300,
+                color: '#5a5a70',
+                lineHeight: 1.85,
               }}>{step.desc}</p>
             </div>
           ))}
@@ -658,26 +522,26 @@ export default function LandingPage() {
       </div>
 
       {/* ── 6. STATS ROW ───────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', borderTop: '1px solid #111118' }}>
+      <div style={{ display: 'flex', borderTop: '1px solid #0f0f16' }}>
         {STATS.map((stat, i) => (
           <div key={i} style={{
             flex: 1,
-            padding: '32px 40px',
-            borderRight: i < STATS.length - 1 ? '1px solid #111118' : 'none',
+            padding: '44px 52px',
+            borderRight: i < STATS.length - 1 ? '1px solid #0f0f16' : 'none',
           }}>
             <p style={{
               fontFamily: MONO,
-              fontSize: '36px',
+              fontSize: '54px',
               color: stat.color,
-              fontWeight: 600,
+              fontWeight: 700,
               lineHeight: 1,
-              marginBottom: '8px',
+              marginBottom: '12px',
             }}>{stat.value}</p>
             <p style={{
               fontFamily: MONO,
-              fontSize: '9px',
+              fontSize: '10px',
               color: '#3a3a4a',
-              letterSpacing: '0.14em',
+              letterSpacing: '0.18em',
               textTransform: 'uppercase' as const,
             }}>{stat.label}</p>
           </div>
@@ -686,14 +550,14 @@ export default function LandingPage() {
 
       {/* ── 7. RECENT SEARCHES ─────────────────────────────────────────────── */}
       {recentSearches.length > 0 && (
-        <div style={{ borderTop: '1px solid #111118', padding: '24px 48px' }}>
+        <div style={{ borderTop: '1px solid #0f0f16', padding: '28px 52px 44px' }}>
           <p style={{
             fontFamily: MONO,
             fontSize: '9px',
             color: '#3a3a4a',
-            letterSpacing: '0.2em',
+            letterSpacing: '0.24em',
             textTransform: 'uppercase' as const,
-            marginBottom: '12px',
+            marginBottom: '16px',
           }}>RECENT</p>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const }}>
             {recentSearches.map((t) => (
@@ -702,12 +566,12 @@ export default function LandingPage() {
                 onClick={() => { setQuery(t); router.push(`/signal?ticker=${encodeURIComponent(t)}&timeframe=${timeframe}`); }}
                 style={{
                   background: 'transparent',
-                  border: '1px solid #1a1a24',
+                  border: '1px solid #1a1a26',
                   borderRadius: 0,
-                  padding: '5px 12px',
+                  padding: '7px 16px',
                   fontFamily: MONO,
                   fontSize: '11px',
-                  color: '#6b6b80',
+                  color: '#5a5a70',
                   cursor: 'pointer',
                   transition: 'border-color 150ms, color 150ms',
                 }}
@@ -716,8 +580,8 @@ export default function LandingPage() {
                   (e.currentTarget as HTMLButtonElement).style.color = '#00e5ff';
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#1a1a24';
-                  (e.currentTarget as HTMLButtonElement).style.color = '#6b6b80';
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#1a1a26';
+                  (e.currentTarget as HTMLButtonElement).style.color = '#5a5a70';
                 }}
               >{t}</button>
             ))}

@@ -1,22 +1,24 @@
 import type { Metadata } from 'next';
-import { DM_Serif_Display, DM_Mono, Outfit } from 'next/font/google';
+import { Playfair_Display, Space_Mono, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 
-const dmSerif = DM_Serif_Display({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-dm-serif',
-});
-
-const dmMono = DM_Mono({
+const playfairDisplay = Playfair_Display({
   subsets: ['latin'],
   weight: ['400', '500'],
-  variable: '--font-dm-mono',
+  style: ['normal', 'italic'],
+  variable: '--font-playfair',
 });
 
-const outfit = Outfit({
+const spaceMono = Space_Mono({
   subsets: ['latin'],
-  variable: '--font-outfit',
+  weight: ['400', '700'],
+  variable: '--font-space-mono',
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['300', '400', '500'],
+  variable: '--font-space-grotesk',
 });
 
 export const metadata: Metadata = {
@@ -26,8 +28,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${dmSerif.variable} ${dmMono.variable} ${outfit.variable}`}>
-      <body>
+    <html lang="en" className={`${playfairDisplay.variable} ${spaceMono.variable} ${spaceGrotesk.variable}`}>
+      <body style={{ fontFamily: 'var(--font-space-grotesk), system-ui, sans-serif' }}>
         {children}
       </body>
     </html>
