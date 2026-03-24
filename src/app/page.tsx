@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { SearchResult } from '@/types';
 
@@ -80,16 +80,8 @@ export default function LandingPage() {
   const [timeframe, setTimeframe]       = useState<7 | 30 | 90>(30);
   const [suggestions, setSuggestions]   = useState<SearchResult[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef    = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('markora_recent_searches');
-      if (stored) setRecentSearches(JSON.parse(stored));
-    } catch { /* ignore */ }
-  }, []);
 
   const fetchSuggestions = useCallback(async (value: string) => {
     if (value.trim().length < 1) { setSuggestions([]); setShowDropdown(false); return; }
@@ -116,12 +108,6 @@ export default function LandingPage() {
   const handleAnalyze = () => {
     const t = query.trim();
     if (!t) return;
-    try {
-      const prev    = JSON.parse(localStorage.getItem('markora_recent_searches') ?? '[]') as string[];
-      const updated = [t, ...prev.filter((x) => x.toLowerCase() !== t.toLowerCase())].slice(0, 5);
-      localStorage.setItem('markora_recent_searches', JSON.stringify(updated));
-      setRecentSearches(updated);
-    } catch { /* ignore */ }
     router.push(`/signal?ticker=${encodeURIComponent(t)}&timeframe=${timeframe}`);
   };
 
@@ -166,12 +152,12 @@ export default function LandingPage() {
                 fontSize: '10px',
                 textTransform: 'uppercase' as const,
                 letterSpacing: '0.18em',
-                color: '#3a3a4a',
+                color: '#3a3a58',
                 textDecoration: 'none',
                 transition: 'color 150ms',
               }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#00e5ff'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#3a3a4a'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#3a3a58'; }}
             >{link}</a>
           ))}
         </div>
@@ -193,13 +179,18 @@ export default function LandingPage() {
 
       {/* ── 3. HERO ────────────────────────────────────────────────────────── */}
       <div style={{
-        padding: '100px 52px 96px',
-        maxWidth: '860px',
+        minHeight: 'calc(100vh - 80px)',
+        display: 'flex',
+        flexDirection: 'column' as const,
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center' as const,
+        padding: '0 24px',
       }}>
         <p style={{
           fontFamily: MONO,
           fontSize: '10px',
-          color: '#3a3a4a',
+          color: '#3a3a55',
           textTransform: 'uppercase' as const,
           letterSpacing: '0.24em',
           marginBottom: '40px',
@@ -242,13 +233,13 @@ export default function LandingPage() {
           color: '#5a5a70',
           lineHeight: 1.8,
           maxWidth: '520px',
-          marginBottom: '56px',
+          margin: '0 auto 52px',
         }}>
           Markora quantifies the gap between what the crowd believes and what price confirms. Five signal types across 50+ global markets.
         </p>
 
         {/* Search + CTA block */}
-        <div style={{ maxWidth: '540px' }}>
+        <div style={{ width: '100%', maxWidth: '560px', margin: '0 auto' }}>
           <div style={{ position: 'relative' }}>
             <input
               ref={inputRef}
@@ -405,9 +396,10 @@ export default function LandingPage() {
           <p style={{
             fontFamily: MONO,
             fontSize: '10px',
-            color: '#3a3a4a',
+            color: '#2e2e45',
             letterSpacing: '0.06em',
             marginTop: '16px',
+            textAlign: 'center' as const,
           }}>
             Quantitative analysis only. Not financial advice.
           </p>
@@ -540,7 +532,7 @@ export default function LandingPage() {
             <p style={{
               fontFamily: MONO,
               fontSize: '10px',
-              color: '#3a3a4a',
+              color: '#2e2e45',
               letterSpacing: '0.18em',
               textTransform: 'uppercase' as const,
             }}>{stat.label}</p>
@@ -548,46 +540,6 @@ export default function LandingPage() {
         ))}
       </div>
 
-      {/* ── 7. RECENT SEARCHES ─────────────────────────────────────────────── */}
-      {recentSearches.length > 0 && (
-        <div style={{ borderTop: '1px solid #0f0f16', padding: '28px 52px 44px' }}>
-          <p style={{
-            fontFamily: MONO,
-            fontSize: '9px',
-            color: '#3a3a4a',
-            letterSpacing: '0.24em',
-            textTransform: 'uppercase' as const,
-            marginBottom: '16px',
-          }}>RECENT</p>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const }}>
-            {recentSearches.map((t) => (
-              <button
-                key={t}
-                onClick={() => { setQuery(t); router.push(`/signal?ticker=${encodeURIComponent(t)}&timeframe=${timeframe}`); }}
-                style={{
-                  background: 'transparent',
-                  border: '1px solid #1a1a26',
-                  borderRadius: 0,
-                  padding: '7px 16px',
-                  fontFamily: MONO,
-                  fontSize: '11px',
-                  color: '#5a5a70',
-                  cursor: 'pointer',
-                  transition: 'border-color 150ms, color 150ms',
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#00e5ff';
-                  (e.currentTarget as HTMLButtonElement).style.color = '#00e5ff';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#1a1a26';
-                  (e.currentTarget as HTMLButtonElement).style.color = '#5a5a70';
-                }}
-              >{t}</button>
-            ))}
-          </div>
-        </div>
-      )}
 
     </div>
   );
