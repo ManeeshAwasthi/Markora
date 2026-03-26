@@ -109,7 +109,7 @@ function DetailsContent() {
         </div>
         {/* Company name + price */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-          <span style={{ ...TYPE.SERIF, fontStyle: 'italic', fontSize: '18px', fontWeight: 800, color: C.TEXT }}>{meta.companyName}</span>
+          <span style={{ fontFamily: T.SERIF, fontStyle: 'italic', fontSize: '18px', fontWeight: 800, color: C.TEXT }}>{meta.companyName}</span>
           <span style={{ ...TYPE.DATA_MD, color: C.CYAN }}>{meta.currencySymbol}{meta.currentPrice.toLocaleString()}</span>
           <span style={{ ...TYPE.LABEL_SM, color: C.TEXT2, background: C.ELEVATED, border: `1px solid ${C.BORDER}`, padding: '3px 8px' }}>
             {meta.exchange}

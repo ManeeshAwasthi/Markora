@@ -1,2 +1,5 @@
 src/components/details/FundamentalsTab.tsx
 src/components/details/RiskProfileTab.tsx
+src/components/details/PeerComparisonTab.tsx
+src/components/details/PriceIntelligenceTab.tsx
+src/components/details/MomentumTab.tsx

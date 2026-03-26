@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 'use client';
 
 import React, { useState } from 'react';
@@ -199,7 +200,7 @@ export default function PeerComparisonTab({ data, meta, targetPriceChangePercent
       </button>
       {showLearn && (
         <div style={styles.collapsibleContent}>
-          Peer comparison (relative strength analysis) shows whether a stock&apos;s move is sector-driven or company-specific. If the whole sector is down but one stock is up, that stock shows unusual strength. P/E comparison across peers shows whether a stock trades at a premium or discount to competitors. Higher P/E = higher growth expectations.
+          Peer comparison (relative strength analysis) shows whether a stock{"'"}s move is sector-driven or company-specific. If the whole sector is down but one stock is up, that stock shows unusual strength. P/E comparison across peers shows whether a stock trades at a premium or discount to competitors. Higher P/E = higher growth expectations.
         </div>
       )}
 

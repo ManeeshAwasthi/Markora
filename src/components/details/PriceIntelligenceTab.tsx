@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 'use client';
 
 import { useState } from 'react';
@@ -245,7 +246,7 @@ export default function PriceIntelligenceTab({ data, meta }: PriceIntelligenceTa
 
         <div style={styles.insightBox}>
           <p style={styles.insightText}>
-            {meta.companyName}&apos;s price is{' '}
+            {meta.companyName}{"'"}s price is{' '}
             <span style={{ color: data.ma200Label === 'Above' ? C.GREEN : C.RED }}>{data.ma200Label.toLowerCase()}</span>{' '}
             the 200-day MA by {Math.abs(data.ma200PercentDiff)}%.{' '}
             {data.ma200Label === 'Above'
