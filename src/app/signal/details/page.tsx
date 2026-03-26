@@ -147,35 +147,86 @@ function DetailsContent() {
 
         {/* ── SIDEBAR ── */}
         <aside style={{
-          width:        '220px',
-          flexShrink:    0,
-          position:     'fixed',
-          top:           '48px',
-          left:           0,
-          height:        'calc(100vh - 48px)',
-          background:    C.BG,
-          borderRight:  `1px solid ${C.BORDER_FAINT}`,
-          display:       'flex',
+          width: '220px',
+          flexShrink: 0,
+          position: 'fixed',
+          top: '48px',
+          left: 0,
+          height: 'calc(100vh - 48px)',
+          background: C.BG,
+          borderRight: `1px solid ${C.BORDER_FAINT}`,
+          display: 'flex',
           flexDirection: 'column',
-          paddingTop:    '24px',
-          overflowY:     'auto',
-          zIndex:         40,
+          paddingTop: '24px',
+          overflowY: 'auto',
+          zIndex: 40,
         }}>
-          <div style={{ padding: '0 24px', marginBottom: '24px' }}>
-            <p style={{ ...TYPE.LABEL_SM, color: C.GREEN,  letterSpacing: '0.3em', marginBottom: '4px' }}>TERMINAL_V1.04</p>
-            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3,  letterSpacing: '0.1em' }}>DEEP_ANALYSIS</p>
+          {/* Title block */}
+          <div style={{ padding: '0 24px', marginBottom: '20px' }}>
+            <p style={{
+              fontFamily: T.MONO,
+              fontSize: '10px',
+              color: C.GREEN,
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              marginBottom: '4px',
+            }}>TERMINAL_V1.04</p>
+            <p style={{
+              fontFamily: T.MONO,
+              fontSize: '9px',
+              color: C.TEXT3,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+            }}>DEEP_ANALYSIS</p>
           </div>
-          <div style={{ padding: '0 24px', marginBottom: '24px' }}>
-            <span style={{ fontFamily: T.MONO, fontSize: '9px', color: C.CYAN, background: C.CYAN + '14', padding: '4px 10px', letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>VIEW: DEEP_ANALYSIS</span>
+
+          {/* Page indicator chip — CYAN for details page */}
+          <div style={{ padding: '0 24px', marginBottom: '28px' }}>
+            <span style={{
+              fontFamily: T.MONO,
+              fontSize: '9px',
+              color: C.CYAN,
+              background: C.CYAN + '18',
+              border: `1px solid ${C.CYAN}30`,
+              padding: '3px 10px',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+            }}>VIEW: DEEP_ANALYSIS</span>
           </div>
-          <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, letterSpacing: '0.3em', padding: '0 24px', marginBottom: '16px' }}>SECTIONS</p>
-          {TABS.map(tab => (
+
+          {/* Sections label */}
+          <p style={{
+            fontFamily: T.MONO,
+            fontSize: '9px',
+            color: C.TEXT3,
+            letterSpacing: '0.3em',
+            textTransform: 'uppercase',
+            padding: '0 24px',
+            marginBottom: '16px',
+          }}>SECTIONS</p>
+
+          {/* Nav items — all 5 always shown, active one highlighted */}
+          {[
+            { slug: 'price-intelligence' as TabSlug, label: 'Price Intelligence' },
+            { slug: 'fundamentals' as TabSlug,       label: 'Fundamentals'       },
+            { slug: 'momentum' as TabSlug,           label: 'Momentum & Flow'    },
+            { slug: 'risk-profile' as TabSlug,       label: 'Risk Profile'       },
+            { slug: 'peer-comparison' as TabSlug,    label: 'Peer Comparison'    },
+          ].map(tab => (
             <button
               key={tab.slug}
               onClick={() => switchTab(tab.slug)}
               style={styles.navItem(activeTab === tab.slug)}
-              onMouseEnter={e => { if (activeTab !== tab.slug) (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
-              onMouseLeave={e => { if (activeTab !== tab.slug) (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
+              onMouseEnter={e => {
+                if (activeTab !== tab.slug) {
+                  (e.currentTarget as HTMLElement).style.color = C.TEXT;
+                }
+              }}
+              onMouseLeave={e => {
+                if (activeTab !== tab.slug) {
+                  (e.currentTarget as HTMLElement).style.color = C.TEXT2;
+                }
+              }}
             >
               {tab.label.toUpperCase()}
             </button>
@@ -193,7 +244,7 @@ function DetailsContent() {
           <header style={{
             display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
             padding: '40px 40px 32px', borderBottom: `1px solid ${C.BORDER_FAINT}`,
-            flexWrap: 'wrap', gap: '24px',
+            flexWrap: 'wrap', gap: '24px', background: C.BG,
           }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '24px', flexWrap: 'wrap' }}>
               <h1 style={{ fontFamily: T.SERIF, fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 2.8rem)', fontWeight: 800, color: C.TEXT, margin: 0, lineHeight: 1.1 }}>
@@ -219,7 +270,6 @@ function DetailsContent() {
           {/* ── CONTROLS BAR ── */}
           <section style={{
             border: `1px solid ${C.BORDER}`, padding: '6px', margin: '0 40px',
-            marginTop: '32px', marginBottom: '0',
             display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap',
             background: C.BG,
           }}>

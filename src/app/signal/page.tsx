@@ -362,44 +362,159 @@ function SignalContent() {
       {/* ── FIXED LEFT SIDEBAR ───────────────────────────────────────────── */}
       {data && (
         <aside style={{
-          position: 'fixed', left: 0, top: '48px',
+          position: 'fixed',
+          left: 0,
+          top: '48px',
           height: 'calc(100vh - 48px - 32px)',
           width: '220px',
+          flexShrink: 0,
           background: C.SURFACE,
           borderRight: `1px solid ${C.BORDER_FAINT}`,
-          display: 'flex', flexDirection: 'column',
+          display: 'flex',
+          flexDirection: 'column',
           paddingTop: '24px',
           overflowY: 'auto',
           zIndex: 40,
         }}>
-          <div style={{ padding: '0 24px', marginBottom: '24px' }}>
-            <p style={{ fontFamily: MONO, fontSize: '10px', color: C.GREEN, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '4px' }}>TERMINAL_V1.04</p>
-            <p style={{ fontFamily: MONO, fontSize: '9px', color: C.TEXT3, textTransform: 'uppercase', letterSpacing: '0.1em' }}>SIGNAL_BOARD</p>
+          {/* Title block */}
+          <div style={{ padding: '0 24px', marginBottom: '20px' }}>
+            <p style={{
+              fontFamily: T.MONO,
+              fontSize: '10px',
+              color: C.GREEN,
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              marginBottom: '4px',
+            }}>TERMINAL_V1.04</p>
+            <p style={{
+              fontFamily: T.MONO,
+              fontSize: '9px',
+              color: C.TEXT3,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+            }}>SIGNAL_BOARD</p>
           </div>
-          <div style={{ padding: '0 24px', marginBottom: '24px' }}>
-            <span style={{ fontFamily: MONO, fontSize: '9px', color: C.GREEN, background: C.GREEN + '14', padding: '4px 10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>VIEW: SIGNAL_BOARD</span>
+
+          {/* Page indicator chip */}
+          <div style={{ padding: '0 24px', marginBottom: '28px' }}>
+            <span style={{
+              fontFamily: T.MONO,
+              fontSize: '9px',
+              color: C.GREEN,
+              background: C.GREEN + '18',
+              border: `1px solid ${C.GREEN}30`,
+              padding: '3px 10px',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+            }}>VIEW: SIGNAL_BOARD</span>
           </div>
-          <p style={{ fontFamily: MONO, fontSize: '9px', color: C.TEXT3, letterSpacing: '0.3em', textTransform: 'uppercase', padding: '0 24px', marginBottom: '16px' }}>SECTIONS</p>
-          {NAV_SECTIONS.slice(0, 4).map(sec => (
-            <a
-              key={sec.id}
-              href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${selectedTimeframe}&tab=${sec.id}`}
-              style={DT.navItem(false)}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
-            >
-              {sec.label}
-            </a>
-          ))}
+
+          {/* Sections label */}
+          <p style={{
+            fontFamily: T.MONO,
+            fontSize: '9px',
+            color: C.TEXT3,
+            letterSpacing: '0.3em',
+            textTransform: 'uppercase',
+            padding: '0 24px',
+            marginBottom: '16px',
+          }}>SECTIONS</p>
+
+          {/* Price Intelligence — always show when data exists */}
+          <a
+            href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=price-intelligence`}
+            style={{
+              display: 'block',
+              padding: '14px 24px',
+              fontFamily: T.MONO,
+              fontSize: '10px',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              color: C.TEXT2,
+              background: 'transparent',
+              borderLeft: '3px solid transparent',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
+          >Price Intelligence</a>
+
+          {/* Fundamentals */}
+          <a
+            href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=fundamentals`}
+            style={{
+              display: 'block',
+              padding: '14px 24px',
+              fontFamily: T.MONO,
+              fontSize: '10px',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              color: C.TEXT2,
+              background: 'transparent',
+              borderLeft: '3px solid transparent',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
+          >Fundamentals</a>
+
+          {/* Momentum & Flow */}
+          <a
+            href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=momentum`}
+            style={{
+              display: 'block',
+              padding: '14px 24px',
+              fontFamily: T.MONO,
+              fontSize: '10px',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              color: C.TEXT2,
+              background: 'transparent',
+              borderLeft: '3px solid transparent',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
+          >Momentum & Flow</a>
+
+          {/* Risk Profile */}
+          <a
+            href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=risk-profile`}
+            style={{
+              display: 'block',
+              padding: '14px 24px',
+              fontFamily: T.MONO,
+              fontSize: '10px',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              color: C.TEXT2,
+              background: 'transparent',
+              borderLeft: '3px solid transparent',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
+          >Risk Profile</a>
+
+          {/* Peer Comparison — only when peer data exists */}
           {data.peerComparison?.peers?.length > 0 && (
             <a
-              href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${selectedTimeframe}&tab=peer-comparison`}
-              style={DT.navItem(false)}
+              href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=peer-comparison`}
+              style={{
+                display: 'block',
+                padding: '14px 24px',
+                fontFamily: T.MONO,
+                fontSize: '10px',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                textDecoration: 'none',
+                color: C.TEXT2,
+                background: 'transparent',
+                borderLeft: '3px solid transparent',
+              }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
-            >
-              Peer Comparison
-            </a>
+            >Peer Comparison</a>
           )}
         </aside>
       )}
