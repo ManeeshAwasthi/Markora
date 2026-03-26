@@ -51,8 +51,8 @@ export default function RiskProfileTab({ data, meta }: RiskProfileTabProps) {
         <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '12px' }}>
           RISK ASSESSMENT // EQUITY // {meta.companyName.toUpperCase()}
         </p>
-        <h2 style={{ ...TYPE.DISPLAY_LG, fontStyle: 'italic', color: C.TEXT, marginBottom: '4px' }}>
-          {meta.companyName}
+        <h2 style={{ ...TYPE.DISPLAY_MD, color: C.TEXT, marginBottom: '20px' }}>
+        Risk analysis for {meta.companyName}
         </h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
           <p style={{ ...TYPE.LABEL_SM, color: C.GREEN }}>STATUS: ANALYSIS_LIVE</p>

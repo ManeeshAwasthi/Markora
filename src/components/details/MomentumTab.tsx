@@ -41,11 +41,11 @@ export default function MomentumTab({ data, meta }: MomentumTabProps) {
       {/* ── PAGE HEADER ── */}
       <div style={{ marginBottom: '40px' }}>
         <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '12px' }}>
-          MOMENTUM &amp; FLOW // {meta.companyName.toUpperCase()}
+          MOMENTUM and FLOW // {meta.companyName.toUpperCase()}
         </p>
-        <h2 style={{ ...TYPE.DISPLAY_LG, color: C.TEXT, marginBottom: '16px' }}>
-          Momentum &amp; Flow
-        </h2>
+         <h2 style={{ ...TYPE.DISPLAY_MD, color: C.TEXT, marginBottom: '20px' }}>
+        Momentum and flow 
+      </h2>
         {/* Summary insight */}
         <div style={styles.insightBox}>
           <p style={styles.insightLabel}>Summary Insight</p>
