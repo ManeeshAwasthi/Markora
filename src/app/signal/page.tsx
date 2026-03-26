@@ -321,8 +321,6 @@ function SignalContent() {
     { id: 'peer-comparison', label: 'Peer Comparison' },
   ];
 
-  const [activeSection, setActiveSection] = useState('price-intelligence');
-
   if (!rawTicker) {
     return (
       <>
@@ -374,34 +372,35 @@ function SignalContent() {
           overflowY: 'auto',
           zIndex: 40,
         }}>
-          <div style={{ padding: '0 24px', marginBottom: '40px' }}>
+          <div style={{ padding: '0 24px', marginBottom: '24px' }}>
             <p style={{ fontFamily: MONO, fontSize: '10px', color: C.GREEN, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '4px' }}>TERMINAL_V1.04</p>
             <p style={{ fontFamily: MONO, fontSize: '9px', color: C.TEXT3, textTransform: 'uppercase', letterSpacing: '0.1em' }}>SIGNAL_BOARD</p>
           </div>
-          <p style={{ fontFamily: MONO, fontSize: '9px', color: C.TEXT3, letterSpacing: '0.3em', textTransform: 'uppercase', padding: '0 24px', marginBottom: '16px' }}>Navigation</p>
-          {NAV_SECTIONS.map(sec => (
+          <div style={{ padding: '0 24px', marginBottom: '24px' }}>
+            <span style={{ fontFamily: MONO, fontSize: '9px', color: C.GREEN, background: C.GREEN + '14', padding: '4px 10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>VIEW: SIGNAL_BOARD</span>
+          </div>
+          <p style={{ fontFamily: MONO, fontSize: '9px', color: C.TEXT3, letterSpacing: '0.3em', textTransform: 'uppercase', padding: '0 24px', marginBottom: '16px' }}>SECTIONS</p>
+          {NAV_SECTIONS.slice(0, 4).map(sec => (
             <a
               key={sec.id}
-              href={`#${sec.id}`}
-              onClick={() => setActiveSection(sec.id)}
-              style={{
-                display: 'block',
-                padding: '14px 24px',
-                fontFamily: MONO,
-                fontSize: '10px',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                textDecoration: 'none',
-                color: activeSection === sec.id ? C.CYAN : C.TEXT2,
-                background: activeSection === sec.id ? C.CYAN + '0d' : 'transparent',
-                borderLeft: activeSection === sec.id ? `3px solid ${C.CYAN}` : '3px solid transparent',
-              }}
-              onMouseEnter={e => { if (activeSection !== sec.id) (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
-              onMouseLeave={e => { if (activeSection !== sec.id) (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
+              href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${selectedTimeframe}&tab=${sec.id}`}
+              style={DT.navItem(false)}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
             >
               {sec.label}
             </a>
           ))}
+          {data.peerComparison?.peers?.length > 0 && (
+            <a
+              href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${selectedTimeframe}&tab=peer-comparison`}
+              style={DT.navItem(false)}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
+            >
+              Peer Comparison
+            </a>
+          )}
         </aside>
       )}
 

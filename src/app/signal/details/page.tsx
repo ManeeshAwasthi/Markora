@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PriceIntelligenceTab from '@/components/details/PriceIntelligenceTab';
 import FundamentalsTab      from '@/components/details/FundamentalsTab';
@@ -8,6 +8,7 @@ import MomentumTab          from '@/components/details/MomentumTab';
 import RiskProfileTab       from '@/components/details/RiskProfileTab';
 import PeerComparisonTab    from '@/components/details/PeerComparisonTab';
 import { C, T, TYPE, styles } from '@/lib/designTokens';
+import { SearchResult } from '@/types';
 
 type TabSlug = 'price-intelligence' | 'fundamentals' | 'momentum' | 'risk-profile' | 'peer-comparison';
 
@@ -40,6 +41,11 @@ function DetailsContent() {
   const [data,      setData]      = useState<any>(null);
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState<string | null>(null);
+  const [inputTicker,       setInputTicker]       = useState(company);
+  const [selectedTimeframe, setSelectedTimeframe] = useState<7 | 30 | 90>(timeframe as 7 | 30 | 90);
+  const [suggestions,       setSuggestions]       = useState<SearchResult[]>([]);
+  const [showDropdown,      setShowDropdown]       = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!company) return;
@@ -63,6 +69,28 @@ function DetailsContent() {
     const params = new URLSearchParams(searchParams.toString());
     params.set('tab', slug);
     router.replace(`/signal/details?${params.toString()}`);
+  };
+
+  const fetchSuggestions = useCallback(async (value: string) => {
+    if (value.trim().length < 1) {
+      setSuggestions([]);
+      setShowDropdown(false);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(value)}`);
+      const results: SearchResult[] = await res.json();
+      setSuggestions(results);
+      setShowDropdown(results.length > 0);
+    } catch {
+      setSuggestions([]);
+    }
+  }, []);
+
+  const handleAnalyze = () => {
+    const t = inputTicker.trim();
+    if (!t) return;
+    router.push(`/signal?ticker=${encodeURIComponent(t)}&timeframe=${selectedTimeframe}`);
   };
 
   if (loading) return <Spinner />;
@@ -107,14 +135,6 @@ function DetailsContent() {
             onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = C.TEXT2)}
           >← SIGNAL BOARD</a>
         </div>
-        {/* Company name + price */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-          <span style={{ fontFamily: T.SERIF, fontStyle: 'italic', fontSize: '18px', fontWeight: 800, color: C.TEXT }}>{meta.companyName}</span>
-          <span style={{ ...TYPE.DATA_MD, color: C.CYAN }}>{meta.currencySymbol}{meta.currentPrice.toLocaleString()}</span>
-          <span style={{ ...TYPE.LABEL_SM, color: C.TEXT2, background: C.ELEVATED, border: `1px solid ${C.BORDER}`, padding: '3px 8px' }}>
-            {meta.exchange}
-          </span>
-        </div>
         {/* Live indicator */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: C.GREEN, animation: 'pulse 2s infinite' }} />
@@ -141,9 +161,12 @@ function DetailsContent() {
           overflowY:     'auto',
           zIndex:         40,
         }}>
-          <div style={{ padding: '0 24px', marginBottom: '40px' }}>
+          <div style={{ padding: '0 24px', marginBottom: '24px' }}>
             <p style={{ ...TYPE.LABEL_SM, color: C.GREEN,  letterSpacing: '0.3em', marginBottom: '4px' }}>TERMINAL_V1.04</p>
             <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3,  letterSpacing: '0.1em' }}>DEEP_ANALYSIS</p>
+          </div>
+          <div style={{ padding: '0 24px', marginBottom: '24px' }}>
+            <span style={{ fontFamily: T.MONO, fontSize: '9px', color: C.CYAN, background: C.CYAN + '14', padding: '4px 10px', letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>VIEW: DEEP_ANALYSIS</span>
           </div>
           <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, letterSpacing: '0.3em', padding: '0 24px', marginBottom: '16px' }}>SECTIONS</p>
           {TABS.map(tab => (
@@ -166,22 +189,130 @@ function DetailsContent() {
           background:   C.BG,
           minHeight:    'calc(100vh - 48px)',
         }}>
-          {/* Page hero header */}
-          <div style={{
-            background:    C.SURFACE,
-            borderBottom: `1px solid ${C.BORDER_FAINT}`,
-            padding:       '32px 40px',
+          {/* ── HERO HEADER (Zone 3) ── */}
+          <header style={{
+            display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+            padding: '40px 40px 32px', borderBottom: `1px solid ${C.BORDER_FAINT}`,
+            flexWrap: 'wrap', gap: '24px',
           }}>
-            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '8px' }}>
-              DEEP ANALYSIS // {TABS.find(t => t.slug === activeTab)?.label.toUpperCase()} · {timeframe}D
-            </p>
-            <h1 style={{ ...TYPE.DISPLAY_LG, fontStyle: 'italic', color: C.TEXT, margin: 0 }}>
-              {meta.companyName}
-            </h1>
-          </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '24px', flexWrap: 'wrap' }}>
+              <h1 style={{ fontFamily: T.SERIF, fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 2.8rem)', fontWeight: 800, color: C.TEXT, margin: 0, lineHeight: 1.1 }}>
+                {meta.companyName}
+              </h1>
+              <span style={{ fontFamily: T.MONO, fontSize: '1.6rem', fontWeight: 700, color: C.CYAN }}>
+                {meta.currencySymbol}{meta.currentPrice.toLocaleString()}
+              </span>
+              <span style={{ background: C.ELEVATED, border: `1px solid ${C.BORDER}`, fontFamily: T.MONO, fontSize: '9px', color: C.TEXT2, padding: '3px 8px' }}>
+                {meta.exchange}
+              </span>
+            </div>
+            <a
+              href="/"
+              style={{ color: C.TEXT2, fontFamily: T.MONO, fontSize: '10px', textDecoration: 'none', border: `1px solid ${C.BORDER}`, padding: '8px 16px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.TEXT; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.TEXT2; }}
+            >
+              ← Home
+            </a>
+          </header>
+
+          {/* ── CONTROLS BAR ── */}
+          <section style={{
+            border: `1px solid ${C.BORDER}`, padding: '6px', margin: '0 40px',
+            marginTop: '32px', marginBottom: '0',
+            display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap',
+            background: C.BG,
+          }}>
+            <div style={{ position: 'relative', width: '280px' }}>
+              <input
+                type="text"
+                value={inputTicker}
+                onChange={e => {
+                  const val = e.target.value;
+                  setInputTicker(val);
+                  if (debounceRef.current) clearTimeout(debounceRef.current);
+                  debounceRef.current = setTimeout(() => fetchSuggestions(val), 280);
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') { setShowDropdown(false); handleAnalyze(); }
+                  if (e.key === 'Escape') setShowDropdown(false);
+                }}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+                onFocus={() => inputTicker.trim().length > 0 && suggestions.length > 0 && setShowDropdown(true)}
+                placeholder="SEARCH EQUITY TICKER..."
+                style={{
+                  width: '100%', background: C.SURFACE, border: `1px solid ${C.BORDER}`,
+                  color: C.TEXT, fontFamily: T.MONO, fontSize: '10px', height: '40px',
+                  padding: '0 16px', outline: 'none', letterSpacing: '0.1em',
+                  boxSizing: 'border-box' as const,
+                }}
+                onFocusCapture={e => { (e.currentTarget as HTMLInputElement).style.borderColor = C.CYAN; }}
+                onBlurCapture={e => { (e.currentTarget as HTMLInputElement).style.borderColor = C.BORDER; }}
+              />
+              {showDropdown && suggestions.length > 0 && (
+                <div style={{
+                  position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
+                  background: C.SURFACE, border: `1px solid ${C.BORDER}`,
+                  overflow: 'hidden', zIndex: 50,
+                }}>
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      onMouseDown={() => { setInputTicker(s.name); setShowDropdown(false); }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '10px',
+                        width: '100%', padding: '10px 16px',
+                        background: 'transparent', border: 'none',
+                        borderBottom: i < suggestions.length - 1 ? `1px solid ${C.BORDER_FAINT}` : 'none',
+                        cursor: 'pointer', textAlign: 'left',
+                      }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = C.ELEVATED; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                    >
+                      <span style={{ fontFamily: T.MONO, fontSize: '11px', color: C.CYAN, minWidth: '55px' }}>{s.ticker}</span>
+                      <span style={{ color: C.TEXT, fontSize: '12px', fontFamily: T.BODY, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
+                      {s.exchange && (
+                        <span style={{ fontFamily: T.MONO, fontSize: '10px', color: C.TEXT2, background: C.ELEVATED, padding: '2px 6px' }}>{s.exchange}</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', background: C.SURFACE, padding: '2px' }}>
+              {([7, 30, 90] as const).map(tf => (
+                <button
+                  key={tf}
+                  onClick={() => setSelectedTimeframe(tf)}
+                  style={{
+                    padding: '6px 20px', fontFamily: T.MONO, fontSize: '10px',
+                    letterSpacing: '0.1em', cursor: 'pointer', border: 'none',
+                    background: selectedTimeframe === tf ? C.CYAN : 'transparent',
+                    color: selectedTimeframe === tf ? C.BG : C.TEXT2,
+                  }}
+                >
+                  {tf}D
+                </button>
+              ))}
+            </div>
+            <div style={{ width: '1px', height: '28px', background: C.BORDER, margin: '0 4px' }} />
+            <button
+              onClick={handleAnalyze}
+              style={{
+                marginLeft: 'auto', padding: '10px 40px', background: C.SURFACE,
+                color: C.TEXT, fontFamily: T.MONO, fontSize: '11px', fontWeight: 700,
+                letterSpacing: '0.2em', textTransform: 'uppercase',
+                border: `1px solid ${C.BORDER}`, cursor: 'pointer',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = C.CYAN; (e.currentTarget as HTMLButtonElement).style.color = C.CYAN; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = C.BORDER; (e.currentTarget as HTMLButtonElement).style.color = C.TEXT; }}
+            >
+              ANALYZE
+            </button>
+          </section>
 
           {/* Scrollable tab content */}
-          <div style={{ padding: '40px 40px 80px', maxWidth: '1000px' }}>
+          <div style={{ padding: '40px 40px 80px' }}>
             {activeTab === 'price-intelligence' && (
               <PriceIntelligenceTab
                 data={priceIntelligence}
