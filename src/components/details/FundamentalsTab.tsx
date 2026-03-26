@@ -299,7 +299,7 @@ export default function FundamentalsTab({ data, meta }: FundamentalsTabProps) {
           </button>
           {showDivLearn && (
             <div style={styles.collapsibleContent}>
-              Dividend yield = annual dividend ÷ current price. Rising yield can mean higher dividend (good) or falling stock price (bad — the "yield trap"). Payout ratio above 80% is risky. Dividend Aristocrats (consistent growers) are quality income investments.
+              Dividend yield = annual dividend ÷ current price. Rising yield can mean higher dividend (good) or falling stock price (bad — the &quot;yield trap&quot;). Payout ratio above 80% is risky. Dividend Aristocrats (consistent growers) are quality income investments.
             </div>
           )}
         </div>

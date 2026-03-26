@@ -215,7 +215,7 @@ export default function RiskProfileTab({ data, meta }: RiskProfileTabProps) {
         </button>
         {showDrawLearn && (
           <div style={styles.collapsibleContent}>
-            Drawdown measures decline from a peak to a subsequent trough. Maximum drawdown answers: "If I bought at the worst time, how much would I have lost?" A key metric for comparing risk profiles — two stocks with similar returns can have very different drawdown characteristics.
+            Drawdown measures decline from a peak to a subsequent trough. Maximum drawdown answers: &quot;If I bought at the worst time, how much would I have lost?&quot; A key metric for comparing risk profiles — two stocks with similar returns can have very different drawdown characteristics.
           </div>
         )}
       </div>
@@ -285,7 +285,7 @@ export default function RiskProfileTab({ data, meta }: RiskProfileTabProps) {
         </button>
         {showSharpeLearn && (
           <div style={styles.collapsibleContent}>
-            Sharpe Ratio = (Return − Risk-Free Rate) / Standard Deviation. Answers: "Am I compensated for the risk I'm taking?" Above 1 = good, above 2 = excellent. Use it to compare investments — higher Sharpe means more return per unit of risk.
+            Sharpe Ratio = (Return − Risk-Free Rate) / Standard Deviation. Answers: &quot;Am I compensated for the risk I&apos;m taking?&quot; Above 1 = good, above 2 = excellent. Use it to compare investments — higher Sharpe means more return per unit of risk.
           </div>
         )}
       </div>
