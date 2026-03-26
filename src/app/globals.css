@@ -1,40 +1,38 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  background: #060608;
-  color: #e8e8f0;
-  font-family: system-ui, sans-serif;
+:root {
+  --bg:           #020204;
+  --surface:      #07080d;
+  --elevated:     #0c0d14;
+  --border:       #1c1c26;
+  --border-faint: #0f1118;
+  --text:         #e2e2ec;
+  --text2:        #5a5a75;
+  --text3:        #2a2a3a;
+  --cyan:         #00e5ff;
+  --green:        #00ff88;
+  --red:          #ef4444;
+  --orange:       #f97316;
+  --violet:       #7c3aed;
+  --gold:         #fbbf24;
+}
+
+html, body {
+  background: #020204;
+  color: #e2e2ec;
+  -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* Ticker tape scroll */
-@keyframes tickerScroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #07080d; }
+::-webkit-scrollbar-thumb { background: #1c1c26; }
 
-/* Spinner */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Nav live dot */
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
-}
-
-/* Hero headline fade-in */
-@keyframes heroFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* Metric card stagger entrance */
-@keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Input placeholder */
 input::placeholder { color: #2a2a3a; }
+
+@keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+@keyframes spin          { to { transform: rotate(360deg); } }
+@keyframes pulse         { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@keyframes heroFadeIn    { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeSlideUp   { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }

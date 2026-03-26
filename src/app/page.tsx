@@ -3,6 +3,11 @@
 import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { SearchResult } from '@/types';
+import { C, T } from '@/lib/designTokens';
+
+const MONO  = T.MONO;
+const SERIF = T.SERIF;
+const BODY  = T.BODY;
 
 const TIMEFRAMES = [
   { value: 7,  label: '7D · WEEK'    },
@@ -11,22 +16,22 @@ const TIMEFRAMES = [
 ] as const;
 
 const TICKER_ITEMS = [
-  { ticker: 'AAPL',        signal: 'Aligned',         color: '#00ff88', price: '+1.2%' },
-  { ticker: 'TSLA',        signal: 'Mild Optimism',   color: '#f97316', price: '+3.4%' },
-  { ticker: 'MSFT',        signal: 'Overconfidence',  color: '#ef4444', price: '-0.8%' },
-  { ticker: 'NVDA',        signal: 'Hidden Strength', color: '#00e5ff', price: '+5.1%' },
-  { ticker: 'META',        signal: 'Aligned',         color: '#00ff88', price: '+0.6%' },
-  { ticker: 'AMZN',        signal: 'Mild Pessimism',  color: '#f97316', price: '-1.9%' },
-  { ticker: 'RELIANCE.NS', signal: 'Hidden Strength', color: '#00e5ff', price: '+2.3%' },
-  { ticker: 'GOOG',        signal: 'Aligned',         color: '#00ff88', price: '+0.9%' },
+  { ticker: 'AAPL',        signal: 'Aligned',         color: C.GREEN,  price: '+1.2%' },
+  { ticker: 'TSLA',        signal: 'Mild Optimism',   color: C.ORANGE, price: '+3.4%' },
+  { ticker: 'MSFT',        signal: 'Overconfidence',  color: C.RED,    price: '-0.8%' },
+  { ticker: 'NVDA',        signal: 'Hidden Strength', color: C.CYAN,   price: '+5.1%' },
+  { ticker: 'META',        signal: 'Aligned',         color: C.GREEN,  price: '+0.6%' },
+  { ticker: 'AMZN',        signal: 'Mild Pessimism',  color: C.ORANGE, price: '-1.9%' },
+  { ticker: 'RELIANCE.NS', signal: 'Hidden Strength', color: C.CYAN,   price: '+2.3%' },
+  { ticker: 'GOOG',        signal: 'Aligned',         color: C.GREEN,  price: '+0.9%' },
 ];
 
 const SIGNALS = [
-  { name: 'Overconfidence', color: '#ef4444', desc: 'Crowd bullish. Price disagrees. Pullback risk elevated.'         },
-  { name: 'Mild Optimism',  color: '#f97316', desc: 'Sentiment slightly ahead of price. Watch momentum.'             },
-  { name: 'Aligned',        color: '#00ff88', desc: 'Sentiment and price in sync. No divergence edge.'               },
-  { name: 'Mild Pessimism', color: '#f97316', desc: 'Price outrunning bearish crowd. Monitor for reversal.'          },
-  { name: 'Hidden Strength',color: '#00e5ff', desc: 'Price rising despite bearish narrative. Rare. Actionable.'      },
+  { name: 'Overconfidence', color: C.RED,    desc: 'Crowd bullish. Price disagrees. Pullback risk elevated.'         },
+  { name: 'Mild Optimism',  color: C.ORANGE, desc: 'Sentiment slightly ahead of price. Watch momentum.'             },
+  { name: 'Aligned',        color: C.GREEN,  desc: 'Sentiment and price in sync. No divergence edge.'               },
+  { name: 'Mild Pessimism', color: C.ORANGE, desc: 'Price outrunning bearish crowd. Monitor for reversal.'          },
+  { name: 'Hidden Strength',color: C.CYAN,   desc: 'Price rising despite bearish narrative. Rare. Actionable.'      },
 ];
 
 const HOW_IT_WORKS = [
@@ -37,20 +42,16 @@ const HOW_IT_WORKS = [
 ];
 
 const STATS = [
-  { value: '50+', label: 'Global markets covered',  color: '#e8e8f0' },
-  { value: '5',   label: 'Divergence signal types',  color: '#e8e8f0' },
-  { value: '7s',  label: 'Avg analysis time',        color: '#00e5ff' },
-  { value: '3',   label: 'Timeframe windows',         color: '#e8e8f0' },
+  { value: '50+', label: 'Global markets covered',  color: C.TEXT },
+  { value: '5',   label: 'Divergence signal types',  color: C.TEXT },
+  { value: '7s',  label: 'Avg analysis time',        color: C.CYAN },
+  { value: '3',   label: 'Timeframe windows',         color: C.TEXT },
 ];
-
-const MONO  = 'var(--font-space-mono), "Courier New", monospace';
-const SERIF = 'var(--font-playfair), Georgia, serif';
-const BODY  = 'var(--font-space-grotesk), system-ui, sans-serif';
 
 function TickerTape() {
   const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
   return (
-    <div style={{ height: '32px', background: '#0a0a0f', borderBottom: '1px solid #0f0f16', overflow: 'hidden' }}>
+    <div style={{ height: '32px', background: C.SURFACE, borderBottom: `1px solid ${C.BORDER_FAINT}`, overflow: 'hidden' }}>
       <div style={{
         display: 'flex',
         gap: '56px',
@@ -62,11 +63,11 @@ function TickerTape() {
       }}>
         {items.map((item, i) => (
           <span key={i} style={{ whiteSpace: 'nowrap', fontFamily: MONO, fontSize: '11px', letterSpacing: '0.04em' }}>
-            <span style={{ color: '#e8e8f0' }}>{item.ticker}</span>
-            <span style={{ color: '#1a1a24', margin: '0 6px' }}>·</span>
+            <span style={{ color: C.TEXT }}>{item.ticker}</span>
+            <span style={{ color: C.BORDER, margin: '0 6px' }}>·</span>
             <span style={{ color: item.color }}>{item.signal}</span>
-            <span style={{ color: '#1a1a24', margin: '0 6px' }}>·</span>
-            <span style={{ color: '#3a3a4a' }}>{item.price}</span>
+            <span style={{ color: C.BORDER, margin: '0 6px' }}>·</span>
+            <span style={{ color: C.TEXT3 }}>{item.price}</span>
           </span>
         ))}
       </div>
@@ -113,9 +114,9 @@ export default function LandingPage() {
 
   return (
     <div style={{
-      background: '#060608',
+      background: C.BG,
       minHeight: '100vh',
-      color: '#e8e8f0',
+      color: C.TEXT,
       fontFamily: BODY,
     }}>
 
@@ -127,17 +128,17 @@ export default function LandingPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: '50px',
+        height: '48px',
         padding: '0 48px',
-        background: '#060608',
-        borderBottom: '1px solid #0f0f16',
+        background: C.BG,
+        borderBottom: `1px solid ${C.BORDER_FAINT}`,
       }}>
         <span style={{
           fontFamily: MONO,
-          fontSize: '14px',
+          fontSize: '13px',
           fontWeight: 700,
-          letterSpacing: '0.12em',
-          color: '#e8e8f0',
+          letterSpacing: '0.2em',
+          color: C.TEXT,
         }}>
           MARKORA
         </span>
@@ -149,15 +150,15 @@ export default function LandingPage() {
               href="#"
               style={{
                 fontFamily: MONO,
-                fontSize: '10px',
+                fontSize: '9px',
                 textTransform: 'uppercase' as const,
                 letterSpacing: '0.18em',
-                color: '#3a3a58',
+                color: C.TEXT2,
                 textDecoration: 'none',
                 transition: 'color 150ms',
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#00e5ff'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#3a3a58'; }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = C.CYAN; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = C.TEXT2; }}
             >{link}</a>
           ))}
         </div>
@@ -167,10 +168,10 @@ export default function LandingPage() {
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            background: '#00ff88',
+            background: C.GREEN,
             animation: 'pulse 2s ease-in-out infinite',
           }} />
-          <span style={{ fontFamily: MONO, fontSize: '10px', color: '#3a3a4a', letterSpacing: '0.06em' }}>LIVE</span>
+          <span style={{ fontFamily: MONO, fontSize: '10px', color: C.TEXT3, letterSpacing: '0.06em' }}>LIVE</span>
         </div>
       </nav>
 
@@ -190,7 +191,7 @@ export default function LandingPage() {
         <p style={{
           fontFamily: MONO,
           fontSize: '10px',
-          color: '#3a3a55',
+          color: C.TEXT3,
           textTransform: 'uppercase' as const,
           letterSpacing: '0.24em',
           marginBottom: '40px',
@@ -221,7 +222,7 @@ export default function LandingPage() {
             meets{' '}
             <em style={{
               fontStyle: 'italic',
-              color: '#00e5ff',
+              color: C.CYAN,
             }}>reality.</em>
           </span>
         </h1>
@@ -230,7 +231,7 @@ export default function LandingPage() {
           fontFamily: BODY,
           fontSize: '16px',
           fontWeight: 300,
-          color: '#5a5a70',
+          color: C.TEXT2,
           lineHeight: 1.8,
           maxWidth: '520px',
           margin: '0 auto 52px',
@@ -255,11 +256,11 @@ export default function LandingPage() {
               style={{
                 width: '100%',
                 height: '58px',
-                background: '#0a0a0f',
-                border: '1px solid #1c1c28',
+                background: C.SURFACE,
+                border: `1px solid ${C.BORDER}`,
                 borderRadius: 0,
                 padding: '0 48px 0 16px',
-                color: '#e8e8f0',
+                color: C.TEXT,
                 fontFamily: MONO,
                 fontSize: '12px',
                 letterSpacing: '0.02em',
@@ -267,15 +268,15 @@ export default function LandingPage() {
                 boxSizing: 'border-box' as const,
                 transition: 'border-color 150ms',
               }}
-              onFocusCapture={(e) => { (e.target as HTMLInputElement).style.borderColor = '#00e5ff'; }}
-              onBlurCapture={(e)  => { (e.target as HTMLInputElement).style.borderColor = '#1c1c28'; }}
+              onFocusCapture={(e) => { (e.target as HTMLInputElement).style.borderColor = C.CYAN; }}
+              onBlurCapture={(e)  => { (e.target as HTMLInputElement).style.borderColor = C.BORDER; }}
             />
             <span style={{
               position: 'absolute',
               right: '16px',
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#3a3a4a',
+              color: C.TEXT3,
               fontFamily: MONO,
               fontSize: '16px',
               pointerEvents: 'none',
@@ -288,8 +289,8 @@ export default function LandingPage() {
                 top: '100%',
                 left: 0,
                 right: 0,
-                background: '#0a0a0f',
-                border: '1px solid #1c1c28',
+                background: C.SURFACE,
+                border: `1px solid ${C.BORDER}`,
                 borderTop: 'none',
                 zIndex: 50,
                 overflow: 'hidden',
@@ -306,23 +307,23 @@ export default function LandingPage() {
                       padding: '10px 16px',
                       background: 'transparent',
                       border: 'none',
-                      borderBottom: i < suggestions.length - 1 ? '1px solid #0f0f16' : 'none',
+                      borderBottom: i < suggestions.length - 1 ? `1px solid ${C.BORDER_FAINT}` : 'none',
                       cursor: 'pointer',
                       textAlign: 'left' as const,
                     }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#0d0d14'; }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = C.ELEVATED; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                   >
                     <span style={{
                       fontFamily: MONO,
                       fontSize: '11px',
-                      color: '#00e5ff',
+                      color: C.CYAN,
                       minWidth: '60px',
                     }}>{s.ticker}</span>
                     <span style={{
                       fontFamily: BODY,
                       fontSize: '13px',
-                      color: '#e8e8f0',
+                      color: C.TEXT,
                       flex: 1,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -332,8 +333,8 @@ export default function LandingPage() {
                       <span style={{
                         fontFamily: MONO,
                         fontSize: '10px',
-                        color: '#3a3a4a',
-                        background: '#111118',
+                        color: C.TEXT3,
+                        background: C.ELEVATED,
                         padding: '2px 6px',
                       }}>{s.exchange}</span>
                     )}
@@ -352,13 +353,13 @@ export default function LandingPage() {
                 style={{
                   flex: 1,
                   height: '42px',
-                  background: timeframe === value ? '#0d0d14' : '#0a0a0f',
-                  border: '1px solid #1c1c28',
+                  background: timeframe === value ? C.ELEVATED : C.SURFACE,
+                  border: `1px solid ${C.BORDER}`,
                   borderTop: 'none',
-                  borderRight: idx < TIMEFRAMES.length - 1 ? 'none' : '1px solid #1c1c28',
-                  borderBottom: timeframe === value ? '2px solid #00e5ff' : '1px solid #1c1c28',
+                  borderRight: idx < TIMEFRAMES.length - 1 ? 'none' : `1px solid ${C.BORDER}`,
+                  borderBottom: timeframe === value ? `2px solid ${C.CYAN}` : `1px solid ${C.BORDER}`,
                   borderRadius: 0,
-                  color: timeframe === value ? '#00e5ff' : '#3a3a4a',
+                  color: timeframe === value ? C.CYAN : C.TEXT3,
                   fontFamily: MONO,
                   fontSize: '10px',
                   letterSpacing: '0.1em',
@@ -377,8 +378,8 @@ export default function LandingPage() {
               width: '100%',
               height: '54px',
               marginTop: '2px',
-              background: '#e8e8f0',
-              color: '#060608',
+              background: C.TEXT,
+              color: C.BG,
               border: 'none',
               borderRadius: 0,
               fontFamily: MONO,
@@ -387,16 +388,16 @@ export default function LandingPage() {
               letterSpacing: '0.22em',
               textTransform: 'uppercase' as const,
               cursor: 'pointer',
-              transition: 'background 150ms',
+              transition: 'opacity 150ms',
             }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#ffffff'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#e8e8f0'; }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.85'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; }}
           >RUN ANALYSIS</button>
 
           <p style={{
             fontFamily: MONO,
             fontSize: '10px',
-            color: '#2e2e45',
+            color: C.TEXT3,
             letterSpacing: '0.06em',
             marginTop: '16px',
             textAlign: 'center' as const,
@@ -407,7 +408,7 @@ export default function LandingPage() {
       </div>
 
       {/* ── 4. FIVE SIGNALS STRIP ──────────────────────────────────────────── */}
-      <div style={{ borderTop: '1px solid #0f0f16' }}>
+      <div style={{ borderTop: `1px solid ${C.BORDER_FAINT}` }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -418,12 +419,12 @@ export default function LandingPage() {
           <span style={{
             fontFamily: MONO,
             fontSize: '9px',
-            color: '#3a3a4a',
+            color: C.TEXT3,
             letterSpacing: '0.24em',
             textTransform: 'uppercase' as const,
             whiteSpace: 'nowrap' as const,
           }}>FIVE SIGNALS</span>
-          <div style={{ flex: 1, height: '1px', background: '#0f0f16' }} />
+          <div style={{ flex: 1, height: '1px', background: C.BORDER_FAINT }} />
         </div>
 
         <div style={{ display: 'flex' }}>
@@ -431,7 +432,7 @@ export default function LandingPage() {
             <div key={i} style={{
               flex: 1,
               padding: '44px 36px',
-              borderRight: i < SIGNALS.length - 1 ? '1px solid #0f0f16' : 'none',
+              borderRight: i < SIGNALS.length - 1 ? `1px solid ${C.BORDER_FAINT}` : 'none',
             }}>
               <div style={{
                 width: '28px',
@@ -451,7 +452,7 @@ export default function LandingPage() {
                 fontFamily: BODY,
                 fontSize: '13px',
                 fontWeight: 300,
-                color: '#5a5a70',
+                color: C.TEXT2,
                 lineHeight: 1.85,
               }}>{sig.desc}</p>
             </div>
@@ -460,7 +461,7 @@ export default function LandingPage() {
       </div>
 
       {/* ── 5. HOW IT WORKS ────────────────────────────────────────────────── */}
-      <div style={{ borderTop: '1px solid #0f0f16' }}>
+      <div style={{ borderTop: `1px solid ${C.BORDER_FAINT}` }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -471,12 +472,12 @@ export default function LandingPage() {
           <span style={{
             fontFamily: MONO,
             fontSize: '9px',
-            color: '#3a3a4a',
+            color: C.TEXT3,
             letterSpacing: '0.24em',
             textTransform: 'uppercase' as const,
             whiteSpace: 'nowrap' as const,
           }}>HOW IT WORKS</span>
-          <div style={{ flex: 1, height: '1px', background: '#0f0f16' }} />
+          <div style={{ flex: 1, height: '1px', background: C.BORDER_FAINT }} />
         </div>
 
         <div style={{ display: 'flex' }}>
@@ -484,19 +485,19 @@ export default function LandingPage() {
             <div key={i} style={{
               flex: 1,
               padding: '48px 40px',
-              borderRight: i < HOW_IT_WORKS.length - 1 ? '1px solid #0f0f16' : 'none',
+              borderRight: i < HOW_IT_WORKS.length - 1 ? `1px solid ${C.BORDER_FAINT}` : 'none',
             }}>
               <p style={{
                 fontFamily: MONO,
                 fontSize: '10px',
-                color: '#222230',
+                color: C.TEXT3,
                 letterSpacing: '0.12em',
                 marginBottom: '28px',
               }}>{step.step}</p>
               <p style={{
                 fontFamily: SERIF,
                 fontSize: '21px',
-                color: '#e8e8f0',
+                color: C.TEXT,
                 lineHeight: 1.2,
                 marginBottom: '16px',
                 fontWeight: 400,
@@ -505,7 +506,7 @@ export default function LandingPage() {
                 fontFamily: BODY,
                 fontSize: '13px',
                 fontWeight: 300,
-                color: '#5a5a70',
+                color: C.TEXT2,
                 lineHeight: 1.85,
               }}>{step.desc}</p>
             </div>
@@ -514,12 +515,12 @@ export default function LandingPage() {
       </div>
 
       {/* ── 6. STATS ROW ───────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', borderTop: '1px solid #0f0f16' }}>
+      <div style={{ display: 'flex', borderTop: `1px solid ${C.BORDER_FAINT}` }}>
         {STATS.map((stat, i) => (
           <div key={i} style={{
             flex: 1,
             padding: '44px 52px',
-            borderRight: i < STATS.length - 1 ? '1px solid #0f0f16' : 'none',
+            borderRight: i < STATS.length - 1 ? `1px solid ${C.BORDER_FAINT}` : 'none',
           }}>
             <p style={{
               fontFamily: MONO,
@@ -532,14 +533,13 @@ export default function LandingPage() {
             <p style={{
               fontFamily: MONO,
               fontSize: '10px',
-              color: '#2e2e45',
+              color: C.TEXT3,
               letterSpacing: '0.18em',
               textTransform: 'uppercase' as const,
             }}>{stat.label}</p>
           </div>
         ))}
       </div>
-
 
     </div>
   );

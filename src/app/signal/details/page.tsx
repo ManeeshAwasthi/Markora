@@ -7,9 +7,7 @@ import FundamentalsTab from '@/components/details/FundamentalsTab';
 import MomentumTab from '@/components/details/MomentumTab';
 import RiskProfileTab from '@/components/details/RiskProfileTab';
 import PeerComparisonTab from '@/components/details/PeerComparisonTab';
-
-const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const MONO = "ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace";
+import { C, T } from '@/lib/designTokens';
 
 type TabSlug = 'price-intelligence' | 'fundamentals' | 'momentum' | 'risk-profile' | 'peer-comparison';
 
@@ -58,14 +56,14 @@ function DetailsContent() {
   };
 
   if (loading) return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#060608' }}>
-      <div style={{ width: '40px', height: '40px', border: '3px solid #1c1c26', borderTop: '3px solid #00e5ff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: C.BG }}>
+      <div style={{ width: '40px', height: '40px', border: `3px solid ${C.BORDER}`, borderTop: `3px solid ${C.CYAN}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 
   if (error) return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#060608', color: '#ef4444', fontFamily: MONO }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: C.BG, color: C.RED, fontFamily: T.MONO }}>
       Error: {error}
     </div>
   );
@@ -75,19 +73,22 @@ function DetailsContent() {
   const { meta, priceIntelligence, fundamentals, momentumFlow, riskProfile, peerComparison } = data;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#060608', color: '#e8e8f0' }}>
+    <div style={{ minHeight: '100vh', background: C.BG, color: C.TEXT }}>
       {/* Header */}
-      <div style={{ borderBottom: '1px solid #1c1c26', padding: '16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#0d0d12', flexWrap: 'wrap', gap: '12px' }}>
-        <a href="/signal" style={{ color: '#4a4a6a', fontFamily: MONO, fontSize: '12px', textDecoration: 'none', letterSpacing: '0.05em' }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#00e5ff'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#4a4a6a'; }}
-        >
-          ← Back to Signal Board
-        </a>
+      <div style={{ borderBottom: `1px solid ${C.BORDER_FAINT}`, padding: '0 32px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.BG, flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+          <span style={{ fontFamily: T.MONO, fontSize: '13px', fontWeight: 700, letterSpacing: '0.2em', color: C.TEXT }}>MARKORA</span>
+          <a href="/signal" style={{ color: C.TEXT2, fontFamily: T.MONO, fontSize: '10px', textDecoration: 'none', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = C.CYAN; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = C.TEXT2; }}
+          >
+            ← SIGNAL BOARD
+          </a>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          <span style={{ fontFamily: FONT, fontSize: '15px', color: '#e8e8f0' }}>{meta.companyName}</span>
-          <span style={{ fontFamily: MONO, fontSize: '15px', color: '#00e5ff' }}>{meta.currencySymbol}{meta.currentPrice.toLocaleString()}</span>
-          <span style={{ fontFamily: MONO, fontSize: '11px', color: '#4a4a6a', background: '#1c1c26', padding: '3px 8px', borderRadius: '4px' }}>{meta.exchange}</span>
+          <span style={{ fontFamily: T.SERIF, fontStyle: 'italic', fontSize: '18px', fontWeight: 800, color: C.TEXT }}>{meta.companyName}</span>
+          <span style={{ fontFamily: T.MONO, fontSize: '16px', fontWeight: 700, color: C.CYAN }}>{meta.currencySymbol}{meta.currentPrice.toLocaleString()}</span>
+          <span style={{ fontFamily: T.MONO, fontSize: '10px', color: C.TEXT2, background: C.ELEVATED, border: `1px solid ${C.BORDER}`, padding: '3px 8px', letterSpacing: '0.08em' }}>{meta.exchange}</span>
         </div>
       </div>
 
@@ -95,7 +96,7 @@ function DetailsContent() {
       <div style={{ display: 'flex', minHeight: 'calc(100vh - 57px)' }}>
 
         {/* Sidebar */}
-        <div style={{ width: '220px', flexShrink: 0, borderRight: '1px solid #1c1c26', background: '#0d0d12', display: 'flex', flexDirection: 'column', paddingTop: '24px' }}>
+        <div style={{ width: '220px', flexShrink: 0, borderRight: `1px solid ${C.BORDER}`, background: C.SURFACE, display: 'flex', flexDirection: 'column', paddingTop: '24px' }}>
           {TABS.map(tab => (
             <button
               key={tab.slug}
@@ -103,19 +104,19 @@ function DetailsContent() {
               style={{
                 padding: '14px 20px',
                 textAlign: 'left',
-                background: activeTab === tab.slug ? '#00e5ff08' : 'transparent',
+                background: activeTab === tab.slug ? C.CYAN + '08' : 'transparent',
                 border: 'none',
-                borderLeft: activeTab === tab.slug ? '3px solid #00e5ff' : '3px solid transparent',
-                color: activeTab === tab.slug ? '#00e5ff' : '#4a4a6a',
-                fontFamily: MONO,
-                fontSize: '12px',
-                letterSpacing: '0.08em',
+                borderLeft: activeTab === tab.slug ? `3px solid ${C.CYAN}` : '3px solid transparent',
+                color: activeTab === tab.slug ? C.CYAN : C.TEXT2,
+                fontFamily: T.MONO,
+                fontSize: '10px',
+                letterSpacing: '0.1em',
                 textTransform: 'uppercase',
                 cursor: 'pointer',
                 width: '100%',
               }}
-              onMouseEnter={e => { if (activeTab !== tab.slug) (e.currentTarget as HTMLElement).style.color = '#a0a0b8'; }}
-              onMouseLeave={e => { if (activeTab !== tab.slug) (e.currentTarget as HTMLElement).style.color = '#4a4a6a'; }}
+              onMouseEnter={e => { if (activeTab !== tab.slug) (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
+              onMouseLeave={e => { if (activeTab !== tab.slug) (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
             >
               {tab.label}
             </button>
@@ -123,7 +124,7 @@ function DetailsContent() {
         </div>
 
         {/* Content area */}
-        <div style={{ flex: 1, padding: '40px', overflowY: 'auto', maxWidth: '900px' }}>
+        <div style={{ flex: 1, padding: '48px 56px 80px', overflowY: 'auto', maxWidth: '960px' }}>
           {activeTab === 'price-intelligence' && (
             <PriceIntelligenceTab
               data={priceIntelligence}
@@ -165,8 +166,8 @@ function DetailsContent() {
 export default function DetailsPage() {
   return (
     <Suspense fallback={
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#060608' }}>
-        <div style={{ width: '40px', height: '40px', border: '3px solid #1c1c26', borderTop: '3px solid #00e5ff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: C.BG }}>
+        <div style={{ width: '40px', height: '40px', border: `3px solid ${C.BORDER}`, borderTop: `3px solid ${C.CYAN}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     }>

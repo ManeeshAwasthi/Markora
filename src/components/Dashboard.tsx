@@ -7,6 +7,7 @@ import SearchBar from './SearchBar';
 import SentimentBadge from './SentimentBadge';
 import MarketOutlook from './MarketOutlook';
 import HeadlineList from './HeadlineList';
+import { C, T, styles } from '@/lib/designTokens';
 
 export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
@@ -83,31 +84,35 @@ export default function Dashboard() {
         <div>
           <h1
             style={{
-              fontSize: '2rem',
+              fontFamily: T.MONO,
+              fontSize: '1.5rem',
               fontWeight: 700,
-              color: '#ffffff',
-              letterSpacing: '-0.02em',
+              color: C.TEXT,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
               marginBottom: '6px',
             }}
           >
             Markora
           </h1>
-          <p style={{ color: '#555555', fontSize: '0.9rem' }}>
+          <p style={{ color: C.TEXT2, fontFamily: T.BODY, fontSize: '13px' }}>
             Financial news sentiment analyzer
           </p>
         </div>
         <Link
           href="/signal"
           style={{
-            background: '#00ff8811',
-            color: '#00ff88',
-            border: '1px solid #00ff8833',
-            borderRadius: '8px',
+            background: C.GREEN + '11',
+            color: C.GREEN,
+            border: `1px solid ${C.GREEN}33`,
             padding: '10px 18px',
-            fontSize: '0.85rem',
+            fontFamily: T.MONO,
+            fontSize: '11px',
             fontWeight: 600,
+            letterSpacing: '0.1em',
             textDecoration: 'none',
             whiteSpace: 'nowrap',
+            textTransform: 'uppercase',
           }}
         >
           Signal Board →
@@ -133,13 +138,12 @@ export default function Dashboard() {
             style={{
               width: '36px',
               height: '36px',
-              border: '3px solid #222222',
-              borderTop: '3px solid #00ff88',
+              border: `3px solid ${C.BORDER}`,
+              borderTop: `3px solid ${C.GREEN}`,
               borderRadius: '50%',
               animation: 'spin 0.7s linear infinite',
             }}
           />
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       )}
 
@@ -147,12 +151,12 @@ export default function Dashboard() {
       {error && (
         <div
           style={{
-            background: '#1a0000',
-            border: '1px solid #ff4444',
-            borderRadius: '8px',
+            background: C.RED + '11',
+            border: `1px solid ${C.RED}44`,
             padding: '16px',
-            color: '#ff4444',
-            fontSize: '0.9rem',
+            color: C.RED,
+            fontFamily: T.MONO,
+            fontSize: '13px',
             marginBottom: '24px',
           }}
         >
@@ -165,9 +169,9 @@ export default function Dashboard() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Overall sentiment */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ color: '#888888', fontSize: '0.85rem' }}>Overall market sentiment:</span>
+            <span style={{ color: C.TEXT2, fontFamily: T.MONO, fontSize: '11px', letterSpacing: '0.05em' }}>Overall market sentiment:</span>
             <SentimentBadge sentiment={result.overall} />
-            <span style={{ color: '#444444', fontSize: '0.78rem', marginLeft: 'auto' }}>
+            <span style={{ color: C.TEXT3, fontFamily: T.MONO, fontSize: '10px', marginLeft: 'auto' }}>
               {new Date(result.analyzedAt).toLocaleTimeString()}
             </span>
           </div>
@@ -177,16 +181,7 @@ export default function Dashboard() {
 
           {/* Headlines */}
           <div>
-            <p
-              style={{
-                color: '#555555',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                marginBottom: '14px',
-              }}
-            >
+            <p style={styles.sectionLabel}>
               Headlines ({result.headlines.length})
             </p>
             <HeadlineList headlines={result.headlines} />

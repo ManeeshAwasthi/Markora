@@ -1,24 +1,27 @@
 import type { Metadata } from 'next';
-import { Playfair_Display, Space_Mono, Space_Grotesk } from 'next/font/google';
+import { Playfair_Display, IBM_Plex_Mono, DM_Sans } from 'next/font/google';
 import './globals.css';
 
 const playfairDisplay = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['400', '500'],
-  style: ['normal', 'italic'],
+  subsets:  ['latin'],
+  weight:   ['700', '800'],
+  style:    ['normal', 'italic'],
   variable: '--font-playfair',
+  display:  'swap',
 });
 
-const spaceMono = Space_Mono({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-space-mono',
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets:  ['latin'],
+  weight:   ['400', '500', '700'],
+  variable: '--font-ibm-plex-mono',
+  display:  'swap',
 });
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  weight: ['300', '400', '500'],
-  variable: '--font-space-grotesk',
+const dmSans = DM_Sans({
+  subsets:  ['latin'],
+  weight:   ['400', '500'],
+  variable: '--font-dm-sans',
+  display:  'swap',
 });
 
 export const metadata: Metadata = {
@@ -28,8 +31,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${playfairDisplay.variable} ${spaceMono.variable} ${spaceGrotesk.variable}`}>
-      <body style={{ fontFamily: 'var(--font-space-grotesk), system-ui, sans-serif' }}>
+    <html lang="en" className={`${playfairDisplay.variable} ${ibmPlexMono.variable} ${dmSans.variable}`}>
+      <body style={{ fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif", background: '#020204', color: '#e2e2ec' }}>
         {children}
       </body>
     </html>

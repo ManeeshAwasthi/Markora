@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, KeyboardEvent } from 'react';
+import { C, T } from '@/lib/designTokens';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -33,12 +34,13 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
         placeholder="Search ticker or company (e.g. AAPL, Tesla)"
         style={{
           flex: 1,
-          background: '#1a1a1a',
-          color: '#ffffff',
-          border: `1px solid ${focused ? '#00ff88' : '#333333'}`,
-          borderRadius: '6px',
-          padding: '12px 16px',
-          fontSize: '0.95rem',
+          background: C.SURFACE,
+          color: C.TEXT,
+          border: `1px solid ${focused ? C.CYAN : C.BORDER}`,
+          padding: '0 16px',
+          height: '40px',
+          fontFamily: T.MONO,
+          fontSize: '12px',
           outline: 'none',
           transition: 'border-color 0.15s ease',
           opacity: isLoading ? 0.6 : 1,
@@ -49,13 +51,16 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
         onClick={handleSubmit}
         disabled={isLoading}
         style={{
-          background: '#000000',
-          color: '#00ff88',
-          border: '1px solid #00ff88',
-          borderRadius: '6px',
-          padding: '12px 24px',
-          fontSize: '0.9rem',
-          fontWeight: 600,
+          background: C.TEXT,
+          color: C.BG,
+          border: 'none',
+          padding: '0 24px',
+          height: '40px',
+          fontFamily: T.MONO,
+          fontSize: '11px',
+          fontWeight: 700,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
           cursor: isLoading ? 'not-allowed' : 'pointer',
           opacity: isLoading ? 0.6 : 1,
           whiteSpace: 'nowrap',
