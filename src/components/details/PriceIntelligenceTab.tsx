@@ -6,7 +6,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
-import { C, T, styles } from '@/lib/designTokens';
+import { C, T, TYPE, styles } from '@/lib/designTokens';
 
 interface PriceIntelligenceTabProps {
   data: {
@@ -60,7 +60,7 @@ function Collapsible({ label, children }: { label: string; children: React.React
   );
 }
 
-function formatVolume(v: number): string {
+function fmtVol(v: number): string {
   if (v >= 1_000_000_000) return `${(v / 1_000_000_000).toFixed(1)}B`;
   if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
   if (v >= 1_000) return `${(v / 1_000).toFixed(0)}K`;
@@ -81,33 +81,46 @@ export default function PriceIntelligenceTab({ data, meta }: PriceIntelligenceTa
   const xInterval = Math.floor((data.rsiHistory.length - 1) / 5);
 
   return (
-    <div style={{ fontFamily: T.BODY }}>
-      {/* Summary — cyan left-border prose + 5-stat pill strip */}
+    <div style={{ fontFamily: T.BODY, color: C.TEXT }}>
+
+      {/* ── PAGE HEADER ── */}
       <div style={{ marginBottom: '40px' }}>
+        <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '12px' }}>
+          EQUITY_REPORT // {new Date().getFullYear()}.Q{Math.ceil((new Date().getMonth() + 1) / 3)}
+        </p>
+        <h2 style={{ ...TYPE.DISPLAY_LG, color: C.TEXT, marginBottom: '4px' }}>
+          {meta.companyName}
+        </h2>
+        <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '20px' }}>
+          PRICE INTELLIGENCE // TECHNICAL SIGNALS
+        </p>
+
+        {/* Summary prose */}
         <div style={styles.insightBox}>
           <p style={styles.insightLabel}>PRICE INTELLIGENCE SUMMARY</p>
-          <p style={{ fontFamily: T.BODY, fontSize: '14px', color: C.TEXT2, lineHeight: 1.7 }}>
+          <p style={{ ...TYPE.PROSE_MD, color: C.TEXT2 }}>
             {summaryParts.join(' ')} The 52-week range position is at the{' '}
-            <span style={{ color: C.CYAN, fontFamily: T.MONO }}>{data.weekRange52Position.toFixed(0)}th</span> percentile.
+            <span style={{ ...TYPE.DATA_SM, color: C.CYAN }}>{data.weekRange52Position.toFixed(0)}th</span> percentile.
             ATR is{' '}
-            <span style={{ color: C.CYAN, fontFamily: T.MONO }}>
+            <span style={{ ...TYPE.DATA_SM, color: C.CYAN }}>
               {meta.currencySymbol}{data.atr.toFixed(2)} ({data.atrPercent.toFixed(1)}%)
             </span>{' '}
             of current price.
           </p>
         </div>
-        {/* 5-stat pill strip */}
+
+        {/* 5-stat strip */}
         <div style={{ display: 'flex', gap: '1px', background: C.BORDER_FAINT, marginTop: '1px', flexWrap: 'wrap' }}>
           {[
-            { label: 'RSI', value: String(data.rsi), color: rsiColor },
-            { label: 'MA200', value: data.ma200Label, color: data.ma200Label === 'Above' ? C.GREEN : C.RED },
-            { label: 'BOLLINGER', value: data.bollingerPosition, color: data.bollingerPosition.includes('Upper') ? C.RED : data.bollingerPosition.includes('Lower') ? C.GREEN : C.NEUTRAL },
-            { label: 'VOLUME', value: data.volumeTrend, color: data.volumeTrend === 'Increasing' ? C.GREEN : data.volumeTrend === 'Decreasing' ? C.RED : C.NEUTRAL },
+            { label: 'RSI',          value: String(data.rsi),           color: rsiColor },
+            { label: 'MA200',        value: data.ma200Label,            color: data.ma200Label === 'Above' ? C.GREEN : C.RED },
+            { label: 'BOLLINGER',    value: data.bollingerPosition,     color: data.bollingerPosition.includes('Upper') ? C.RED : data.bollingerPosition.includes('Lower') ? C.GREEN : C.NEUTRAL },
+            { label: 'VOLUME',       value: data.volumeTrend,           color: data.volumeTrend === 'Increasing' ? C.GREEN : data.volumeTrend === 'Decreasing' ? C.RED : C.NEUTRAL },
             { label: '52W POSITION', value: `${data.weekRange52Position.toFixed(0)}th %ile`, color: C.CYAN },
           ].map(({ label, value, color }) => (
             <div key={label} style={{ background: C.ELEVATED, padding: '12px 16px', flex: 1, minWidth: '120px' }}>
-              <p style={styles.metricLabel}>{label}</p>
-              <p style={{ fontFamily: T.MONO, fontSize: '12px', fontWeight: 600, color }}>{value}</p>
+              <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '6px' }}>{label}</p>
+              <p style={{ ...TYPE.DATA_SM, color, fontWeight: 600 }}>{value}</p>
             </div>
           ))}
         </div>
@@ -117,7 +130,7 @@ export default function PriceIntelligenceTab({ data, meta }: PriceIntelligenceTa
       <div style={{ marginBottom: '40px' }}>
         <p style={styles.sectionLabel}>RSI — Relative Strength Index</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
-          <span style={{ fontFamily: T.MONO, fontSize: '2.2rem', fontWeight: 700, color: rsiColor }}>{data.rsi}</span>
+          <span style={{ ...TYPE.DATA_HERO, fontSize: '3.5rem', color: rsiColor }}>{data.rsi}</span>
           <span style={styles.badge(rsiColor)}>{data.rsiLabel}</span>
         </div>
         {data.rsiHistory.length > 0 && (
@@ -158,38 +171,37 @@ export default function PriceIntelligenceTab({ data, meta }: PriceIntelligenceTa
         <p style={styles.sectionLabel}>Moving Averages</p>
         <div style={{ display: 'flex', gap: '1px', marginBottom: '20px', flexWrap: 'wrap', background: C.BORDER_FAINT }}>
           <div style={{ background: C.ELEVATED, padding: '16px 20px', minWidth: '140px' }}>
-            <p style={styles.metricLabel}>MA 50</p>
-            <p style={{ fontFamily: T.MONO, fontSize: '1.4rem', color: C.GOLD, fontWeight: 600 }}>
+            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '6px' }}>MA 50</p>
+            <p style={{ ...TYPE.DATA_LG, color: C.GOLD }}>
               {meta.currencySymbol}{data.ma50.toFixed(2)}
             </p>
           </div>
           <div style={{ background: C.ELEVATED, padding: '16px 20px', minWidth: '140px' }}>
-            <p style={styles.metricLabel}>MA 200</p>
-            <p style={{ fontFamily: T.MONO, fontSize: '1.4rem', color: C.ORANGE, fontWeight: 600 }}>
+            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '6px' }}>MA 200</p>
+            <p style={{ ...TYPE.DATA_LG, color: C.ORANGE }}>
               {meta.currencySymbol}{data.ma200.toFixed(2)}
             </p>
           </div>
           <div style={{ background: C.ELEVATED, padding: '16px 20px', minWidth: '160px' }}>
-            <p style={styles.metricLabel}>Price vs MA200</p>
-            <p style={{ fontFamily: T.MONO, fontSize: '1.1rem', color: data.ma200Label === 'Above' ? C.GREEN : C.RED, fontWeight: 600 }}>
+            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '6px' }}>Price vs MA200</p>
+            <p style={{ ...TYPE.DATA_MD, color: data.ma200Label === 'Above' ? C.GREEN : C.RED }}>
               {data.ma200Label} ({data.ma200PercentDiff > 0 ? '+' : ''}{data.ma200PercentDiff.toFixed(1)}%)
             </p>
           </div>
           {data.crossSignal !== 'None' && (
             <div style={{ background: C.ELEVATED, padding: '16px 20px', minWidth: '140px' }}>
-              <p style={styles.metricLabel}>Cross Signal</p>
+              <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '6px' }}>Cross Signal</p>
               <span style={styles.badge(data.crossSignal === 'Golden Cross' ? C.GOLD : C.RED)}>{data.crossSignal}</span>
             </div>
           )}
         </div>
         {data.maHistory.length > 0 && (
           <div style={{ background: C.SURFACE, padding: '16px' }}>
-            {/* Manual legend */}
             <div style={{ display: 'flex', gap: '16px', marginBottom: '12px' }}>
               {([[C.CYAN, 'Price'], [C.GOLD, 'MA50'], [C.ORANGE, 'MA200']] as [string, string][]).map(([c, l]) => (
                 <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                   <span style={{ width: '16px', height: '2px', background: c, display: 'inline-block' }} />
-                  <span style={{ color: C.TEXT2, fontSize: '11px', fontFamily: T.MONO }}>{l}</span>
+                  <span style={{ ...TYPE.LABEL_SM, color: C.TEXT2 }}>{l}</span>
                 </span>
               ))}
             </div>
@@ -223,7 +235,7 @@ export default function PriceIntelligenceTab({ data, meta }: PriceIntelligenceTa
       <div style={{ marginBottom: '40px' }}>
         <p style={styles.sectionLabel}>Bollinger Bands</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
-          <span style={{ fontFamily: T.MONO, fontSize: '13px', color: C.TEXT2 }}>Position:</span>
+          <span style={{ ...TYPE.DATA_SM, color: C.TEXT2 }}>Position:</span>
           <span style={styles.badge(
             data.bollingerPosition.includes('Upper') ? C.RED : data.bollingerPosition.includes('Lower') ? C.GREEN : C.NEUTRAL
           )}>{data.bollingerPosition}</span>
@@ -272,15 +284,15 @@ export default function PriceIntelligenceTab({ data, meta }: PriceIntelligenceTa
         <p style={styles.sectionLabel}>Volume Analysis</p>
         <div style={{ display: 'flex', gap: '1px', marginBottom: '20px', flexWrap: 'wrap', background: C.BORDER_FAINT }}>
           <div style={{ background: C.ELEVATED, padding: '14px 18px' }}>
-            <p style={styles.metricLabel}>Latest Volume</p>
-            <p style={{ fontFamily: T.MONO, fontSize: '1.3rem', color: C.TEXT, fontWeight: 600 }}>{formatVolume(data.latestVolume)}</p>
+            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '6px' }}>Latest Volume</p>
+            <p style={{ ...TYPE.DATA_LG, color: C.TEXT }}>{fmtVol(data.latestVolume)}</p>
           </div>
           <div style={{ background: C.ELEVATED, padding: '14px 18px' }}>
-            <p style={styles.metricLabel}>Avg Volume (30d)</p>
-            <p style={{ fontFamily: T.MONO, fontSize: '1.3rem', color: C.TEXT, fontWeight: 600 }}>{formatVolume(data.avgVolume30d)}</p>
+            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '6px' }}>Avg Volume (30d)</p>
+            <p style={{ ...TYPE.DATA_LG, color: C.TEXT }}>{fmtVol(data.avgVolume30d)}</p>
           </div>
           <div style={{ background: C.ELEVATED, padding: '14px 18px' }}>
-            <p style={styles.metricLabel}>Trend</p>
+            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '6px' }}>Trend</p>
             <span style={styles.badge(
               data.volumeTrend === 'Increasing' ? C.GREEN : data.volumeTrend === 'Decreasing' ? C.RED : C.NEUTRAL
             )}>{data.volumeTrend}</span>
@@ -292,8 +304,8 @@ export default function PriceIntelligenceTab({ data, meta }: PriceIntelligenceTa
               <ComposedChart data={data.volumeHistory} margin={{ top: 4, right: 8, left: -24, bottom: 0 }}>
                 <CartesianGrid stroke={C.BORDER_FAINT} vertical={false} />
                 <XAxis dataKey="date" tick={{ fill: C.TEXT3, fontSize: 10, fontFamily: T.MONO }} tickLine={false} axisLine={false} interval={Math.floor(data.volumeHistory.length / 6)} />
-                <YAxis tick={{ fill: C.TEXT3, fontSize: 10, fontFamily: T.MONO }} tickLine={false} axisLine={false} tickFormatter={formatVolume} />
-                <Tooltip {...styles.tooltipStyle} formatter={(v: unknown, name: unknown) => [formatVolume(v as number), name as string]} />
+                <YAxis tick={{ fill: C.TEXT3, fontSize: 10, fontFamily: T.MONO }} tickLine={false} axisLine={false} tickFormatter={fmtVol} />
+                <Tooltip {...styles.tooltipStyle} formatter={(v: unknown, name: unknown) => [fmtVol(v as number), name as string]} />
                 <Bar dataKey="volume" fill={`${C.CYAN}99`} name="Volume" isAnimationActive={false} />
                 <Line type="monotone" dataKey="avgVolume" stroke={C.ORANGE} strokeWidth={2} dot={false} isAnimationActive={false} name="Avg Volume" />
               </ComposedChart>
@@ -307,7 +319,7 @@ export default function PriceIntelligenceTab({ data, meta }: PriceIntelligenceTa
             : data.volumeTrend === 'Decreasing'
             ? 'Falling volume can signal weakening conviction. Trend moves on low volume are less reliable and more prone to reversal.'
             : 'Volume is stable — no strong directional signal from participation levels.'}
-          {' '}The 30-day average is {formatVolume(data.avgVolume30d)} shares/day.
+          {' '}The 30-day average is {fmtVol(data.avgVolume30d)} shares/day.
         </InsightBox>
         <Collapsible label="How volume analysis works">
           Volume shows how many shares were traded in a period. High volume during a price move confirms conviction — buyers or sellers are actively engaged. Low volume on a breakout is suspicious. Volume divergence (price rising but volume falling) can signal a weakening trend. The 20-day moving average of volume provides a baseline — days above average indicate heightened interest.
@@ -318,13 +330,12 @@ export default function PriceIntelligenceTab({ data, meta }: PriceIntelligenceTa
       <div style={{ marginBottom: '40px' }}>
         <p style={styles.sectionLabel}>Support &amp; Resistance Levels</p>
         {data.supportResistance.length === 0 ? (
-          <p style={{ color: C.TEXT2, fontFamily: T.MONO, fontSize: '13px' }}>No clear levels detected in recent 90-day range.</p>
+          <p style={{ ...TYPE.DATA_SM, color: C.TEXT2 }}>No clear levels detected in recent 90-day range.</p>
         ) : (
           <div style={{ background: C.SURFACE, border: `1px solid ${C.BORDER}`, overflow: 'hidden' }}>
-            {/* Table header */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', background: C.ELEVATED, padding: '10px 16px', borderBottom: `1px solid ${C.BORDER}` }}>
               {(['TYPE', 'LEVEL', 'STRENGTH'] as const).map((h, i) => (
-                <span key={h} style={{ fontFamily: T.MONO, fontSize: '9px', color: C.TEXT3, letterSpacing: '0.1em', textTransform: 'uppercase', textAlign: i === 2 ? 'right' : 'left' }}>{h}</span>
+                <span key={h} style={{ ...TYPE.LABEL_SM, color: C.TEXT3, textAlign: i === 2 ? 'right' : 'left' }}>{h}</span>
               ))}
             </div>
             {[...data.supportResistance].sort((a, b) => b.level - a.level).map((lvl, i) => {
@@ -332,9 +343,9 @@ export default function PriceIntelligenceTab({ data, meta }: PriceIntelligenceTa
               const pctAway = ((Math.abs(lvl.level - meta.currentPrice) / meta.currentPrice) * 100).toFixed(1);
               return (
                 <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', background: C.SURFACE, padding: '11px 16px', borderBottom: i < data.supportResistance.length - 1 ? `1px solid ${C.BORDER_FAINT}` : 'none' }}>
-                  <span style={{ fontFamily: T.MONO, fontSize: '11px', color, textTransform: 'uppercase' }}>{lvl.type}</span>
-                  <span style={{ fontFamily: T.MONO, fontSize: '14px', fontWeight: 700, color }}>{meta.currencySymbol}{lvl.level.toFixed(2)}</span>
-                  <span style={{ fontFamily: T.MONO, fontSize: '10px', color: C.TEXT2, textAlign: 'right' }}>
+                  <span style={{ ...TYPE.LABEL_LG, color, textTransform: 'uppercase' }}>{lvl.type}</span>
+                  <span style={{ ...TYPE.DATA_MD, color, fontWeight: 700 }}>{meta.currencySymbol}{lvl.level.toFixed(2)}</span>
+                  <span style={{ ...TYPE.LABEL_SM, color: C.TEXT2, textAlign: 'right' }}>
                     {lvl.strength} · {pctAway}% away
                   </span>
                 </div>
@@ -363,22 +374,22 @@ export default function PriceIntelligenceTab({ data, meta }: PriceIntelligenceTa
           <div style={{ position: 'relative', height: '6px', background: `linear-gradient(to right, ${C.RED}40, ${C.GOLD}40, ${C.GREEN}40)`, margin: '16px 0 10px' }}>
             <div style={{ position: 'absolute', left: `${clamp52}%`, top: '50%', transform: 'translate(-50%, -50%)', width: '14px', height: '14px', background: C.CYAN, borderRadius: '50%', boxShadow: `0 0 8px ${C.CYAN}80` }} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontFamily: T.MONO }}>
-            <span style={{ color: C.RED }}>L {meta.currencySymbol}{data.low52.toFixed(2)}</span>
-            <span style={{ color: C.CYAN }}>{clamp52.toFixed(0)}th percentile</span>
-            <span style={{ color: C.GREEN }}>H {meta.currencySymbol}{data.high52.toFixed(2)}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ ...TYPE.LABEL_SM, color: C.RED }}>L {meta.currencySymbol}{data.low52.toFixed(2)}</span>
+            <span style={{ ...TYPE.LABEL_SM, color: C.CYAN }}>{clamp52.toFixed(0)}th percentile</span>
+            <span style={{ ...TYPE.LABEL_SM, color: C.GREEN }}>H {meta.currencySymbol}{data.high52.toFixed(2)}</span>
           </div>
         </div>
         <div style={{ display: 'flex', gap: '1px', flexWrap: 'wrap', background: C.BORDER_FAINT }}>
           <div style={{ background: C.ELEVATED, padding: '14px 18px', flex: 1, minWidth: '120px' }}>
-            <p style={styles.metricLabel}>Distance from High</p>
-            <p style={{ fontFamily: T.MONO, fontSize: '1.2rem', color: C.RED, fontWeight: 600 }}>
+            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '6px' }}>Distance from High</p>
+            <p style={{ ...TYPE.DATA_LG, color: C.RED }}>
               -{((data.high52 - meta.currentPrice) / data.high52 * 100).toFixed(1)}%
             </p>
           </div>
           <div style={{ background: C.ELEVATED, padding: '14px 18px', flex: 1, minWidth: '120px' }}>
-            <p style={styles.metricLabel}>Distance from Low</p>
-            <p style={{ fontFamily: T.MONO, fontSize: '1.2rem', color: C.GREEN, fontWeight: 600 }}>
+            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '6px' }}>Distance from Low</p>
+            <p style={{ ...TYPE.DATA_LG, color: C.GREEN }}>
               +{((meta.currentPrice - data.low52) / data.low52 * 100).toFixed(1)}%
             </p>
           </div>
@@ -399,20 +410,20 @@ export default function PriceIntelligenceTab({ data, meta }: PriceIntelligenceTa
         <p style={styles.sectionLabel}>ATR &amp; Daily Volatility</p>
         <div style={{ display: 'flex', gap: '1px', marginBottom: '20px', flexWrap: 'wrap', background: C.BORDER_FAINT }}>
           <div style={{ background: C.ELEVATED, padding: '20px 24px', flex: 1, minWidth: '160px' }}>
-            <p style={styles.metricLabel}>ATR (14-day)</p>
-            <p style={{ fontFamily: T.MONO, fontSize: '2rem', color: C.TEXT, fontWeight: 600, lineHeight: 1 }}>
+            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '8px' }}>ATR (14-day)</p>
+            <p style={{ ...TYPE.DATA_HERO, fontSize: '3rem', color: C.TEXT }}>
               {meta.currencySymbol}{data.atr.toFixed(2)}
             </p>
-            <p style={{ fontFamily: T.MONO, fontSize: '12px', color: C.TEXT3, marginTop: '8px' }}>
+            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginTop: '8px' }}>
               {data.atrPercent.toFixed(1)}% of price per day
             </p>
           </div>
           <div style={{ background: C.ELEVATED, padding: '20px 24px', flex: 1, minWidth: '200px' }}>
-            <p style={styles.metricLabel}>Risk Sizing Helper</p>
-            <p style={{ fontFamily: T.MONO, fontSize: '13px', color: C.TEXT2, lineHeight: 1.6 }}>
+            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '8px' }}>Risk Sizing Helper</p>
+            <p style={{ ...TYPE.PROSE_MD, color: C.TEXT2 }}>
               1x ATR stop: {meta.currencySymbol}{(meta.currentPrice - data.atr).toFixed(2)}<br />
               2x ATR stop: {meta.currencySymbol}{(meta.currentPrice - 2 * data.atr).toFixed(2)}<br />
-              <span style={{ color: C.TEXT3, fontSize: '11px' }}>Risk {data.atrPercent.toFixed(1)}% — {(data.atrPercent * 2).toFixed(1)}% per trade</span>
+              <span style={{ ...TYPE.LABEL_SM, color: C.TEXT3 }}>Risk {data.atrPercent.toFixed(1)}% — {(data.atrPercent * 2).toFixed(1)}% per trade</span>
             </p>
           </div>
         </div>
