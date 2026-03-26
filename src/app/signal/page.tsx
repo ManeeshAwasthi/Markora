@@ -138,7 +138,6 @@ function MetricCard({
       minWidth: 0, background: C.SURFACE, padding: '24px 24px 20px',
       animation: 'fadeSlideUp 400ms ease forwards',
       animationDelay: `${index * 80}ms`,
-      opacity: 0,
     }}>
       <p style={{ color: C.TEXT2, fontSize: '9px', fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: MONO, marginBottom: '16px' }}>
         {label}
