@@ -5,7 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, ReferenceLine,
 } from 'recharts';
-import { C, T, styles } from '@/lib/designTokens';
+import { C, T, TYPE, styles } from '@/lib/designTokens';
 
 interface FundamentalsTabProps {
   data: {
@@ -27,61 +27,39 @@ interface FundamentalsTabProps {
   meta: { companyName: string; currencySymbol: string; currentPrice: number };
 }
 
-const sectionStyle = { marginBottom: '40px' };
-const sectionTitleStyle = {
-  fontSize: '10px', fontFamily: T.MONO, color: C.TEXT3,
-  letterSpacing: '0.2em', textTransform: 'uppercase' as const, marginBottom: '20px',
-};
-
-function fmt(v: number | null | undefined, decimals = 1): string {
-  return v !== null && v !== undefined ? v.toFixed(decimals) : '—';
-}
-
-function fmtPct(v: number | null | undefined, isAlreadyPct = false): string {
-  return v !== null && v !== undefined ? `${(isAlreadyPct ? v : v * 100).toFixed(1)}%` : '—';
-}
-
-function MetricBigCard({ label, value, sub, color }: { label: string; value: string; sub?: string; color?: string }) {
-  return (
-    <div style={{ background: C.SURFACE, padding: '20px 22px', flex: 1, minWidth: '140px' }}>
-      <p style={styles.metricLabel}>{label}</p>
-      <p style={{ ...styles.metricValue, fontSize: '1.8rem', color: color ?? C.TEXT, marginBottom: sub ? '8px' : 0 }}>{value}</p>
-      {sub && <p style={{ fontSize: '11px', color: C.TEXT3, fontFamily: T.MONO }}>{sub}</p>}
-    </div>
-  );
-}
-
-function StatRow({ label, value, color, hint }: { label: string; value: string; color?: string; hint?: string }) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '10px 0', borderBottom: `1px solid ${C.BORDER_FAINT}`, gap: '16px' }}>
-      <div>
-        <span style={styles.statRowLabel}>{label}</span>
-        {hint && <p style={styles.statRowHint}>{hint}</p>}
-      </div>
-      <span style={{ ...styles.statRowValue, color: color ?? C.TEXT, whiteSpace: 'nowrap' }}>{value}</span>
-    </div>
-  );
-}
-
-function formatRevenue(v: number): string {
+function fmt(v: number | null | undefined, d = 1)           { return v !== null && v !== undefined ? v.toFixed(d) : '—'; }
+function fmtPct(v: number | null | undefined, isP = false) { return v !== null && v !== undefined ? `${(isP ? v : v * 100).toFixed(1)}%` : '—'; }
+function fmtRev(v: number): string {
   if (v >= 1e12) return `${(v / 1e12).toFixed(2)}T`;
-  if (v >= 1e9) return `${(v / 1e9).toFixed(2)}B`;
-  if (v >= 1e6) return `${(v / 1e6).toFixed(1)}M`;
+  if (v >= 1e9)  return `${(v / 1e9).toFixed(2)}B`;
+  if (v >= 1e6)  return `${(v / 1e6).toFixed(1)}M`;
   return `${(v / 1e3).toFixed(0)}K`;
 }
 
+function StatRow({ label, hint, value, color }: { label: string; hint?: string; value: string; color?: string }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '10px 0', borderBottom: `1px solid ${C.BORDER_FAINT}`, gap: '16px' }}>
+      <div>
+        <span style={{ ...TYPE.DATA_SM, color: C.TEXT2 }}>{label}</span>
+        {hint && <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginTop: '2px' }}>{hint}</p>}
+      </div>
+      <span style={{ ...TYPE.DATA_SM, color: color ?? C.TEXT, fontWeight: 600, whiteSpace: 'nowrap' }}>{value}</span>
+    </div>
+  );
+}
+
 export default function FundamentalsTab({ data, meta }: FundamentalsTabProps) {
-  const [showValLearn, setShowValLearn] = useState(false);
+  const [showValLearn,    setShowValLearn]    = useState(false);
   const [showGrowthLearn, setShowGrowthLearn] = useState(false);
   const [showHealthLearn, setShowHealthLearn] = useState(false);
-  const [showEPSLearn, setShowEPSLearn] = useState(false);
-  const [showRevLearn, setShowRevLearn] = useState(false);
-  const [showDivLearn, setShowDivLearn] = useState(false);
+  const [showEPSLearn,    setShowEPSLearn]    = useState(false);
+  const [showRevLearn,    setShowRevLearn]    = useState(false);
+  const [showDivLearn,    setShowDivLearn]    = useState(false);
 
-  const revenueGrowthPct = data.revenueGrowth !== null ? data.revenueGrowth * 100 : null;
-  const grossMarginsPct = data.grossMargins !== null ? data.grossMargins * 100 : null;
-  const roePct = data.returnOnEquity !== null ? data.returnOnEquity * 100 : null;
-  const dividendYieldPct = data.dividendYield !== null ? data.dividendYield * 100 : null;
+  const roePct          = data.returnOnEquity !== null ? data.returnOnEquity * 100 : null;
+  const revenueGrowthPct = data.revenueGrowth  !== null ? data.revenueGrowth  * 100 : null;
+  const grossMarginsPct  = data.grossMargins   !== null ? data.grossMargins   * 100 : null;
+  const dividendYieldPct = data.dividendYield  !== null ? data.dividendYield  * 100 : null;
 
   const earningsChartData = data.earningsHistory
     .filter(e => e.epsActual !== null || e.epsEstimate !== null)
@@ -92,165 +70,168 @@ export default function FundamentalsTab({ data, meta }: FundamentalsTabProps) {
     .map(r => ({ period: r.period, revenue: r.revenue as number }));
 
   return (
-    <div style={{ fontFamily: T.BODY }}>
-      {/* Summary */}
-      <div style={{ ...styles.card, marginBottom: '40px' }}>
-        <p style={styles.insightLabel}>Fundamentals Summary</p>
-        <p style={{ fontFamily: T.BODY, fontSize: '14px', color: C.TEXT2, lineHeight: 1.7 }}>
-          {meta.companyName} trades at a{' '}
-          {data.peRatio !== null
-            ? <><span style={{ color: C.CYAN, fontFamily: T.MONO }}>{data.peRatio.toFixed(1)}x</span> trailing P/E</>
-            : 'P/E not available'}.{' '}
-          {data.revenueGrowth !== null
-            ? <>Revenue is growing at <span style={{ color: data.revenueGrowth >= 0 ? C.GREEN : C.RED, fontFamily: T.MONO }}>{fmtPct(data.revenueGrowth)}</span> year-over-year.</>
-            : ''}
-          {data.grossMargins !== null && <> Gross margins are <span style={{ fontFamily: T.MONO, color: C.TEXT }}>{fmtPct(data.grossMargins)}</span>.</>}
-          {data.sector && <> Sector: <span style={{ fontFamily: T.MONO, color: C.TEXT2 }}>{data.sector}</span>.</>}
+    <div style={{ fontFamily: T.BODY, color: C.TEXT }}>
+
+      {/* ── PAGE HEADER ── */}
+      <div style={{ marginBottom: '40px' }}>
+        <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '12px' }}>
+          FUNDAMENTALS // {meta.companyName.toUpperCase()}
         </p>
+        <h2 style={{ ...TYPE.DISPLAY_MD, color: C.TEXT, marginBottom: '16px' }}>
+          Financial Analysis
+        </h2>
+        {/* Summary */}
+        <div style={{ ...styles.insightBox }}>
+          <p style={styles.insightLabel}>Fundamentals Summary</p>
+          <p style={styles.insightText}>
+            {meta.companyName} trades at{' '}
+            {data.peRatio !== null
+              ? <><span style={{ ...TYPE.DATA_SM, color: C.CYAN }}>{data.peRatio.toFixed(1)}×</span> trailing P/E</>
+              : 'P/E not available'}.{' '}
+            {revenueGrowthPct !== null && <>Revenue growth: <span style={{ ...TYPE.DATA_SM, color: revenueGrowthPct >= 0 ? C.GREEN : C.RED }}>{fmtPct(data.revenueGrowth)}</span> YoY. </>}
+            {grossMarginsPct  !== null && <>Gross margins: <span style={{ ...TYPE.DATA_SM, color: C.TEXT }}>{fmtPct(data.grossMargins)}</span>. </>}
+            {data.sector && <>Sector: <span style={{ ...TYPE.DATA_SM, color: C.TEXT2 }}>{data.sector}</span>.</>}
+          </p>
+        </div>
       </div>
 
-      {/* 1. Valuation Metrics */}
-      <div style={sectionStyle}>
-        <p style={sectionTitleStyle}>Valuation Metrics</p>
-        <div style={{ display: 'flex', gap: '1px', flexWrap: 'wrap', background: C.BORDER_FAINT }}>
-          <MetricBigCard
-            label="P/E Ratio (Trailing)"
-            value={fmt(data.peRatio)}
-            sub="Price / Earnings"
-            color={data.peRatio !== null ? (data.peRatio < 15 ? C.GREEN : data.peRatio > 40 ? C.RED : C.TEXT) : undefined}
-          />
-          <MetricBigCard
-            label="Forward P/E"
-            value={fmt(data.forwardPE)}
-            sub="Next Year's Earnings"
-            color={data.forwardPE !== null ? (data.forwardPE < 15 ? C.GREEN : data.forwardPE > 40 ? C.RED : C.TEXT) : undefined}
-          />
-          <MetricBigCard
-            label="PEG Ratio"
-            value={fmt(data.pegRatio, 2)}
-            sub="P/E ÷ Growth Rate"
-            color={data.pegRatio !== null ? (data.pegRatio < 1 ? C.GREEN : data.pegRatio > 2 ? C.RED : C.GOLD) : undefined}
-          />
+      {/* ── 1. VALUATION METRICS ── */}
+      <div style={{ marginBottom: '40px' }}>
+        <p style={styles.sectionLabel}>Valuation Metrics</p>
+        {/* Three big metric cards */}
+        <div style={{ display: 'flex', gap: '1px', flexWrap: 'wrap', background: C.BORDER_FAINT, marginBottom: '16px' }}>
+          {[
+            {
+              label: 'P/E Ratio (TTM)',
+              value: fmt(data.peRatio),
+              sub: 'Price / Earnings',
+              color: data.peRatio !== null ? (data.peRatio < 15 ? C.GREEN : data.peRatio > 40 ? C.RED : C.TEXT) : C.TEXT,
+            },
+            {
+              label: 'Forward P/E',
+              value: fmt(data.forwardPE),
+              sub: '1YR Estimate',
+              color: data.forwardPE !== null ? (data.forwardPE < 15 ? C.GREEN : data.forwardPE > 40 ? C.RED : C.TEXT) : C.TEXT,
+            },
+            {
+              label: 'PEG Ratio',
+              value: fmt(data.pegRatio, 2),
+              sub: 'P/E ÷ Growth Rate',
+              color: data.pegRatio !== null ? (data.pegRatio < 1 ? C.GREEN : data.pegRatio > 2 ? C.RED : C.GOLD) : C.TEXT,
+            },
+          ].map(({ label, value, sub, color }) => (
+            <div key={label} style={{ background: C.SURFACE, padding: '24px 28px', flex: '1 1 160px' }}>
+              <p style={styles.metricLabel}>{label}</p>
+              <p style={{ ...TYPE.DATA_HERO, fontSize: '3rem', color, marginBottom: '6px', lineHeight: '1' }}>{value}</p>
+              <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3 }}>{sub}</p>
+            </div>
+          ))}
         </div>
         <div style={styles.insightBox}>
           <p style={styles.insightLabel}>What this means</p>
           <p style={styles.insightText}>
             {data.peRatio !== null
-              ? `A P/E of ${data.peRatio.toFixed(1)}x means investors pay ${data.peRatio.toFixed(1)} dollars for every dollar of earnings. ${data.peRatio < 15 ? 'This is relatively low — potentially undervalued or a value stock.' : data.peRatio > 40 ? 'This is high — the market expects significant future growth to justify the premium.' : 'This is in a moderate range for most established companies.'}`
-              : 'P/E ratio data is unavailable — this may be because the company has negative earnings.'}
-            {data.pegRatio !== null && ` PEG ratio of ${data.pegRatio.toFixed(2)} ${data.pegRatio < 1 ? '(below 1) suggests the stock may be undervalued relative to its growth rate.' : data.pegRatio > 2 ? '(above 2) suggests the stock may be overvalued relative to growth.' : 'is in a fair-value range.'}`}
+              ? `A P/E of ${data.peRatio.toFixed(1)}× means investors pay ${data.peRatio.toFixed(1)} dollars per dollar of earnings. ${data.peRatio < 15 ? 'Relatively low — potentially undervalued.' : data.peRatio > 40 ? 'High — market expects significant future growth.' : 'Moderate range for established companies.'}`
+              : 'P/E ratio unavailable — company may have negative earnings.'}
+            {data.pegRatio !== null && ` PEG of ${data.pegRatio.toFixed(2)} ${data.pegRatio < 1 ? '— potentially undervalued relative to growth.' : data.pegRatio > 2 ? '— may be overvalued relative to growth.' : '— fair-value range.'}`}
           </p>
         </div>
         <button style={styles.collapsibleBtn} onClick={() => setShowValLearn(v => !v)}>
-          {showValLearn ? '▲' : '▼'} How valuation metrics work
+          <span style={{ color: C.CYAN }}>{showValLearn ? '▾' : '▸'}</span> How valuation metrics work
         </button>
         {showValLearn && (
           <div style={styles.collapsibleContent}>
-            P/E Ratio (Price-to-Earnings) is the most widely used valuation metric. It shows how much investors pay per dollar of profit. High P/E means high growth expectations. Forward P/E uses estimated future earnings — a lower forward P/E than trailing P/E suggests earnings are expected to grow. PEG ratio adjusts P/E for growth rate — below 1.0 typically indicates value, above 2.0 suggests overvaluation. Compare to sector peers for context.
+            P/E = price per dollar of profit. High P/E = high growth expectations. Forward P/E uses estimated future earnings. PEG adjusts P/E for growth — below 1.0 suggests value, above 2.0 suggests overvaluation. Always compare to sector peers.
           </div>
         )}
       </div>
 
-      {/* 2. Growth & Profitability */}
-      <div style={sectionStyle}>
-        <p style={sectionTitleStyle}>Growth &amp; Profitability</p>
-        <div style={{ background: C.SURFACE, border: `1px solid ${C.BORDER}`, padding: '4px 20px' }}>
-          <StatRow
-            label="Revenue Growth (YoY)"
-            hint="Year-over-year top-line growth"
-            value={fmtPct(data.revenueGrowth)}
-            color={revenueGrowthPct !== null ? (revenueGrowthPct >= 0 ? C.GREEN : C.RED) : undefined}
-          />
-          <StatRow
-            label="Gross Margins"
-            hint="Revenue kept after direct costs"
-            value={fmtPct(data.grossMargins)}
-            color={grossMarginsPct !== null ? (grossMarginsPct >= 50 ? C.GREEN : grossMarginsPct >= 20 ? C.TEXT : C.RED) : undefined}
-          />
-          <StatRow
-            label="Return on Equity"
-            hint="Profit generated per unit of shareholder equity"
-            value={fmtPct(data.returnOnEquity)}
-            color={roePct !== null ? (roePct >= 15 ? C.GREEN : roePct >= 0 ? C.TEXT : C.RED) : undefined}
-          />
+      {/* ── 2. GROWTH & PROFITABILITY ── */}
+      <div style={{ marginBottom: '40px' }}>
+        <p style={styles.sectionLabel}>Growth &amp; Profitability</p>
+        <div style={{ background: C.SURFACE, border: `1px solid ${C.BORDER}`, padding: '4px 24px' }}>
+          <StatRow label="Revenue Growth (YoY)" hint="Year-over-year top-line growth" value={fmtPct(data.revenueGrowth)} color={revenueGrowthPct !== null ? (revenueGrowthPct >= 0 ? C.GREEN : C.RED) : undefined} />
+          <StatRow label="Gross Margins"        hint="Revenue kept after direct costs" value={fmtPct(data.grossMargins)} color={grossMarginsPct  !== null ? (grossMarginsPct >= 50 ? C.GREEN : grossMarginsPct >= 20 ? C.TEXT : C.RED) : undefined} />
+          <StatRow label="Return on Equity"     hint="Profit per unit of equity" value={fmtPct(data.returnOnEquity)} color={roePct !== null ? (roePct >= 15 ? C.GREEN : roePct >= 0 ? C.TEXT : C.RED) : undefined} />
         </div>
         <div style={styles.insightBox}>
           <p style={styles.insightLabel}>What this means</p>
           <p style={styles.insightText}>
-            {revenueGrowthPct !== null
-              ? `Revenue is ${revenueGrowthPct >= 0 ? 'growing' : 'declining'} at ${Math.abs(revenueGrowthPct).toFixed(1)}% year-over-year.`
-              : ''}
-            {grossMarginsPct !== null && ` Gross margins of ${grossMarginsPct.toFixed(1)}% ${grossMarginsPct >= 50 ? 'indicate a high-margin business with pricing power.' : grossMarginsPct >= 20 ? 'are typical for the sector.' : 'are low, suggesting competitive pressure or high input costs.'}`}
-            {roePct !== null && ` ROE of ${roePct.toFixed(1)}% ${roePct >= 15 ? 'shows strong capital efficiency.' : roePct >= 0 ? 'is positive but moderate.' : 'is negative — the company is not generating returns for shareholders.'}`}
+            {revenueGrowthPct !== null ? `Revenue is ${revenueGrowthPct >= 0 ? 'growing' : 'declining'} at ${Math.abs(revenueGrowthPct).toFixed(1)}% YoY. ` : ''}
+            {grossMarginsPct !== null && `Gross margins of ${grossMarginsPct.toFixed(1)}% ${grossMarginsPct >= 50 ? 'indicate strong pricing power.' : grossMarginsPct >= 20 ? 'are typical for the sector.' : 'suggest competitive pressure or high input costs.'} `}
+            {roePct !== null && `ROE of ${roePct.toFixed(1)}% ${roePct >= 15 ? 'shows strong capital efficiency.' : roePct >= 0 ? 'is positive but moderate.' : 'is negative — not generating returns for shareholders.'}`}
           </p>
         </div>
         <button style={styles.collapsibleBtn} onClick={() => setShowGrowthLearn(v => !v)}>
-          {showGrowthLearn ? '▲' : '▼'} How growth metrics work
+          <span style={{ color: C.CYAN }}>{showGrowthLearn ? '▾' : '▸'}</span> How growth metrics work
         </button>
         {showGrowthLearn && (
           <div style={styles.collapsibleContent}>
-            Revenue growth measures how fast a company is expanding its top line. Gross margins show how much of each dollar of revenue the company keeps after direct costs. Return on Equity (ROE) measures how efficiently management uses shareholder capital to generate profit — Warren Buffett considers sustained ROE above 15% a sign of a durable competitive advantage. High margins combined with strong ROE and growth is the hallmark of quality businesses.
+            Revenue growth = top-line expansion. Gross margins = revenue kept after direct costs. ROE = profit generated per unit of shareholder equity. Sustained ROE above 15% is a hallmark of quality businesses (Buffett benchmark).
           </div>
         )}
       </div>
 
-      {/* 3. Earnings History */}
+      {/* ── 3. EPS HISTORY ── */}
       {earningsChartData.length > 0 && (
-        <div style={sectionStyle}>
-          <p style={sectionTitleStyle}>Earnings History (EPS)</p>
-          <div style={{ background: C.SURFACE, padding: '16px' }}>
+        <div style={{ marginBottom: '40px' }}>
+          <p style={styles.sectionLabel}>EPS History (Quarterly)</p>
+          <div style={{ background: C.SURFACE, border: `1px solid ${C.BORDER}`, padding: '24px' }}>
+            <h3 style={{ ...TYPE.DISPLAY_SM, color: C.TEXT, marginBottom: '4px' }}>Earnings Per Share</h3>
+            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '20px' }}>Actual vs Estimates</p>
+            <div style={{ display: 'flex', gap: '16px', marginBottom: '12px' }}>
+              {([[C.TEXT3, 'Estimate'], [C.GREEN, 'Beat'], [C.RED, 'Miss']] as [string, string][]).map(([c, l]) => (
+                <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ width: '8px', height: '8px', background: c, display: 'inline-block' }} />
+                  <span style={{ ...TYPE.LABEL_SM, color: C.TEXT3 }}>{l}</span>
+                </span>
+              ))}
+            </div>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={earningsChartData} margin={{ top: 4, right: 8, left: -24, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={C.BORDER} vertical={false} />
-                <XAxis dataKey="quarter" tick={{ fill: C.TEXT2, fontSize: 10, fontFamily: T.MONO }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fill: C.TEXT2, fontSize: 10, fontFamily: T.MONO }} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={C.BORDER_FAINT} vertical={false} />
+                <XAxis dataKey="quarter" tick={{ fill: C.TEXT3, fontSize: 10, fontFamily: T.MONO }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fill: C.TEXT3, fontSize: 10, fontFamily: T.MONO }} tickLine={false} axisLine={false} />
                 <Tooltip {...styles.tooltipStyle} formatter={(v: unknown, name: unknown) => [v !== null && v !== undefined ? (v as number).toFixed(2) : '—', name as string]} />
                 <ReferenceLine y={0} stroke={C.BORDER} />
-                <Bar dataKey="estimate" fill={C.TEXT3} name="EPS Estimate" isAnimationActive={false} />
-                <Bar dataKey="actual" name="EPS Actual" isAnimationActive={false}>
-                  {earningsChartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={entry.actual !== null && entry.estimate !== null
+                <Bar dataKey="estimate" fill={C.TEXT3} name="Estimate" isAnimationActive={false} />
+                <Bar dataKey="actual"   name="Actual"  isAnimationActive={false}>
+                  {earningsChartData.map((entry, i) => (
+                    <Cell key={`cell-${i}`} fill={
+                      entry.actual !== null && entry.estimate !== null
                         ? (entry.actual >= entry.estimate ? C.GREEN : C.RED)
-                        : C.NEUTRAL}
-                    />
+                        : C.NEUTRAL
+                    } />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
-            {[[C.TEXT3, 'Estimate'], [C.GREEN, 'Beat'], [C.RED, 'Miss']].map(([c, l]) => (
-              <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <span style={{ width: '8px', height: '8px', background: c, display: 'inline-block' }} />
-                <span style={{ color: C.TEXT2, fontSize: '11px', fontFamily: T.MONO }}>{l}</span>
-              </span>
-            ))}
-          </div>
           <button style={styles.collapsibleBtn} onClick={() => setShowEPSLearn(v => !v)}>
-            {showEPSLearn ? '▲' : '▼'} How EPS history works
+            <span style={{ color: C.CYAN }}>{showEPSLearn ? '▾' : '▸'}</span> How EPS history works
           </button>
           {showEPSLearn && (
             <div style={styles.collapsibleContent}>
-              EPS (Earnings Per Share) shows the company&apos;s profit divided by outstanding shares. Comparing actual EPS to analyst estimates shows whether the company beats or misses expectations. Consistent beats build investor confidence. Misses can trigger sharp selloffs. The trend in EPS matters as much as the individual quarter — sustained growth in EPS alongside revenue growth is the strongest fundamental signal.
+              EPS = profit divided by shares outstanding. Beats build confidence; misses can trigger selloffs. Consistent beats alongside revenue growth is the strongest fundamental signal.
             </div>
           )}
         </div>
       )}
 
-      {/* 4. Revenue Trend */}
+      {/* ── 4. REVENUE TREND ── */}
       {revenueChartData.length > 0 && (
-        <div style={sectionStyle}>
-          <p style={sectionTitleStyle}>Revenue Trend (Quarterly)</p>
-          <div style={{ background: C.SURFACE, padding: '16px' }}>
+        <div style={{ marginBottom: '40px' }}>
+          <p style={styles.sectionLabel}>Revenue Trend (Quarterly)</p>
+          <div style={{ background: C.SURFACE, border: `1px solid ${C.BORDER}`, padding: '24px' }}>
+            <h3 style={{ ...TYPE.DISPLAY_SM, color: C.TEXT, marginBottom: '4px' }}>Revenue History</h3>
+            <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '20px' }}>Most recent quarter highlighted in cyan</p>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={revenueChartData} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={C.BORDER} vertical={false} />
-                <XAxis dataKey="period" tick={{ fill: C.TEXT2, fontSize: 10, fontFamily: T.MONO }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fill: C.TEXT2, fontSize: 10, fontFamily: T.MONO }} tickLine={false} axisLine={false} tickFormatter={formatRevenue} />
-                <Tooltip {...styles.tooltipStyle} formatter={(v: unknown) => [formatRevenue(v as number), 'Revenue']} />
-                <Bar dataKey="revenue" fill={C.VIOLET} name="Revenue" isAnimationActive={false}>
+                <CartesianGrid strokeDasharray="3 3" stroke={C.BORDER_FAINT} vertical={false} />
+                <XAxis dataKey="period" tick={{ fill: C.TEXT3, fontSize: 10, fontFamily: T.MONO }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fill: C.TEXT3, fontSize: 10, fontFamily: T.MONO }} tickLine={false} axisLine={false} tickFormatter={fmtRev} />
+                <Tooltip {...styles.tooltipStyle} formatter={(v: unknown) => [fmtRev(v as number), 'Revenue']} />
+                <Bar dataKey="revenue" name="Revenue" isAnimationActive={false}>
                   {revenueChartData.map((_, i) => (
                     <Cell key={`rev-${i}`} fill={i === revenueChartData.length - 1 ? C.CYAN : C.VIOLET} />
                   ))}
@@ -259,82 +240,71 @@ export default function FundamentalsTab({ data, meta }: FundamentalsTabProps) {
             </ResponsiveContainer>
           </div>
           <button style={styles.collapsibleBtn} onClick={() => setShowRevLearn(v => !v)}>
-            {showRevLearn ? '▲' : '▼'} How revenue trend works
+            <span style={{ color: C.CYAN }}>{showRevLearn ? '▾' : '▸'}</span> How revenue trend works
           </button>
           {showRevLearn && (
             <div style={styles.collapsibleContent}>
-              Quarterly revenue shows the trajectory of the company&apos;s top-line growth. A consistently rising revenue chart suggests business expansion. Flat or declining revenue can indicate market saturation or competitive pressure. Seasonal businesses will show cyclical patterns. The most recent quarter (highlighted in cyan) shows the latest data point. Compare each quarter to the same quarter a year ago (year-over-year) for the most accurate growth picture.
+              Consistently rising revenue signals business expansion. Flat or declining revenue can indicate market saturation. Compare each quarter to the same quarter a year ago (YoY) for the most accurate picture.
             </div>
           )}
         </div>
       )}
 
-      {/* 5. Financial Health */}
-      <div style={sectionStyle}>
-        <p style={sectionTitleStyle}>Financial Health</p>
-        <div style={{ background: C.SURFACE, border: `1px solid ${C.BORDER}`, padding: '4px 20px' }}>
-          <StatRow
-            label="Debt / Equity"
-            hint="Total debt relative to shareholder equity"
-            value={fmt(data.debtToEquity, 2)}
-            color={data.debtToEquity !== null ? (data.debtToEquity < 0.5 ? C.GREEN : data.debtToEquity > 2 ? C.RED : C.GOLD) : undefined}
-          />
-          <StatRow
-            label="Current Ratio"
-            hint="Short-term assets vs short-term liabilities"
-            value={fmt(data.currentRatio, 2)}
-            color={data.currentRatio !== null ? (data.currentRatio >= 2 ? C.GREEN : data.currentRatio >= 1 ? C.TEXT : C.RED) : undefined}
-          />
+      {/* ── 5. FINANCIAL HEALTH ── */}
+      <div style={{ marginBottom: '40px' }}>
+        <p style={styles.sectionLabel}>Financial Health</p>
+        <div style={{ background: C.SURFACE, border: `1px solid ${C.BORDER}`, padding: '4px 24px' }}>
+          <StatRow label="Debt / Equity"   hint="Total debt relative to equity"       value={fmt(data.debtToEquity, 2)} color={data.debtToEquity !== null ? (data.debtToEquity < 0.5 ? C.GREEN : data.debtToEquity > 2 ? C.RED : C.GOLD) : undefined} />
+          <StatRow label="Current Ratio"   hint="Short-term assets vs liabilities"    value={fmt(data.currentRatio, 2)} color={data.currentRatio !== null ? (data.currentRatio >= 2 ? C.GREEN : data.currentRatio >= 1 ? C.TEXT : C.RED) : undefined} />
         </div>
         <div style={styles.insightBox}>
           <p style={styles.insightLabel}>What this means</p>
           <p style={styles.insightText}>
-            {data.debtToEquity !== null
-              ? `Debt/Equity of ${data.debtToEquity.toFixed(2)} means the company has ${data.debtToEquity.toFixed(2)} dollars of debt for every dollar of equity. ${data.debtToEquity < 0.5 ? 'Low leverage — financially conservative.' : data.debtToEquity > 2 ? 'High leverage — elevated financial risk, especially in rising rate environments.' : 'Moderate leverage — manageable for most sectors.'}`
-              : ''}
-            {data.currentRatio !== null && ` Current ratio of ${data.currentRatio.toFixed(2)} ${data.currentRatio >= 2 ? 'shows strong short-term liquidity.' : data.currentRatio >= 1 ? 'indicates the company can meet short-term obligations.' : 'is below 1 — potential short-term liquidity concerns.'}`}
+            {data.debtToEquity !== null ? `D/E of ${data.debtToEquity.toFixed(2)} — ${data.debtToEquity < 0.5 ? 'low leverage, financially conservative.' : data.debtToEquity > 2 ? 'high leverage, elevated risk in rising rate environments.' : 'moderate leverage.'}` : ''}
+            {data.currentRatio !== null && ` Current ratio of ${data.currentRatio.toFixed(2)} ${data.currentRatio >= 2 ? '— strong short-term liquidity.' : data.currentRatio >= 1 ? '— can meet short-term obligations.' : '— potential liquidity concerns.'}`}
           </p>
         </div>
         <button style={styles.collapsibleBtn} onClick={() => setShowHealthLearn(v => !v)}>
-          {showHealthLearn ? '▲' : '▼'} How financial health metrics work
+          <span style={{ color: C.CYAN }}>{showHealthLearn ? '▾' : '▸'}</span> How financial health metrics work
         </button>
         {showHealthLearn && (
           <div style={styles.collapsibleContent}>
-            Debt/Equity ratio measures how much a company finances operations with debt vs shareholder equity. High D/E amplifies both gains and losses — manageable in low-rate environments but risky when rates rise. The Current Ratio measures short-term solvency: current assets divided by current liabilities. Above 2 is generally healthy; below 1 may signal liquidity risk. Both metrics vary significantly by industry — capital-intensive industries like utilities typically carry more debt.
+            Debt/Equity measures financial leverage. High D/E amplifies gains and losses — risky when rates rise. Current Ratio above 2 = healthy liquidity. Below 1 = potential short-term risk. Both vary by industry.
           </div>
         )}
       </div>
 
-      {/* 6. Dividend */}
+      {/* ── 6. DIVIDEND ── */}
       {dividendYieldPct !== null && dividendYieldPct > 0 && (
-        <div style={sectionStyle}>
-          <p style={sectionTitleStyle}>Dividend</p>
-          <div style={{ background: C.SURFACE, border: `1px solid ${C.BORDER}`, padding: '20px 24px', display: 'flex', alignItems: 'center', gap: '24px' }}>
+        <div style={{ marginBottom: '40px' }}>
+          <p style={styles.sectionLabel}>Dividend</p>
+          <div style={{ background: C.SURFACE, border: `1px solid ${C.BORDER}`, padding: '28px', display: 'flex', alignItems: 'center', gap: '28px', flexWrap: 'wrap' }}>
             <div>
               <p style={styles.metricLabel}>Dividend Yield</p>
-              <p style={{ fontFamily: T.MONO, fontSize: '2.5rem', color: C.GREEN, fontWeight: 700, lineHeight: 1 }}>
+              <p style={{ ...TYPE.DATA_HERO, fontSize: '3.5rem', color: C.GREEN, lineHeight: '1' }}>
                 {dividendYieldPct.toFixed(2)}%
               </p>
             </div>
-            <p style={{ fontFamily: T.BODY, fontSize: '13px', color: C.TEXT2, lineHeight: 1.6 }}>
-              Annual dividend income as a percentage of the current stock price.{' '}
+            <p style={{ ...TYPE.PROSE_MD, color: C.TEXT2, maxWidth: '360px' }}>
+              Annual dividend income as a % of current price.{' '}
               {dividendYieldPct > 5
-                ? 'High yield — verify it is sustainable and not driven by a falling stock price.'
+                ? 'High yield — verify it is sustainable and not a falling-price trap.'
                 : dividendYieldPct > 2
-                ? 'Healthy yield offering income alongside potential price appreciation.'
-                : 'Low yield — company prioritizes growth reinvestment over income distribution.'}
+                ? 'Healthy yield offering income alongside price appreciation.'
+                : 'Low yield — company reinvests in growth over income distribution.'}
             </p>
           </div>
           <button style={styles.collapsibleBtn} onClick={() => setShowDivLearn(v => !v)}>
-            {showDivLearn ? '▲' : '▼'} How dividend yield works
+            <span style={{ color: C.CYAN }}>{showDivLearn ? '▾' : '▸'}</span> How dividend yield works
           </button>
           {showDivLearn && (
             <div style={styles.collapsibleContent}>
-              Dividend yield = annual dividend per share divided by current stock price. A rising yield can mean the company raised its dividend (positive) or the stock price fell (negative — the &quot;yield trap&quot;). Key metrics to check: payout ratio (what % of earnings is paid as dividend — above 80% is risky), dividend growth history, and free cash flow coverage. Consistent dividend growers (Dividend Aristocrats) are considered quality income investments.
+              Dividend yield = annual dividend ÷ current price. Rising yield can mean higher dividend (good) or falling stock price (bad — the "yield trap"). Payout ratio above 80% is risky. Dividend Aristocrats (consistent growers) are quality income investments.
             </div>
           )}
         </div>
       )}
+
     </div>
   );
 }
