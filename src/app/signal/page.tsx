@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense, useRef, useCallback } from 'react';
+import React from 'react';
 import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -95,7 +96,9 @@ function getBadgeStyle(label: EntryExitLabel): CSSProperties {
 }
 
 // ── Top Nav ───────────────────────────────────────────────────────────────────
-function TopNav() {
+function TopNav({ company = '', timeframe = 30 }: { company?: string; timeframe?: number }) {
+  const navLink: React.CSSProperties = { fontFamily: MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase' as const, textDecoration: 'none', color: C.TEXT2 };
+  const activeLink: React.CSSProperties = { ...navLink, color: C.GREEN, borderBottom: `1px solid ${C.GREEN}`, paddingBottom: '2px' };
   return (
     <nav style={{
       position: 'fixed', top: 0, left: 0, right: 0, height: '48px',
@@ -108,9 +111,12 @@ function TopNav() {
           <span style={{ fontFamily: MONO, fontSize: '13px', fontWeight: 700, letterSpacing: '0.2em', color: C.TEXT }}>MARKORA</span>
         </Link>
         <div style={{ display: 'flex', gap: '32px' }}>
-          <span style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: C.GREEN, borderBottom: `1px solid ${C.GREEN}`, paddingBottom: '2px' }}>SIGNALS</span>
-          <Link href="/markets" style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>MARKETS</Link>
-          <Link href="/methodology" style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>METHODOLOGY</Link>
+          <span style={activeLink}>SIGNALS</span>
+          {company && (
+            <Link href={`/signal/details?company=${encodeURIComponent(company)}&timeframe=${timeframe}`} style={navLink}>DEEP ANALYSIS</Link>
+          )}
+          <Link href="/markets" style={navLink}>MARKETS</Link>
+          <Link href="/methodology" style={navLink}>METHODOLOGY</Link>
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -360,7 +366,7 @@ function SignalContent() {
     <div style={{ background: C.BG, minHeight: '100vh', fontFamily: BODY }}>
 
       {/* ── FIXED TOP NAV ────────────────────────────────────────────────── */}
-      <TopNav />
+      <TopNav company={data?.companyName ?? rawTicker} timeframe={timeframe} />
 
       {/* ── FIXED LEFT SIDEBAR ───────────────────────────────────────────── */}
       {data && (

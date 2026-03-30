@@ -143,8 +143,9 @@ function DetailsContent() {
           <div style={{ display: 'flex', gap: '32px' }}>
             <a
               href={`/signal?ticker=${encodeURIComponent(company)}&timeframe=${timeframe}`}
-              style={{ fontFamily: T.MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.GREEN, borderBottom: `1px solid ${C.GREEN}`, paddingBottom: '2px' }}
+              style={{ fontFamily: T.MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}
             >SIGNALS</a>
+            <span style={{ fontFamily: T.MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: C.GREEN, borderBottom: `1px solid ${C.GREEN}`, paddingBottom: '2px' }}>DEEP ANALYSIS</span>
             <a href="/markets" style={{ fontFamily: T.MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>MARKETS</a>
             <a href="/methodology" style={{ fontFamily: T.MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>METHODOLOGY</a>
           </div>

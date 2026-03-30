@@ -186,14 +186,20 @@ export const styles = {
     color:      C.TEXT2,
   } as CSSProperties,
 
-  // Nav item (sidebar)
+  // Nav item (sidebar) — works on both <a> and <button>
   navItem: (active: boolean): CSSProperties => ({
     display:        'flex',
     alignItems:     'center',
     gap:            '10px',
     padding:        '13px 20px',
+    width:          '100%',
+    boxSizing:      'border-box' as const,
     ...TYPE.LABEL_MD,
     textDecoration: 'none',
+    cursor:         'pointer',
+    border:         'none',
+    outline:        'none',
+    textAlign:      'left' as const,
     color:          active ? C.CYAN : C.TEXT2,
     background:     active ? C.CYAN + '08' : 'transparent',
     borderLeft:     active ? `3px solid ${C.CYAN}` : '3px solid transparent',
