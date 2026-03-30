@@ -241,7 +241,25 @@ function SignalContent() {
     if (!rawTicker) return;
     let cancelled = false;
 
+    const CACHE_KEY = `markora_signal_${rawTicker}_${timeframe}`;
+    const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
     const run = async () => {
+      // Check sessionStorage cache first
+      try {
+        const cached = sessionStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const { data: cachedData, ts } = JSON.parse(cached);
+          if (Date.now() - ts < CACHE_TTL) {
+            if (!cancelled) {
+              setData(cachedData as AnalyzeResponse);
+              setLoading(false);
+            }
+            return;
+          }
+        }
+      } catch { /* ignore storage errors */ }
+
       setLoading(true);
       setError(null);
       setData(null);
@@ -253,8 +271,14 @@ function SignalContent() {
         });
         const json = await res.json();
         if (!cancelled) {
-          if (!res.ok) setError((json as ApiError).error ?? 'Analysis failed');
-          else setData(json as AnalyzeResponse);
+          if (!res.ok) {
+            setError((json as ApiError).error ?? 'Analysis failed');
+          } else {
+            setData(json as AnalyzeResponse);
+            try {
+              sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: json, ts: Date.now() }));
+            } catch { /* ignore storage errors */ }
+          }
         }
       } catch {
         if (!cancelled) setError('Network error — please try again');
