@@ -108,9 +108,9 @@ function TopNav() {
           <span style={{ fontFamily: MONO, fontSize: '13px', fontWeight: 700, letterSpacing: '0.2em', color: C.TEXT }}>MARKORA</span>
         </Link>
         <div style={{ display: 'flex', gap: '32px' }}>
-          <a href="#" style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.GREEN, borderBottom: `1px solid ${C.GREEN}`, paddingBottom: '2px' }}>SIGNALS</a>
-          <a href="#" style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>MARKETS</a>
-          <a href="#" style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>METHODOLOGY</a>
+          <span style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: C.GREEN, borderBottom: `1px solid ${C.GREEN}`, paddingBottom: '2px' }}>SIGNALS</span>
+          <Link href="/markets" style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>MARKETS</Link>
+          <Link href="/methodology" style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>METHODOLOGY</Link>
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -379,9 +379,9 @@ function SignalContent() {
             <span style={{
               fontFamily: T.MONO,
               fontSize: '9px',
-              color: C.GREEN,
-              background: C.GREEN + '18',
-              border: `1px solid ${C.GREEN}30`,
+              color: C.CYAN,
+              background: C.CYAN + '18',
+              border: `1px solid ${C.CYAN}30`,
               padding: '3px 10px',
               letterSpacing: '0.1em',
               textTransform: 'uppercase',

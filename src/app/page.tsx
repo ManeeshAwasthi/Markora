@@ -144,10 +144,14 @@ export default function LandingPage() {
         </span>
 
         <div style={{ display: 'flex', gap: '36px' }}>
-          {['SIGNALS', 'MARKETS', 'METHODOLOGY'].map((link) => (
+          {([
+            { label: 'SIGNALS',     href: '/signal'      },
+            { label: 'MARKETS',     href: '/markets'     },
+            { label: 'METHODOLOGY', href: '/methodology' },
+          ] as const).map((link) => (
             <a
-              key={link}
-              href="#"
+              key={link.label}
+              href={link.href}
               style={{
                 fontFamily: MONO,
                 fontSize: '9px',
@@ -159,7 +163,7 @@ export default function LandingPage() {
               }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = C.CYAN; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = C.TEXT2; }}
-            >{link}</a>
+            >{link.label}</a>
           ))}
         </div>
 

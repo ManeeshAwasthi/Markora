@@ -145,8 +145,8 @@ function DetailsContent() {
               href={`/signal?ticker=${encodeURIComponent(company)}&timeframe=${timeframe}`}
               style={{ fontFamily: T.MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.GREEN, borderBottom: `1px solid ${C.GREEN}`, paddingBottom: '2px' }}
             >SIGNALS</a>
-            <a href="#" style={{ fontFamily: T.MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>MARKETS</a>
-            <a href="#" style={{ fontFamily: T.MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>METHODOLOGY</a>
+            <a href="/markets" style={{ fontFamily: T.MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>MARKETS</a>
+            <a href="/methodology" style={{ fontFamily: T.MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>METHODOLOGY</a>
           </div>
         </div>
         {/* Live indicator */}
