@@ -138,19 +138,21 @@ function DetailsContent() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
           <a href="/" style={{ textDecoration: 'none' }}>
-            <span style={{ ...TYPE.LABEL_LG, fontSize: '13px', letterSpacing: '0.2em', color: C.TEXT }}>MARKORA</span>
+            <span style={{ fontFamily: T.MONO, fontSize: '13px', fontWeight: 700, letterSpacing: '0.2em', color: C.TEXT }}>MARKORA</span>
           </a>
-          <a
-            href={`/signal?ticker=${encodeURIComponent(company)}&timeframe=${timeframe}`}
-            style={{ ...TYPE.LABEL_SM, color: C.TEXT2, textDecoration: 'none', transition: 'color 120ms' }}
-            onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.color = C.CYAN)}
-            onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = C.TEXT2)}
-          >← SIGNAL BOARD</a>
+          <div style={{ display: 'flex', gap: '32px' }}>
+            <a
+              href={`/signal?ticker=${encodeURIComponent(company)}&timeframe=${timeframe}`}
+              style={{ fontFamily: T.MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.GREEN, borderBottom: `1px solid ${C.GREEN}`, paddingBottom: '2px' }}
+            >SIGNALS</a>
+            <a href="#" style={{ fontFamily: T.MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>MARKETS</a>
+            <a href="#" style={{ fontFamily: T.MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', color: C.TEXT2 }}>METHODOLOGY</a>
+          </div>
         </div>
         {/* Live indicator */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: C.GREEN, animation: 'pulse 2s infinite' }} />
-          <span style={{ ...TYPE.LABEL_SM, color: C.TEXT3 }}>LIVE_FEED</span>
+          <span style={{ ...TYPE.LABEL_SM, color: C.TEXT2, textTransform: 'uppercase', letterSpacing: '0.15em' }}>LIVE_FEED</span>
         </div>
       </nav>
 
