@@ -60,11 +60,6 @@ const SECTION_LABEL: CSSProperties = {
   marginBottom: '16px',
 };
 
-const TICKER_TAPE_ITEMS = [
-  'AAPL · Aligned', 'TSLA · Mild Optimism', 'MSFT · Overconfidence',
-  'NVDA · Hidden Strength', 'META · Aligned', 'AMZN · Mild Pessimism',
-  'GOOG · Aligned', 'NFLX · Mild Optimism', 'AMD · Hidden Strength',
-];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const fmt = (v: number | null | undefined, decimals = 2, suffix = ''): string =>
@@ -174,27 +169,6 @@ function Badge({ label, color, bg }: { label: string; color: string; bg: string 
   );
 }
 
-// ── Ticker tape ───────────────────────────────────────────────────────────────
-function TickerTape() {
-  const items = [...TICKER_TAPE_ITEMS, ...TICKER_TAPE_ITEMS];
-  return (
-    <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: '32px', background: C.SURFACE, borderTop: `1px solid ${C.BORDER_FAINT}`, overflow: 'hidden', zIndex: 40 }}>
-      <div style={{ display: 'flex', gap: '48px', alignItems: 'center', height: '100%', width: 'max-content', animation: 'tickerScroll 40s linear infinite', paddingLeft: '100%' }}>
-        {items.map((item, i) => {
-          const [symbol, signal] = item.split(' · ');
-          const color = SIGNAL_COLORS[signal as SignalType] ?? C.NEUTRAL;
-          return (
-            <span key={i} style={{ whiteSpace: 'nowrap', fontFamily: MONO, fontSize: '11px' }}>
-              <span style={{ color: C.TEXT }}>{symbol}</span>
-              <span style={{ color: C.TEXT3, margin: '0 6px' }}>·</span>
-              <span style={{ color }}>{signal}</span>
-            </span>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 // ── Sentiment bar ─────────────────────────────────────────────────────────────
 function SentimentBar({ bullish, neutral, bearish }: { bullish: number; neutral: number; bearish: number }) {
@@ -447,7 +421,7 @@ function SignalContent() {
       <main style={{
         marginLeft: data ? '220px' : '0',
         marginTop: '48px',
-        padding: '40px 40px 80px',
+        padding: '40px 40px 48px',
         minHeight: 'calc(100vh - 48px)',
         background: C.BG,
       }}>
@@ -539,7 +513,7 @@ function SignalContent() {
               }}
               onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
               onFocus={() => inputTicker.trim().length > 0 && suggestions.length > 0 && setShowDropdown(true)}
-              placeholder="SEARCH EQUITY TICKER..."
+              placeholder="SEARCH COMPANY..."
               style={{
                 width: '100%',
                 background: C.SURFACE,
@@ -581,7 +555,6 @@ function SignalContent() {
                     onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = C.ELEVATED; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                   >
-                    <span style={{ fontFamily: MONO, fontSize: '11px', color: C.CYAN, minWidth: '55px' }}>{s.ticker}</span>
                     <span style={{ color: C.TEXT, fontSize: '12px', fontFamily: BODY, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
                     {s.exchange && (
                       <span style={{ fontFamily: MONO, fontSize: '10px', color: C.TEXT2, background: C.ELEVATED, padding: '2px 6px' }}>{s.exchange}</span>
@@ -1143,7 +1116,6 @@ function SignalContent() {
         )}
       </main>
 
-      <TickerTape />
     </div>
   );
 }

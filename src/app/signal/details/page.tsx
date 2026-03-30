@@ -296,7 +296,7 @@ function DetailsContent() {
                 }}
                 onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
                 onFocus={() => inputTicker.trim().length > 0 && suggestions.length > 0 && setShowDropdown(true)}
-                placeholder="SEARCH EQUITY TICKER..."
+                placeholder="SEARCH COMPANY..."
                 style={{
                   width: '100%', background: C.SURFACE, border: `1px solid ${C.BORDER}`,
                   color: C.TEXT, fontFamily: T.MONO, fontSize: '10px', height: '40px',
@@ -326,7 +326,6 @@ function DetailsContent() {
                       onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = C.ELEVATED; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                     >
-                      <span style={{ fontFamily: T.MONO, fontSize: '11px', color: C.CYAN, minWidth: '55px' }}>{s.ticker}</span>
                       <span style={{ color: C.TEXT, fontSize: '12px', fontFamily: T.BODY, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
                       {s.exchange && (
                         <span style={{ fontFamily: T.MONO, fontSize: '10px', color: C.TEXT2, background: C.ELEVATED, padding: '2px 6px' }}>{s.exchange}</span>
