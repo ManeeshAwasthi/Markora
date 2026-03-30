@@ -263,7 +263,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // ── Build response ───────────────────────────────────────────────────
     const response = {
-      meta: { ticker, companyName, currencySymbol, exchange, country, currency, currentPrice: Math.round(currentPrice * 100) / 100, timeframe },
+      meta: {
+        ticker, companyName, currencySymbol, exchange, country, currency,
+        currentPrice: Math.round(currentPrice * 100) / 100, timeframe,
+        priceChangePercent: (() => {
+          const startIdx = Math.max(0, closes.length - timeframe - 1);
+          const startPrice = closes[startIdx];
+          return startPrice > 0 ? Math.round(((currentPrice - startPrice) / startPrice) * 10000) / 100 : 0;
+        })(),
+      },
       priceIntelligence: {
         rsi: currentRSI, rsiLabel,
         rsiHistory: rsiHistory.slice(-timeframe),

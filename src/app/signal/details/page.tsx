@@ -8,7 +8,15 @@ import MomentumTab          from '@/components/details/MomentumTab';
 import RiskProfileTab       from '@/components/details/RiskProfileTab';
 import PeerComparisonTab    from '@/components/details/PeerComparisonTab';
 import { C, T, TYPE, styles } from '@/lib/designTokens';
-import { SearchResult } from '@/types';
+import { SearchResult, SignalType } from '@/types';
+
+const SIGNAL_COLORS: Record<SignalType, string> = {
+  Overconfidence:   C.RED,
+  'Mild Optimism':  C.ORANGE,
+  Aligned:          C.GREEN,
+  'Mild Pessimism': C.ORANGE,
+  'Hidden Strength':C.CYAN,
+};
 
 type TabSlug = 'price-intelligence' | 'fundamentals' | 'momentum' | 'risk-profile' | 'peer-comparison';
 
@@ -41,6 +49,7 @@ function DetailsContent() {
   const company      = searchParams.get('company')   ?? '';
   const timeframe    = Number(searchParams.get('timeframe') ?? '30') || 30;
   const tabParam     = (searchParams.get('tab') ?? 'price-intelligence') as TabSlug;
+  const signalParam  = searchParams.get('signal') ?? '';
 
   const [activeTab, setActiveTab] = useState<TabSlug>(tabParam);
   const [data,      setData]      = useState<any>(null);
@@ -249,7 +258,7 @@ function DetailsContent() {
           background:   C.BG,
           minHeight:    'calc(100vh - 48px)',
         }}>
-          {/* ── HERO HEADER (Zone 3) ── */}
+          {/* ── HERO HEADER ── */}
           <header style={{
             display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
             padding: '40px 40px 32px', borderBottom: `1px solid ${C.BORDER_FAINT}`,
@@ -259,21 +268,52 @@ function DetailsContent() {
               <h1 style={{ fontFamily: T.SERIF, fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 2.8rem)', fontWeight: 800, color: C.TEXT, margin: 0, lineHeight: 1.1 }}>
                 {meta.companyName}
               </h1>
-              <span style={{ fontFamily: T.MONO, fontSize: '1.6rem', fontWeight: 700, color: C.CYAN }}>
-                {meta.currencySymbol}{meta.currentPrice.toLocaleString()}
-              </span>
-              <span style={{ background: C.ELEVATED, border: `1px solid ${C.BORDER}`, fontFamily: T.MONO, fontSize: '9px', color: C.TEXT2, padding: '3px 8px' }}>
-                {meta.exchange}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                <span style={{ fontFamily: T.MONO, fontSize: '1.6rem', fontWeight: 700, color: C.TEXT }}>
+                  {meta.currencySymbol}{meta.currentPrice.toLocaleString()}
+                </span>
+                {meta.priceChangePercent !== undefined && (
+                  <span style={{ fontFamily: T.MONO, fontSize: '12px', fontWeight: 700, color: meta.priceChangePercent >= 0 ? C.GREEN : C.RED }}>
+                    {meta.priceChangePercent >= 0 ? '+' : ''}{meta.priceChangePercent.toFixed(2)}%
+                  </span>
+                )}
+              </div>
             </div>
-            <a
-              href="/"
-              style={{ color: C.TEXT2, fontFamily: T.MONO, fontSize: '10px', textDecoration: 'none', border: `1px solid ${C.BORDER}`, padding: '8px 16px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.TEXT; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.TEXT2; }}
-            >
-              ← Home
-            </a>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              {signalParam && (
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                    <span style={{ fontFamily: T.MONO, fontSize: '9px', color: C.TEXT2, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Signal Status</span>
+                    <span style={{
+                      padding: '4px 12px',
+                      background: `${SIGNAL_COLORS[signalParam as SignalType] ?? C.NEUTRAL}10`,
+                      border: `1px solid ${SIGNAL_COLORS[signalParam as SignalType] ?? C.NEUTRAL}40`,
+                      color: SIGNAL_COLORS[signalParam as SignalType] ?? C.NEUTRAL,
+                      fontFamily: T.MONO, fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700,
+                    }}>{signalParam}</span>
+                  </div>
+                  <div style={{ width: '1px', height: '40px', background: C.BORDER_FAINT }} />
+                </>
+              )}
+              <div style={{ display: 'flex', gap: '6px' }}>
+                {data.fundamentals?.sector && (
+                  <span style={{ padding: '4px 10px', background: C.ELEVATED, border: `1px solid ${C.BORDER}`, fontFamily: T.MONO, fontSize: '9px', color: C.TEXT2, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    {data.fundamentals.sector}
+                  </span>
+                )}
+                {data.fundamentals?.industry && (
+                  <span style={{ padding: '4px 10px', background: C.ELEVATED, border: `1px solid ${C.BORDER}`, fontFamily: T.MONO, fontSize: '9px', color: C.TEXT2, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    {data.fundamentals.industry}
+                  </span>
+                )}
+              </div>
+              <a
+                href="/"
+                style={{ color: C.TEXT2, fontFamily: T.MONO, fontSize: '10px', textDecoration: 'none', border: `1px solid ${C.BORDER}`, padding: '8px 16px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.TEXT; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.TEXT2; }}
+              >← Home</a>
+            </div>
           </header>
 
           {/* ── CONTROLS BAR ── */}

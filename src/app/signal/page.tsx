@@ -96,7 +96,7 @@ function getBadgeStyle(label: EntryExitLabel): CSSProperties {
 }
 
 // ── Top Nav ───────────────────────────────────────────────────────────────────
-function TopNav({ company = '', timeframe = 30 }: { company?: string; timeframe?: number }) {
+function TopNav({ company = '', timeframe = 30, signal = '' }: { company?: string; timeframe?: number; signal?: string }) {
   const navLink: React.CSSProperties = { fontFamily: MONO, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase' as const, textDecoration: 'none', color: C.TEXT2 };
   const activeLink: React.CSSProperties = { ...navLink, color: C.GREEN, borderBottom: `1px solid ${C.GREEN}`, paddingBottom: '2px' };
   return (
@@ -113,7 +113,7 @@ function TopNav({ company = '', timeframe = 30 }: { company?: string; timeframe?
         <div style={{ display: 'flex', gap: '32px' }}>
           <span style={activeLink}>SIGNALS</span>
           {company && (
-            <Link href={`/signal/details?company=${encodeURIComponent(company)}&timeframe=${timeframe}`} style={navLink}>DEEP ANALYSIS</Link>
+            <Link href={`/signal/details?company=${encodeURIComponent(company)}&timeframe=${timeframe}${signal ? `&signal=${encodeURIComponent(signal)}` : ''}`} style={navLink}>DEEP ANALYSIS</Link>
           )}
           <Link href="/markets" style={navLink}>MARKETS</Link>
           <Link href="/methodology" style={navLink}>METHODOLOGY</Link>
@@ -366,7 +366,7 @@ function SignalContent() {
     <div style={{ background: C.BG, minHeight: '100vh', fontFamily: BODY }}>
 
       {/* ── FIXED TOP NAV ────────────────────────────────────────────────── */}
-      <TopNav company={data?.companyName ?? rawTicker} timeframe={timeframe} />
+      <TopNav company={data?.companyName ?? rawTicker} timeframe={timeframe} signal={data?.signal ?? ''} />
 
       {/* ── FIXED LEFT SIDEBAR ───────────────────────────────────────────── */}
       {data && (
@@ -435,7 +435,7 @@ function SignalContent() {
             return (
               <a
                 key={section.id}
-                href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=${section.id}`}
+                href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=${section.id}&signal=${encodeURIComponent(data.signal)}`}
                 style={DT.navItem(false)}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
