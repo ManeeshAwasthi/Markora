@@ -104,7 +104,7 @@ function TopNav() {
   return (
     <nav style={{
       position: 'fixed', top: 0, left: 0, right: 0, height: '48px',
-      background: C.SURFACE, borderBottom: `1px solid ${C.BORDER_FAINT}`,
+      background: C.BG, borderBottom: `1px solid ${C.BORDER_FAINT}`,
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       padding: '0 32px', zIndex: 50,
     }}>
@@ -132,20 +132,22 @@ function MetricCard({
 }: {
   label: string; value: string; sub?: string; valueColor?: string; index?: number;
 }) {
-  const fontSize = value.length > 14 ? '1.1rem' : value.length > 10 ? '1.4rem' : value.length > 7 ? '1.75rem' : '2.2rem';
+  const fontSize = value.length > 14 ? '1.05rem' : value.length > 10 ? '1.35rem' : value.length > 7 ? '1.7rem' : '2.1rem';
   return (
     <div style={{
       minWidth: 0, background: C.SURFACE, padding: '24px 24px 20px',
+      borderBottom: `2px solid ${valueColor ? valueColor + '30' : C.BORDER_FAINT}`,
       animation: 'fadeSlideUp 400ms ease forwards',
       animationDelay: `${index * 80}ms`,
+      opacity: 0,
     }}>
-      <p style={{ color: C.TEXT2, fontSize: '9px', fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: MONO, marginBottom: '16px' }}>
+      <p style={{ color: C.TEXT3, fontSize: '9px', fontWeight: 500, letterSpacing: '0.24em', textTransform: 'uppercase', fontFamily: MONO, marginBottom: '18px' }}>
         {label}
       </p>
       <p style={{ color: valueColor ?? C.TEXT, fontSize, fontWeight: 700, fontFamily: MONO, lineHeight: 1.1, marginBottom: sub ? '10px' : 0, wordBreak: 'break-word', letterSpacing: '-0.02em' }}>
         {value}
       </p>
-      {sub && <p style={{ color: C.TEXT2, fontSize: '13px', fontFamily: BODY, lineHeight: 1.4 }}>{sub}</p>}
+      {sub && <p style={{ color: C.TEXT2, fontSize: '12px', fontFamily: BODY, lineHeight: 1.5, marginTop: '4px' }}>{sub}</p>}
     </div>
   );
 }
@@ -166,7 +168,7 @@ function StatRow({ label, hint, value, color }: { label: string; hint?: string; 
 // ── Small badge ───────────────────────────────────────────────────────────────
 function Badge({ label, color, bg }: { label: string; color: string; bg: string }) {
   return (
-    <span style={{ fontFamily: MONO, fontSize: '10px', padding: '3px 10px', color, background: bg, letterSpacing: '0.08em', textTransform: 'uppercase' as const, borderRadius: '2px' }}>
+    <span style={{ fontFamily: MONO, fontSize: '10px', padding: '3px 10px', color, background: bg, letterSpacing: '0.08em', textTransform: 'uppercase' as const, borderRadius: '0' }}>
       {label}
     </span>
   );
@@ -325,9 +327,12 @@ function SignalContent() {
     return (
       <>
         <TopNav />
-        <div style={{ textAlign: 'center', padding: '120px 24px', fontFamily: BODY, marginTop: '48px' }}>
-          <p style={{ color: C.TEXT2, fontFamily: MONO, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>No ticker selected</p>
-          <Link href="/" style={{ color: C.CYAN, fontSize: '12px', fontFamily: MONO, textDecoration: 'none', letterSpacing: '0.1em', textTransform: 'uppercase' }}>← Return to terminal</Link>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 48px)', padding: '24px', marginTop: '48px' }}>
+          <p style={{ color: C.TEXT3, fontFamily: MONO, fontSize: '10px', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '24px' }}>NO TICKER SELECTED</p>
+          <p style={{ color: C.TEXT2, fontFamily: BODY, fontSize: '15px', lineHeight: 1.7, maxWidth: '360px', textAlign: 'center', marginBottom: '32px' }}>
+            Enter a company name or ticker symbol on the terminal to run a divergence analysis.
+          </p>
+          <Link href="/" style={{ color: C.TEXT, fontFamily: MONO, fontSize: '10px', textDecoration: 'none', letterSpacing: '0.2em', textTransform: 'uppercase', border: `1px solid ${C.BORDER}`, padding: '12px 28px', background: C.SURFACE }}>← RETURN TO TERMINAL</Link>
         </div>
       </>
     );
@@ -368,7 +373,7 @@ function SignalContent() {
           height: 'calc(100vh - 48px - 32px)',
           width: '220px',
           flexShrink: 0,
-          background: C.SURFACE,
+          background: C.BG,
           borderRight: `1px solid ${C.BORDER_FAINT}`,
           display: 'flex',
           flexDirection: 'column',
@@ -420,102 +425,21 @@ function SignalContent() {
             marginBottom: '16px',
           }}>SECTIONS</p>
 
-          {/* Price Intelligence — always show when data exists */}
-          <a
-            href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=price-intelligence`}
-            style={{
-              display: 'block',
-              padding: '14px 24px',
-              fontFamily: T.MONO,
-              fontSize: '10px',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              color: C.TEXT2,
-              background: 'transparent',
-              borderLeft: '3px solid transparent',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
-          >Price Intelligence</a>
-
-          {/* Fundamentals */}
-          <a
-            href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=fundamentals`}
-            style={{
-              display: 'block',
-              padding: '14px 24px',
-              fontFamily: T.MONO,
-              fontSize: '10px',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              color: C.TEXT2,
-              background: 'transparent',
-              borderLeft: '3px solid transparent',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
-          >Fundamentals</a>
-
-          {/* Momentum & Flow */}
-          <a
-            href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=momentum`}
-            style={{
-              display: 'block',
-              padding: '14px 24px',
-              fontFamily: T.MONO,
-              fontSize: '10px',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              color: C.TEXT2,
-              background: 'transparent',
-              borderLeft: '3px solid transparent',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
-          >Momentum & Flow</a>
-
-          {/* Risk Profile */}
-          <a
-            href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=risk-profile`}
-            style={{
-              display: 'block',
-              padding: '14px 24px',
-              fontFamily: T.MONO,
-              fontSize: '10px',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              color: C.TEXT2,
-              background: 'transparent',
-              borderLeft: '3px solid transparent',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
-          >Risk Profile</a>
-
-          {/* Peer Comparison — only when peer data exists */}
-          {data.peerComparison?.peers?.length > 0 && (
-            <a
-              href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=peer-comparison`}
-              style={{
-                display: 'block',
-                padding: '14px 24px',
-                fontFamily: T.MONO,
-                fontSize: '10px',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                textDecoration: 'none',
-                color: C.TEXT2,
-                background: 'transparent',
-                borderLeft: '3px solid transparent',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
-            >Peer Comparison</a>
-          )}
+          {/* Deep analysis nav links */}
+          {NAV_SECTIONS.map(section => {
+            if (section.id === 'peer-comparison' && !(data.peerComparison?.peers?.length > 0)) return null;
+            return (
+              <a
+                key={section.id}
+                href={`/signal/details?company=${encodeURIComponent(data.companyName)}&timeframe=${data.timeframe}&tab=${section.id}`}
+                style={DT.navItem(false)}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.TEXT2; }}
+              >
+                {section.label.toUpperCase()}
+              </a>
+            );
+          })}
         </aside>
       )}
 
@@ -713,16 +637,26 @@ function SignalContent() {
 
         {/* ── LOADING ────────────────────────────────────────────────────── */}
         {loading && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', padding: '80px 0' }}>
-            <div style={{ width: '32px', height: '32px', border: '2px solid #1c1c26', borderTop: '2px solid #00e5ff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-            <p style={{ color: C.TEXT2, fontSize: '11px', fontFamily: MONO, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Fetching data and running analysis…</p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', padding: '100px 0' }}>
+            <div style={{ position: 'relative', width: '40px', height: '40px' }}>
+              <div style={{ position: 'absolute', inset: 0, border: `1px solid ${C.BORDER}`, borderTop: `1px solid ${C.CYAN}`, borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} />
+              <div style={{ position: 'absolute', inset: '8px', border: `1px solid ${C.BORDER_FAINT}`, borderBottom: `1px solid ${C.VIOLET}`, borderRadius: '50%', animation: 'spin 1.4s linear infinite reverse' }} />
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ color: C.TEXT2, fontSize: '10px', fontFamily: MONO, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>RUNNING ANALYSIS</p>
+              <p style={{ color: C.TEXT3, fontSize: '10px', fontFamily: MONO, letterSpacing: '0.1em' }}>Fetching market data &amp; scoring divergence…</p>
+            </div>
           </div>
         )}
 
         {/* ── ERROR ──────────────────────────────────────────────────────── */}
         {error && (
-          <div style={{ background: C.RED + '0d', border: `1px solid ${C.RED}44`, padding: '16px 20px', color: C.RED, fontSize: '13px', fontFamily: MONO, marginBottom: '24px', letterSpacing: '0.05em' }}>
-            ERROR: {error}
+          <div style={{ background: C.RED + '0a', border: `1px solid ${C.RED}33`, borderLeft: `3px solid ${C.RED}`, padding: '20px 24px', marginBottom: '24px', display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+            <span style={{ color: C.RED, fontFamily: MONO, fontSize: '12px', fontWeight: 700, flexShrink: 0, letterSpacing: '0.1em' }}>ERR</span>
+            <div>
+              <p style={{ color: C.RED, fontSize: '12px', fontFamily: MONO, letterSpacing: '0.08em', marginBottom: '4px', fontWeight: 600 }}>{error}</p>
+              <p style={{ color: C.TEXT3, fontSize: '11px', fontFamily: BODY }}>Check the ticker symbol and try again, or return to the terminal.</p>
+            </div>
           </div>
         )}
 
@@ -1140,7 +1074,7 @@ function SignalContent() {
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '12px', padding: '12px 8px', background: C.CYAN + '08', borderBottom: `1px solid ${C.BORDER_FAINT}`, marginBottom: '2px' }}>
                   <span style={{ color: C.TEXT, fontSize: '12px', fontFamily: BODY }}>
                     {data.companyName}
-                    <span style={{ marginLeft: '8px', color: C.CYAN, fontSize: '9px', fontFamily: MONO, background: C.CYAN + '1a', padding: '1px 6px', letterSpacing: '0.1em', borderRadius: '2px' }}>TARGET</span>
+                    <span style={{ marginLeft: '8px', color: C.CYAN, fontSize: '9px', fontFamily: MONO, background: C.CYAN + '1a', padding: '1px 6px', letterSpacing: '0.1em', borderRadius: '0' }}>TARGET</span>
                   </span>
                   <span style={{ color: data.priceChangePercent >= 0 ? C.GREEN : C.RED, fontSize: '12px', fontFamily: MONO, textAlign: 'right' }}>
                     {data.priceChangePercent >= 0 ? '+' : ''}{data.priceChangePercent.toFixed(2)}%
@@ -1174,22 +1108,31 @@ function SignalContent() {
                   width: '100%', padding: '18px 24px',
                   background: 'transparent', border: 'none', cursor: 'pointer',
                   borderBottom: headlinesExpanded ? `1px solid ${C.BORDER_FAINT}` : 'none',
+                  transition: 'background 120ms',
                 }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = C.ELEVATED; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
               >
-                <span style={{ fontFamily: MONO, fontSize: '10px', color: C.TEXT2, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-                  Signal Context / Headlines ({data.headlines.length})
-                </span>
-                <span style={{ color: C.TEXT2, fontSize: '12px', fontFamily: MONO }}>{headlinesExpanded ? '▲' : '▼'}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontFamily: MONO, fontSize: '10px', color: C.TEXT3, letterSpacing: '0.24em', textTransform: 'uppercase' }}>
+                    Signal Context
+                  </span>
+                  <span style={{ fontFamily: MONO, fontSize: '9px', color: C.TEXT3, background: C.ELEVATED, border: `1px solid ${C.BORDER}`, padding: '1px 8px', letterSpacing: '0.1em' }}>
+                    {data.headlines.length} HEADLINES
+                  </span>
+                </div>
+                <span style={{ color: C.TEXT3, fontSize: '10px', fontFamily: MONO, letterSpacing: '0.1em' }}>{headlinesExpanded ? '▲ COLLAPSE' : '▼ EXPAND'}</span>
               </button>
               {headlinesExpanded && (
                 <div>
                   {data.headlines.map((h, i) => (
                     <div key={i} style={{
-                      padding: '14px 24px',
+                      padding: '13px 24px',
                       borderBottom: i < data.headlines.length - 1 ? `1px solid ${C.BORDER_FAINT}` : 'none',
-                      color: C.TEXT2, fontSize: '13px', fontFamily: BODY, lineHeight: 1.6,
+                      display: 'flex', alignItems: 'flex-start', gap: '12px',
                     }}>
-                      {h}
+                      <span style={{ color: C.TEXT3, fontFamily: MONO, fontSize: '10px', marginTop: '2px', flexShrink: 0 }}>{String(i + 1).padStart(2, '0')}</span>
+                      <span style={{ color: C.TEXT2, fontSize: '13px', fontFamily: BODY, lineHeight: 1.65 }}>{h}</span>
                     </div>
                   ))}
                 </div>

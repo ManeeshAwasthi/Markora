@@ -38,9 +38,9 @@ export default function PeerComparisonTab({ data, meta, targetPriceChangePercent
         <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '12px' }}>
           EQUITY_REPORT // {new Date().getFullYear()}.Q{Math.ceil((new Date().getMonth() + 1) / 3)}
         </p>
-         <h2 style={{ ...TYPE.DISPLAY_MD, color: C.TEXT, marginBottom: '20px' }}>
-        Peer comparison for {meta.companyName}
-      </h2>
+        <h2 style={{ ...TYPE.DISPLAY_MD, color: C.TEXT, marginBottom: '20px' }}>
+          Peer Comparison — {meta.companyName}
+        </h2>
         <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '20px' }}>
           SECTOR PEER BENCHMARKING // {meta.timeframe}D WINDOW
         </p>
@@ -81,7 +81,7 @@ export default function PeerComparisonTab({ data, meta, targetPriceChangePercent
 
       {/* ── PEER BENCHMARKING TABLE ── */}
       <div style={{ marginBottom: '40px' }}>
-        <p style={styles.sectionLabel}>Peer_Benchmarking</p>
+        <p style={styles.sectionLabel}>Peer Benchmarking</p>
 
         {peers.length === 0 ? (
           <div style={{ background: C.SURFACE, border: `1px solid ${C.BORDER}`, padding: '32px', textAlign: 'center' }}>

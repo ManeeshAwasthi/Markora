@@ -22,10 +22,15 @@ const TABS: Array<{ slug: TabSlug; label: string }> = [
 
 function Spinner() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: C.BG, gap: '16px' }}>
-      <div style={{ width: '40px', height: '40px', border: `2px solid ${C.BORDER}`, borderTop: `2px solid ${C.CYAN}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3 }}>LOADING DEEP ANALYSIS</p>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: C.BG, gap: '24px' }}>
+      <div style={{ position: 'relative', width: '48px', height: '48px' }}>
+        <div style={{ position: 'absolute', inset: 0, border: `1px solid ${C.BORDER}`, borderTop: `1px solid ${C.CYAN}`, borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} />
+        <div style={{ position: 'absolute', inset: '10px', border: `1px solid ${C.BORDER_FAINT}`, borderBottom: `1px solid ${C.VIOLET}`, borderRadius: '50%', animation: 'spin 1.5s linear infinite reverse' }} />
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ ...TYPE.LABEL_SM, color: C.TEXT3, marginBottom: '6px' }}>LOADING DEEP ANALYSIS</p>
+        <p style={{ fontFamily: T.MONO, fontSize: '9px', color: C.TEXT3, letterSpacing: '0.1em', opacity: 0.6 }}>Fetching market data…</p>
+      </div>
     </div>
   );
 }
@@ -97,8 +102,13 @@ function DetailsContent() {
 
   if (error) return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: C.BG }}>
-      <div style={{ background: C.RED + '0d', border: `1px solid ${C.RED}44`, padding: '20px 32px', ...TYPE.DATA_SM, color: C.RED }}>
-        ERROR: {error}
+      <div style={{ background: C.RED + '0a', border: `1px solid ${C.RED}33`, borderLeft: `3px solid ${C.RED}`, padding: '24px 32px', maxWidth: '480px', width: '100%' }}>
+        <p style={{ ...TYPE.LABEL_SM, color: C.RED, marginBottom: '8px' }}>ANALYSIS FAILED</p>
+        <p style={{ ...TYPE.DATA_SM, color: C.TEXT2, marginBottom: '16px' }}>{error}</p>
+        <a href="/" style={{ ...TYPE.LABEL_SM, color: C.TEXT3, textDecoration: 'none', border: `1px solid ${C.BORDER}`, padding: '6px 16px', display: 'inline-block' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.TEXT; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.TEXT3; }}
+        >← Return to Terminal</a>
       </div>
     </div>
   );
@@ -127,10 +137,12 @@ function DetailsContent() {
         zIndex:        50,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          <span style={{ ...TYPE.LABEL_LG, fontSize: '13px', letterSpacing: '0.2em', color: C.TEXT }}>MARKORA</span>
+          <a href="/" style={{ textDecoration: 'none' }}>
+            <span style={{ ...TYPE.LABEL_LG, fontSize: '13px', letterSpacing: '0.2em', color: C.TEXT }}>MARKORA</span>
+          </a>
           <a
             href={`/signal?ticker=${encodeURIComponent(company)}&timeframe=${timeframe}`}
-            style={{ ...TYPE.LABEL_SM, color: C.TEXT2, textDecoration: 'none' }}
+            style={{ ...TYPE.LABEL_SM, color: C.TEXT2, textDecoration: 'none', transition: 'color 120ms' }}
             onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.color = C.CYAN)}
             onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = C.TEXT2)}
           >← SIGNAL BOARD</a>
@@ -206,13 +218,7 @@ function DetailsContent() {
           }}>SECTIONS</p>
 
           {/* Nav items — all 5 always shown, active one highlighted */}
-          {[
-            { slug: 'price-intelligence' as TabSlug, label: 'Price Intelligence' },
-            { slug: 'fundamentals' as TabSlug,       label: 'Fundamentals'       },
-            { slug: 'momentum' as TabSlug,           label: 'Momentum & Flow'    },
-            { slug: 'risk-profile' as TabSlug,       label: 'Risk Profile'       },
-            { slug: 'peer-comparison' as TabSlug,    label: 'Peer Comparison'    },
-          ].map(tab => (
+          {TABS.map(tab => (
             <button
               key={tab.slug}
               onClick={() => switchTab(tab.slug)}
@@ -269,9 +275,10 @@ function DetailsContent() {
 
           {/* ── CONTROLS BAR ── */}
           <section style={{
-            border: `1px solid ${C.BORDER}`, padding: '6px', margin: '0 40px',
-            display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap',
-            background: C.BG,
+            borderBottom: `1px solid ${C.BORDER_FAINT}`,
+            padding: '10px 40px',
+            display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap',
+            background: C.SURFACE,
           }}>
             <div style={{ position: 'relative', width: '280px' }}>
               <input

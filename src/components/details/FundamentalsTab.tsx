@@ -79,7 +79,7 @@ export default function FundamentalsTab({ data, meta }: FundamentalsTabProps) {
           FUNDAMENTALS // {meta.companyName.toUpperCase()}
         </p>
         <h2 style={{ ...TYPE.DISPLAY_MD, color: C.TEXT, marginBottom: '16px' }}>
-          Financial Analysis
+          Financial Analysis — {meta.companyName}
         </h2>
         {/* Summary */}
         <div style={{ ...styles.insightBox }}>

@@ -524,11 +524,12 @@ export default function LandingPage() {
           }}>
             <p style={{
               fontFamily: MONO,
-              fontSize: '54px',
+              fontSize: 'clamp(2.8rem, 4vw, 3.5rem)',
               color: stat.color,
               fontWeight: 700,
               lineHeight: 1,
               marginBottom: '12px',
+              letterSpacing: '-0.02em',
             }}>{stat.value}</p>
             <p style={{
               fontFamily: MONO,
@@ -540,6 +541,32 @@ export default function LandingPage() {
           </div>
         ))}
       </div>
+
+      {/* ── 7. FOOTER ───────────────────────────────────────────────────────── */}
+      <footer style={{
+        borderTop: `1px solid ${C.BORDER_FAINT}`,
+        padding: '28px 48px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap' as const,
+        gap: '16px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <span style={{ fontFamily: MONO, fontSize: '11px', fontWeight: 700, letterSpacing: '0.2em', color: C.TEXT }}>MARKORA</span>
+          <span style={{ fontFamily: MONO, fontSize: '9px', color: C.TEXT3, letterSpacing: '0.12em' }}>
+            DIVERGENCE ANALYSIS ENGINE · v1.04
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '32px', flexWrap: 'wrap' as const }}>
+          <span style={{ fontFamily: MONO, fontSize: '9px', color: C.TEXT3, letterSpacing: '0.1em' }}>QUANTITATIVE ANALYSIS ONLY</span>
+          <span style={{ fontFamily: MONO, fontSize: '9px', color: C.TEXT3, letterSpacing: '0.1em' }}>NOT FINANCIAL ADVICE</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: C.GREEN, animation: 'pulse 2s ease-in-out infinite' }} />
+            <span style={{ fontFamily: MONO, fontSize: '9px', color: C.TEXT3, letterSpacing: '0.12em' }}>LIVE</span>
+          </div>
+        </div>
+      </footer>
 
     </div>
   );
