@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { SentimentResult, ResolvedCompany } from '@/types';
 import { computeSentimentScore } from '@/lib/normalize';
 import { TrendDirection } from '@/types';
+import { fallbackSentimentAnalysis } from '@/lib/sentimentFallback';
 
 interface GeminiSentimentJSON {
   bullish: number;
@@ -18,7 +19,9 @@ export async function analyzeSentiment(
   resolved: ResolvedCompany
 ): Promise<{ sentiment: SentimentResult; insight: string }> {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('GEMINI_API_KEY is not configured');
+  if (!apiKey) {
+    return fallbackSentimentAnalysis(headlines, companyName, trendDirection);
+  }
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel(
@@ -54,30 +57,41 @@ Rules:
 - insight must read as independent analyst commentary
 - Return only the raw JSON object, nothing else`;
 
-  const result = await model.generateContent(prompt);
-  const raw = result.response.text();
-
-  const cleaned = raw
-    .replace(/^```(?:json)?\s*/i, '')
-    .replace(/\s*```\s*$/, '')
-    .trim();
-
-  let parsed: GeminiSentimentJSON;
   try {
-    parsed = JSON.parse(cleaned) as GeminiSentimentJSON;
-  } catch {
-    throw new Error(`Failed to parse Gemini response as JSON. Raw: ${raw.slice(0, 200)}`);
+    const result = await model.generateContent(prompt);
+    const raw = result.response.text();
+
+    const cleaned = raw
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```\s*$/, '')
+      .trim();
+
+    const parsed = JSON.parse(cleaned) as GeminiSentimentJSON;
+    const values = [parsed.bullish, parsed.bearish, parsed.neutral];
+    const isValid =
+      values.every((value) => Number.isInteger(value) && value >= 0 && value <= 100) &&
+      values.reduce((sum, value) => sum + value, 0) === 100 &&
+      typeof parsed.insight === 'string' &&
+      parsed.insight.trim().length > 0;
+
+    if (!isValid) {
+      throw new Error('Gemini returned an invalid sentiment payload');
+    }
+
+    const score = computeSentimentScore(parsed.bullish, parsed.bearish);
+
+    return {
+      sentiment: {
+        bullish: parsed.bullish,
+        bearish: parsed.bearish,
+        neutral: parsed.neutral,
+        score,
+      },
+      insight: parsed.insight,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(`Gemini sentiment unavailable; using deterministic fallback. ${message}`);
+    return fallbackSentimentAnalysis(headlines, companyName, trendDirection);
   }
-
-  const score = computeSentimentScore(parsed.bullish, parsed.bearish);
-
-  return {
-    sentiment: {
-      bullish: parsed.bullish,
-      bearish: parsed.bearish,
-      neutral: parsed.neutral,
-      score,
-    },
-    insight: parsed.insight,
-  };
 }
