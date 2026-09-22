@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { fallbackSentimentAnalysis } from '@/lib/sentimentFallback';
 
 interface SentimentRequestBody {
   headlines: string[];
@@ -11,18 +12,41 @@ interface GeminiSentimentResponse {
   outlook: string;
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const body: SentimentRequestBody = await request.json();
-    const { headlines } = body;
+function getFallbackResponse(headlines: string[]): GeminiSentimentResponse {
+  const fallback = fallbackSentimentAnalysis(headlines, 'the company', 'Stable');
+  const { bullish, bearish, neutral } = fallback.sentiment;
+  const overall =
+    bullish > bearish && bullish > neutral
+      ? 'bullish'
+      : bearish > bullish && bearish > neutral
+        ? 'bearish'
+        : 'neutral';
 
-    if (!headlines || headlines.length === 0) {
+  return {
+    overall,
+    headlineSentiments: fallback.labels,
+    outlook: fallback.insight.replace('the company', 'the selected company'),
+  };
+}
+
+export async function POST(request: NextRequest) {
+  let headlines: string[] | undefined;
+
+  try {
+    const body = (await request.json()) as Partial<SentimentRequestBody>;
+    headlines = body.headlines;
+
+    if (
+      !Array.isArray(headlines) ||
+      headlines.length === 0 ||
+      headlines.some((headline) => typeof headline !== 'string')
+    ) {
       return NextResponse.json({ error: 'headlines array is required' }, { status: 400 });
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: 'GEMINI_API_KEY is not configured' }, { status: 500 });
+      return NextResponse.json(getFallbackResponse(headlines));
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
@@ -59,7 +83,12 @@ Rules:
 
     return NextResponse.json(parsed);
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.warn('Gemini sentiment route unavailable; using deterministic fallback.', err);
+
+    if (headlines && headlines.length > 0) {
+      return NextResponse.json(getFallbackResponse(headlines));
+    }
+
+    return NextResponse.json({ error: 'Unable to analyze sentiment' }, { status: 500 });
   }
 }
